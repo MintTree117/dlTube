@@ -13,8 +13,9 @@ namespace dlTubeAvalonia.ViewModels;
 
 public sealed class YoutubeViewModel : ReactiveObject
 {
-    const string DefaultVideoName = "Video";
+    const string DefaultVideoName = "";
     const string DefaultImage = "avares://dlTubeAvalonia/Assets/defaultplayer.png";
+    const string DefaultQuality = "None";
     
     string _youtubeLink = string.Empty;
     string _videoName = DefaultVideoName;
@@ -22,7 +23,7 @@ public sealed class YoutubeViewModel : ReactiveObject
     Bitmap? _videoThumbnailBitmap;
 
     List<string> _streamTypes = Enum.GetNames<Filetype>().ToList();
-    List<string> _streamQualities = [ "None" ];
+    List<string> _streamQualities = [ DefaultQuality ];
     
     string _selectedStreamType;
     string _selectedStreamQuality = string.Empty;
@@ -34,6 +35,7 @@ public sealed class YoutubeViewModel : ReactiveObject
         // validate and fetch is called on button click and is bound to the reactive model
         ValidateAndFetchCommand = ReactiveCommand.Create( ValidateAndFetch );
         SelectedStreamType = StreamTypes[ 0 ];
+        SelectedStreamQuality = _streamQualities[ 0 ];
         LoadDefaultImage();
     }
 
@@ -87,7 +89,8 @@ public sealed class YoutubeViewModel : ReactiveObject
         VideoName = string.Empty;
         _videoThumbnailUrl = string.Empty;
         VideoThumbnailBitmap = null;
-        StreamQualities.Clear();
+        StreamQualities = [ DefaultQuality ];
+        SelectedStreamQuality = StreamQualities[ 0 ];
         _dlService = null;
 
         if ( string.IsNullOrWhiteSpace( _youtubeLink ) )
@@ -115,6 +118,7 @@ public sealed class YoutubeViewModel : ReactiveObject
             VideoThumbnailBitmap = newThumbnailBitmap;
         else
             LoadDefaultImage(); // Fallback to default image if new image loading fails
+        
         HandleNewStreamType();
     }
     async Task<Bitmap?> LoadImageFromUrlAsync( string imageUrl )
@@ -148,9 +152,14 @@ public sealed class YoutubeViewModel : ReactiveObject
         if ( _dlService is null || !StreamTypes.Contains( _selectedStreamType ) )
             return;
 
-        int streamType = StreamTypes.IndexOf( _selectedStreamType );
-        StreamQualities = _dlService.GetStreamInfo( streamType );
-        SelectedStreamQuality = StreamQualities.FirstOrDefault() ?? "";
+        int streamType = StreamTypes.IndexOf( _selectedStreamType ); 
+        List<string> streamQualities = _dlService.GetStreamInfo( streamType );
+
+        StreamQualities = streamQualities.Count > 0
+            ? streamQualities
+            : [ DefaultQuality ];
+        
+        SelectedStreamQuality = StreamQualities[ 0 ];
     }
     void ValidateAndFetch()
     {
