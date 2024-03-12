@@ -1,4 +1,9 @@
-<UserControl x:Class="dlTubeAvalonia.Views.ArchiveView"
+<UserControl 
+	x:Class="dlTubeAvalonia.Views.ArchiveView"
+	x:DataType="viewModels:ArchiveViewModel"
 	xmlns="https://github.com/avaloniaui"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels">
+	
+	<TextBlock Text="Browse the Archive"></TextBlock>
 </UserControl>
