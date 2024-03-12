@@ -3,7 +3,7 @@ using Avalonia.Interactivity;
 
 namespace dlTubeAvalonia.Views;
 
-public partial class MainWindow : Window
+public sealed partial class MainWindow : Window
 {
     readonly YoutubeView _youtubeView;
     ArchiveView? _archiveView;
@@ -23,5 +23,9 @@ public partial class MainWindow : Window
     {
         _archiveView ??= new ArchiveView();
         MainContent.Content = _archiveView;
+    }
+    void OnClickAppSettings( object? sender, RoutedEventArgs args )
+    {
+        MainContent.Content = new AppSettingsView();
     }
 }

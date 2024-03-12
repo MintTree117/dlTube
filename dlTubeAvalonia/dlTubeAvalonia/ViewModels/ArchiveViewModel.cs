@@ -1,6 +1,8 @@
+using ReactiveUI;
+
 namespace dlTubeAvalonia.ViewModels;
 
-public class ArchiveViewModel : ViewModelBase
+public sealed class ArchiveViewModel : ReactiveObject
 {
     
 }

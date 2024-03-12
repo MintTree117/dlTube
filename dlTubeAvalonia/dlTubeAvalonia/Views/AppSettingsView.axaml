@@ -1,0 +1,34 @@
+<UserControl 
+	x:Class="dlTubeAvalonia.Views.AppSettingsView"
+	x:DataType="viewModels:AppSettingsViewModel"
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels">
+	
+	<StackPanel
+		HorizontalAlignment="Center"
+		Width="400" 
+		Height="400">
+		<TextBlock 
+			Margin="0 0 0 10" 
+			HorizontalAlignment="Center"
+			Text="Download Location" />
+		<TextBox 
+			Width="300" Margin="0 10 0 0" 
+			HorizontalAlignment="Center"
+			Text="{Binding DownloadLocation}" />
+		<Button
+			Width="150"
+			Margin="0,10,0,10"
+			Padding="30,15"
+			HorizontalContentAlignment="Center"
+			Background='MediumSeaGreen'
+			BorderThickness="3"
+			BorderBrush="LimeGreen"
+			HorizontalAlignment="Center"
+			IsEnabled="{Binding DownloadLocationChanged}"
+			Command="{Binding SaveDownloadLocationCommand}"
+			Content="Save" />
+	</StackPanel>
+	
+</UserControl>

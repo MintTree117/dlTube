@@ -1,6 +1,8 @@
-﻿namespace dlTubeAvalonia.ViewModels;
+﻿using ReactiveUI;
 
-public class MainWindowViewModel : ViewModelBase
+namespace dlTubeAvalonia.ViewModels;
+
+public sealed class MainWindowViewModel : ReactiveObject
 {
 #pragma warning disable CA1822 // Mark members as static
     public string Greeting => "Welcome to Avalonia!";

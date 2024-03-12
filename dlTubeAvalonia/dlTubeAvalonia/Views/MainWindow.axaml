@@ -18,15 +18,23 @@
     
     <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="Account">
-                <MenuItem Header="Sign In"></MenuItem>
+            <MenuItem 
+                Header="Account">
+                <MenuItem 
+                    Header="Sign In"></MenuItem>
             </MenuItem>
-            <MenuItem Header="Settings">
-                <MenuItem Header="Download Folder"></MenuItem>
+            <MenuItem 
+                Header="Settings"
+                Click="OnClickAppSettings">
             </MenuItem>
-            <MenuItem Header="Views">
-                <MenuItem Header="Youtube Downloader" Click="OnClickViewYoutube" />
-                <MenuItem Header="Media Archive" Click="OnClickViewArchive" />
+            <MenuItem 
+                Header="Views">
+                <MenuItem 
+                    Header="Youtube Downloader" 
+                    Click="OnClickViewYoutube" />
+                <MenuItem 
+                    Header="Media Archive" 
+                    Click="OnClickViewArchive" />
             </MenuItem>
         </Menu>
 

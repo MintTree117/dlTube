@@ -1,13 +1,15 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using dlTubeAvalonia.ViewModels;
 
 namespace dlTubeAvalonia.Views;
 
-public sealed partial class ArchiveView : UserControl
+public sealed partial class AppSettingsView : UserControl
 {
-    public ArchiveView()
+    public AppSettingsView()
     {
         InitializeComponent();
+        this.DataContext = new AppSettingsViewModel();
     }
     void InitializeComponent()
     {

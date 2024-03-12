@@ -4,7 +4,7 @@ using dlTubeAvalonia.ViewModels;
 
 namespace dlTubeAvalonia.Views;
 
-public partial class YoutubeView : UserControl
+public sealed partial class YoutubeView : UserControl
 {
     public YoutubeView()
     {

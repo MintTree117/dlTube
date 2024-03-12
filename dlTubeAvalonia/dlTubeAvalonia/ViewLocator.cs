@@ -1,11 +1,11 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using dlTubeAvalonia.ViewModels;
+using ReactiveUI;
 
 namespace dlTubeAvalonia;
 
-public class ViewLocator : IDataTemplate
+public sealed class ViewLocator : IDataTemplate
 {
     public Control? Build( object? data )
     {
@@ -25,6 +25,6 @@ public class ViewLocator : IDataTemplate
 
     public bool Match( object? data )
     {
-        return data is ViewModelBase;
+        return data is ReactiveObject;
     }
 }
