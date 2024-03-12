@@ -2,9 +2,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="dlTubeAvalonia.App"
              xmlns:local="using:dlTubeAvalonia"
+             xmlns:services="clr-namespace:dlTubeAvalonia.Services"
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-
+    
+    <!-- Register my custom image source converter service for fallback images -->
+    <Application.Resources>
+        <ResourceDictionary>
+            <services:ImageSourceFallbackConverter x:Key="ImageSourceFallbackConverter"/>
+        </ResourceDictionary>
+    </Application.Resources>
+             
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
