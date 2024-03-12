@@ -16,13 +16,20 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
     
-    <TabControl>
-        <TabItem Header="Youtube Downloader">
-            <views:YoutubeView/>
-        </TabItem>
-        <TabItem Header="Media Archive">
-            <views:ArchiveView/>
-        </TabItem>
-    </TabControl>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="Account">
+                <MenuItem Header="Sign In"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Settings">
+                <MenuItem Header="Download Folder"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Views">
+                <MenuItem Header="Youtube Downloader" Click="OnClickViewYoutube" />
+                <MenuItem Header="Media Archive" Click="OnClickViewArchive" />
+            </MenuItem>
+        </Menu>
 
+        <ContentControl x:Name="MainContent" />
+    </DockPanel>
 </Window>

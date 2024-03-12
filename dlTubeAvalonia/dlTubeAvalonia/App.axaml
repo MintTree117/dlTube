@@ -5,13 +5,6 @@
              xmlns:services="clr-namespace:dlTubeAvalonia.Services"
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-    
-    <!-- Register my custom image source converter service for fallback images -->
-    <Application.Resources>
-        <ResourceDictionary>
-            <services:ImageSourceFallbackConverter x:Key="ImageSourceFallbackConverter"/>
-        </ResourceDictionary>
-    </Application.Resources>
              
     <Application.DataTemplates>
         <local:ViewLocator/>
