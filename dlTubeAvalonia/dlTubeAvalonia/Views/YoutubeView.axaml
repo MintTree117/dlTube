@@ -8,19 +8,17 @@
 	<!-- Downloader -->
 	<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
 		<!-- Video Meta -->
+		<TextBlock
+			Margin="0,0,0,10"
+			FontWeight="Bold"
+			HorizontalAlignment="Center"
+			Text="{Binding VideoName}" />
 		<Image 
 			Width="300" 
 			Height="150" 
 			Margin="0,0,0,10" 
 			HorizontalAlignment="Center"
-			Source="{Binding VideoThumbnailBitmap}"
-			IsVisible="{Binding IsThumbnailAvailable}" />
-		<TextBlock 
-			Margin="0,0,0,10" 
-			FontWeight="Bold" 
-			HorizontalAlignment="Left"
-			Text="{Binding VideoName}" 
-			IsVisible="{Binding IsNameAvailable}"/>
+			Source="{Binding VideoThumbnailBitmap}" />
 		<!-- Link Box -->
 		<TextBlock
 			Margin="0,0,0,10"

@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using dlTubeAvalonia.Services;
 using ReactiveUI;
 
@@ -12,18 +13,18 @@ namespace dlTubeAvalonia.ViewModels;
 
 public sealed class YoutubeViewModel : ReactiveObject
 {
+    const string DefaultVideoName = "Video";
+    const string DefaultImage = "avares://dlTubeAvalonia/Assets/defaultplayer.png";
+    
     string _youtubeLink = string.Empty;
-    string _videoName = string.Empty;
-    string _videoThumbnailUrl = string.Empty;
+    string _videoName = DefaultVideoName;
+    string _videoThumbnailUrl = DefaultImage;
     Bitmap? _videoThumbnailBitmap;
-
-    bool _isNameAvailable = false;
-    bool _isThumbnailAvailable = false;
 
     List<string> _streamTypes = Enum.GetNames<Filetype>().ToList();
     List<string> _streamQualities = [ "None" ];
     
-    string _selectedStreamType = string.Empty;
+    string _selectedStreamType;
     string _selectedStreamQuality = string.Empty;
 
     YoutubeDownloaderService? _dlService;
@@ -32,7 +33,8 @@ public sealed class YoutubeViewModel : ReactiveObject
     {
         // validate and fetch is called on button click and is bound to the reactive model
         ValidateAndFetchCommand = ReactiveCommand.Create( ValidateAndFetch );
-        _selectedStreamType = _streamTypes[ 0 ];
+        SelectedStreamType = StreamTypes[ 0 ];
+        LoadDefaultImage();
     }
 
     public string YoutubeLink
@@ -49,25 +51,10 @@ public sealed class YoutubeViewModel : ReactiveObject
         get => _videoName;
         set => this.RaiseAndSetIfChanged( ref _videoName, value );
     }
-    public string VideoThumbnailUrl
-    {
-        get => _videoThumbnailUrl;
-        set => this.RaiseAndSetIfChanged( ref _videoThumbnailUrl, value );
-    }
     public Bitmap? VideoThumbnailBitmap
     {
         get => _videoThumbnailBitmap;
         set => this.RaiseAndSetIfChanged( ref _videoThumbnailBitmap, value );
-    }
-    public bool IsNameAvailable
-    {
-        get => _isNameAvailable;
-        set => this.RaiseAndSetIfChanged( ref _isNameAvailable, value );
-    }
-    public bool IsThumbnailAvailable
-    {
-        get => _isThumbnailAvailable;
-        set => this.RaiseAndSetIfChanged( ref _isThumbnailAvailable, value );
     }
     public List<string> StreamTypes
     {
@@ -98,14 +85,16 @@ public sealed class YoutubeViewModel : ReactiveObject
     async void HandleNewLink()
     {
         VideoName = string.Empty;
-        VideoThumbnailUrl = string.Empty;
-        IsNameAvailable = false;
-        IsThumbnailAvailable = false;
+        _videoThumbnailUrl = string.Empty;
+        VideoThumbnailBitmap = null;
         StreamQualities.Clear();
         _dlService = null;
-        
+
         if ( string.IsNullOrWhiteSpace( _youtubeLink ) )
+        {
+            LoadDefaultImage();
             return;
+        }
         
         _dlService = new YoutubeDownloaderService( _youtubeLink );
 
@@ -113,18 +102,19 @@ public sealed class YoutubeViewModel : ReactiveObject
         {
             // show messages
             Console.WriteLine( "Failed to obtain stream manifest!" );
+            LoadDefaultImage();
             _dlService = null;
             return;
         }
         
         VideoName = _dlService.VideoName ?? "";
-        VideoThumbnailUrl = _dlService.VideoThumbnail ?? "";
-        IsNameAvailable = !string.IsNullOrWhiteSpace( VideoName );
-        IsThumbnailAvailable = !string.IsNullOrWhiteSpace( VideoThumbnailUrl );
-
-        if ( _isThumbnailAvailable )
-            VideoThumbnailBitmap = await LoadImageFromUrlAsync( VideoThumbnailUrl );
-
+        _videoThumbnailUrl = _dlService.VideoThumbnail ?? "";
+        
+        Bitmap? newThumbnailBitmap = await LoadImageFromUrlAsync( _videoThumbnailUrl );
+        if ( newThumbnailBitmap is not null )
+            VideoThumbnailBitmap = newThumbnailBitmap;
+        else
+            LoadDefaultImage(); // Fallback to default image if new image loading fails
         HandleNewStreamType();
     }
     async Task<Bitmap?> LoadImageFromUrlAsync( string imageUrl )
@@ -149,16 +139,18 @@ public sealed class YoutubeViewModel : ReactiveObject
         }
         return null;
     }
+    void LoadDefaultImage()
+    {
+        VideoThumbnailBitmap = new Bitmap( AssetLoader.Open( new Uri( DefaultImage ) ) );
+    }
     void HandleNewStreamType()
     {
         if ( _dlService is null || !StreamTypes.Contains( _selectedStreamType ) )
-        {
-            throw new Exception( "FAAAAAAAAAAAAAAAAAAAAAAAIL" );
             return;
-        }
 
         int streamType = StreamTypes.IndexOf( _selectedStreamType );
         StreamQualities = _dlService.GetStreamInfo( streamType );
+        SelectedStreamQuality = StreamQualities.FirstOrDefault() ?? "";
     }
     void ValidateAndFetch()
     {
