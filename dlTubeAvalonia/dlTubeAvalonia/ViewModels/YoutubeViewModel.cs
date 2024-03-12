@@ -4,14 +4,17 @@ using ReactiveUI;
 
 namespace dlTubeAvalonia.ViewModels;
 
-public sealed class YoutubeViewModel : ViewModelBase
+public sealed class YoutubeViewModel : ReactiveObject
 {
     string _youtubeLink = string.Empty;
+    string _videoName = string.Empty;
     string _videoThumbnailUrl = string.Empty;
-    bool _isThumbnailAvailable;
+
+    bool _isNameAvailable = false;
+    bool _isThumbnailAvailable = false;
     
-    List<string> _streamTypes = [ ];
-    List<string> _streamQualities = [ ];
+    List<string> _streamTypes = [ "A", "B", "C" ];
+    List<string> _streamQualities = [ "1", "2", "3" ];
     
     string _selectedStreamType = string.Empty;
     string _selectedStreamQuality = string.Empty;
@@ -20,6 +23,7 @@ public sealed class YoutubeViewModel : ViewModelBase
     {
         // validate and fetch is called on button click and is bound to the reactive model
         ValidateAndFetchCommand = ReactiveCommand.Create( ValidateAndFetch );
+        _isThumbnailAvailable = false;
     }
 
     public string YoutubeLink
@@ -27,10 +31,20 @@ public sealed class YoutubeViewModel : ViewModelBase
         get => _youtubeLink;
         set => this.RaiseAndSetIfChanged( ref _youtubeLink, value );
     }
+    public string VideoName
+    {
+        get => _videoName;
+        set => this.RaiseAndSetIfChanged( ref _videoName, value );
+    }
     public string VideoThumbnailUrl
     {
         get => _videoThumbnailUrl;
         set => this.RaiseAndSetIfChanged( ref _videoThumbnailUrl, value );
+    }
+    public bool IsNameAvailable
+    {
+        get => _isNameAvailable;
+        set => this.RaiseAndSetIfChanged( ref _isNameAvailable, value );
     }
     public bool IsThumbnailAvailable
     {
