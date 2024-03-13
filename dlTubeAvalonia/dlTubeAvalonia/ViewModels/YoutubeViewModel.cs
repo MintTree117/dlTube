@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using dlTubeAvalonia.Models;
 using dlTubeAvalonia.Services;
 using ReactiveUI;
 
@@ -13,32 +14,44 @@ namespace dlTubeAvalonia.ViewModels;
 
 public sealed class YoutubeViewModel : ReactiveObject
 {
-    const string DefaultVideoName = "";
+    const string DefaultVideoName = "Video Name";
     const string DefaultImage = "avares://dlTubeAvalonia/Assets/defaultplayer.png";
     const string DefaultQuality = "None";
-    
+    readonly string _downloadPath;
+
+    bool _isVideoLoaded = false;
     string _youtubeLink = string.Empty;
     string _videoName = DefaultVideoName;
     string _videoThumbnailUrl = DefaultImage;
     Bitmap? _videoThumbnailBitmap;
 
-    List<string> _streamTypes = Enum.GetNames<Filetype>().ToList();
+    List<string> _streamTypes = Enum.GetNames<StreamType>().ToList();
     List<string> _streamQualities = [ DefaultQuality ];
     
-    string _selectedStreamType;
-    string _selectedStreamQuality = string.Empty;
+    string _selectedStreamTypeName = null!;
+    string _selectedStreamQualityName = string.Empty;
 
     YoutubeDownloaderService? _dlService;
+    
+    public ReactiveCommand<Unit, Unit> DownloadCommand { get; }
     
     public YoutubeViewModel()
     {
         // validate and fetch is called on button click and is bound to the reactive model
-        ValidateAndFetchCommand = ReactiveCommand.Create( ValidateAndFetch );
+        DownloadCommand = ReactiveCommand.CreateFromTask( Download );
         SelectedStreamType = StreamTypes[ 0 ];
         SelectedStreamQuality = _streamQualities[ 0 ];
         LoadDefaultImage();
+
+        AppSettingsModel settings = AppConfig.LoadSettingsS( AppConfig.GetUserSettingsPath() ) ?? new AppSettingsModel();
+        _downloadPath = settings.DownloadLocation;
     }
 
+    public bool IsVideoLoaded
+    {
+        get => _isVideoLoaded;
+        set => this.RaiseAndSetIfChanged( ref _isVideoLoaded, value );
+    }
     public string YoutubeLink
     {
         get => _youtubeLink;
@@ -65,10 +78,10 @@ public sealed class YoutubeViewModel : ReactiveObject
     }
     public string SelectedStreamType
     {
-        get => _selectedStreamType;
+        get => _selectedStreamTypeName;
         set
         {
-            this.RaiseAndSetIfChanged( ref _selectedStreamType, value );
+            this.RaiseAndSetIfChanged( ref _selectedStreamTypeName, value );
             HandleNewStreamType();
         }
     }
@@ -79,15 +92,15 @@ public sealed class YoutubeViewModel : ReactiveObject
     }
     public string SelectedStreamQuality
     {
-        get => _selectedStreamQuality;
-        set => this.RaiseAndSetIfChanged( ref _selectedStreamQuality, value );
+        get => _selectedStreamQualityName;
+        set => this.RaiseAndSetIfChanged( ref _selectedStreamQualityName, value );
     }
-    public ReactiveCommand<Unit, Unit> ValidateAndFetchCommand { get; }
 
     async void HandleNewLink()
     {
+        IsVideoLoaded = false;
         VideoName = string.Empty;
-        _videoThumbnailUrl = string.Empty;
+        _videoThumbnailUrl = DefaultImage;
         VideoThumbnailBitmap = null;
         StreamQualities = [ DefaultQuality ];
         SelectedStreamQuality = StreamQualities[ 0 ];
@@ -98,7 +111,8 @@ public sealed class YoutubeViewModel : ReactiveObject
             LoadDefaultImage();
             return;
         }
-        
+
+        VideoName = "Loading...";
         _dlService = new YoutubeDownloaderService( _youtubeLink );
 
         if ( !await _dlService.GetStreamManifest() )
@@ -109,7 +123,8 @@ public sealed class YoutubeViewModel : ReactiveObject
             _dlService = null;
             return;
         }
-        
+
+        IsVideoLoaded = true;
         VideoName = _dlService.VideoName ?? "";
         _videoThumbnailUrl = _dlService.VideoThumbnail ?? "";
         
@@ -149,10 +164,9 @@ public sealed class YoutubeViewModel : ReactiveObject
     }
     void HandleNewStreamType()
     {
-        if ( _dlService is null || !StreamTypes.Contains( _selectedStreamType ) )
+        if ( _dlService is null || !Enum.TryParse( _selectedStreamTypeName, out StreamType streamType ) )
             return;
-
-        int streamType = StreamTypes.IndexOf( _selectedStreamType ); 
+        
         List<string> streamQualities = _dlService.GetStreamInfo( streamType );
 
         StreamQualities = streamQualities.Count > 0
@@ -161,8 +175,20 @@ public sealed class YoutubeViewModel : ReactiveObject
         
         SelectedStreamQuality = StreamQualities[ 0 ];
     }
-    void ValidateAndFetch()
+    async Task Download()
     {
-        // Validation and data fetching logic will go here
+        if ( _dlService is null || !Enum.TryParse( _selectedStreamTypeName, out StreamType streamType ) )
+            return;
+
+        if ( !_streamQualities.Contains( _selectedStreamQualityName ) )
+            return;
+
+        bool success = await _dlService.Download( 
+            _downloadPath, streamType, _streamQualities.IndexOf( _selectedStreamQualityName ) );
+
+        if ( !success )
+        {
+            // make error message
+        }
     }
 }

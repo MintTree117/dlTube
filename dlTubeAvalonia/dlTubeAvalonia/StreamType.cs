@@ -1,6 +1,6 @@
 namespace dlTubeAvalonia;
 
-public enum Filetype
+public enum StreamType
 {
     Mixed = 0,
     Audio = 1,

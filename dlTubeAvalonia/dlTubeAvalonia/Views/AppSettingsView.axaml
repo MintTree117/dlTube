@@ -9,26 +9,33 @@
 		HorizontalAlignment="Center"
 		Width="400" 
 		Height="400">
-		<TextBlock 
+		<TextBlock
+			Margin="0 0 0 30"
+			HorizontalAlignment="Left"
+			FontWeight="Bold"
+			FontSize="40"
+			TextDecorations="Underline"
+			Text="App Settings" />
+		<TextBlock
 			Margin="0 0 0 10" 
-			HorizontalAlignment="Center"
+			HorizontalAlignment="Left"
 			Text="Download Location" />
 		<TextBox 
-			Width="300" Margin="0 10 0 0" 
+			Width="400" Margin="0 0 0 0" 
 			HorizontalAlignment="Center"
 			Text="{Binding DownloadLocation}" />
 		<Button
-			Width="150"
-			Margin="0,10,0,10"
-			Padding="30,15"
+			Width="400"
+			Margin="0,20,0,10"
+			Padding="20,8"
 			HorizontalContentAlignment="Center"
 			Background='MediumSeaGreen'
 			BorderThickness="3"
 			BorderBrush="LimeGreen"
 			HorizontalAlignment="Center"
-			IsEnabled="{Binding DownloadLocationChanged}"
-			Command="{Binding SaveDownloadLocationCommand}"
-			Content="Save" />
+			IsEnabled="{Binding SettingsChanged}"
+			Command="{Binding SaveChangesCommand}"
+			Content="Save Changes" />
 	</StackPanel>
 	
 </UserControl>

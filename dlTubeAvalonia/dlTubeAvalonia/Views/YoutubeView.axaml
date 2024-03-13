@@ -5,22 +5,29 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels">
 	
-	<!-- Downloader -->
-	<Panel
-        Width="360"
+	<!-- Padding -->
+    <Panel
+        MaxWidth="560"
         HorizontalAlignment="Center"
         VerticalAlignment="Center"
-        Background="Black">
-		<Border
-            Background="DimGray" 
-            BorderBrush="Black" 
-            Padding="5" 
-            BorderThickness="1">
-			<StackPanel
+        Background="#cc000000">
+        <Border
+            BorderBrush="DarkGray"
+            BorderThickness="1"
+            CornerRadius="5">
+            <StackPanel
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Background="DimGray"
-                MaxWidth="300">
+                MaxWidth="460"
+                Margin="50,30,50,50">
+                <!-- Page Title -->
+                <TextBlock
+                    Margin="0 0 0 30"
+                    HorizontalAlignment="Center"
+                    FontWeight="Bold"
+                    FontSize="40"
+                    TextDecorations="Underline"
+                    Text="Youtube Downloader" />
                 <!-- Video Meta -->
                 <TextBlock
                     Margin="0,0,0,10"
@@ -29,62 +36,66 @@
                     TextWrapping="Wrap"
                     Text="{Binding VideoName}" />
                 <Image 
-                    Width="300" 
+                    Width="460" 
                     Height="150" 
-                    Margin="0,0,0,10" 
+                    Margin="0,0,0,25" 
                     HorizontalAlignment="Center"
                     Source="{Binding VideoThumbnailBitmap}" />
                 <!-- Link Box -->
                 <TextBlock
-                    Margin="0,10,0,10"
+                    Margin="0,0,0,7"
                     FontWeight="Bold"
                     HorizontalAlignment="Left"
-                    Text="Paste a link to download" />
+                    Text="Link" />
                 <TextBox
-                    Width="300"
-                    Margin="0,0,0,10"
-                    Padding="15,15,15,15"
+                    Width="460"
+                    Margin="0,0,0,15"
+                    Padding="20,20,20,20"
                     HorizontalAlignment="Center" 
                     Watermark="Paste link here"
                     Text="{Binding YoutubeLink}"/>
                 <!-- File Type -->
                 <TextBlock 
-                    Margin="0,10,0,10" 
+                    Margin="0,0,0,7"
+                    FontWeight="Bold"
                     HorizontalAlignment="Left"
-                    Text="File Type" />
+                    Text="Type" />
                 <ComboBox 
-                    Width="300"
-                    Margin="0,0,0,10"
-                    Padding="15,15,15,15"
+                    Width="460"
+                    Margin="0,0,0,15"
+                    Padding="20,20,20,20"
                     HorizontalAlignment="Center" 
                     ItemsSource="{Binding StreamTypes}" 
-                    SelectedItem="{Binding SelectedStreamType}" />
+                    SelectedItem="{Binding SelectedStreamType}" 
+                    IsEnabled="{Binding IsVideoLoaded}" />
                 <!-- Quality -->
                 <TextBlock
-                    Margin="0,10,0,10"
+                    Margin="0,0,0,7"
+                    FontWeight="Bold"
                     HorizontalAlignment="Left"
                     Text="Quality" />
                 <ComboBox 
-                    Width="300" 
-                    Margin="0,0,0,10"
-                    Padding="15,15,15,15"
+                    Width="460" 
+                    Margin="0,0,0,25"
+                    Padding="20,20,20,20"
                     HorizontalAlignment="Center"
                     ItemsSource="{Binding StreamQualities}" 
-                    SelectedItem="{Binding SelectedStreamQuality}" />
+                    SelectedItem="{Binding SelectedStreamQuality}"
+                    IsEnabled="{Binding IsVideoLoaded}" />
                 <!-- Submit -->
                 <Button 
-                    Width="150"
-                    Margin="0,10,0,10"
-                    Padding="30,15"
+                    Width="460"
+                    Margin="0,10,0, 0"
+                    Padding="30,20"
                     HorizontalContentAlignment="Center"
-                    Background='MediumSeaGreen'
-                    BorderThickness="3"
-                    BorderBrush="LimeGreen"
+                    Background='#8043ff64'
+                    BorderThickness="1"
+                    BorderBrush="DarkGray"
                     HorizontalAlignment="Center"
-                    Content="Download" />
-            </StackPanel>
-		</Border>
-	</Panel>
-
-	
+                    Content="Download"
+                    Command="{Binding DownloadCommand}"
+                    IsEnabled="{Binding IsVideoLoaded}" />
+                </StackPanel>
+        </Border>
+    </Panel>
 </UserControl>

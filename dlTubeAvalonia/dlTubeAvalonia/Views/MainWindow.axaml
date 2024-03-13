@@ -4,40 +4,48 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:dlTubeAvalonia.Views"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
         x:Class="dlTubeAvalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="dlTubeAvalonia">
 
+    <!-- Data Context -->
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
     
-    <DockPanel>
-        <Menu DockPanel.Dock="Top">
-            <MenuItem 
-                Header="Account">
-                <MenuItem 
-                    Header="Sign In"></MenuItem>
-            </MenuItem>
-            <MenuItem 
-                Header="Settings"
-                Click="OnClickAppSettings">
-            </MenuItem>
-            <MenuItem 
-                Header="Views">
-                <MenuItem 
-                    Header="Youtube Downloader" 
+    <!-- Window Background -->
+    <Window.Background>
+        <ImageBrush
+            Source="avares://dlTubeAvalonia/Assets/dsotm.jpg"
+            Stretch="UniformToFill" />
+    </Window.Background>
+    
+    <!-- Content -->
+    <Grid>
+        <!-- Background -->
+        <Image Source="avares://dlTubeAvalonia/Assets/dsotm.jpg" Stretch="Fill" />
+        <Border Background="#AA000000" /> <!-- Semi-transparent overlay -->
+        <!-- Main -->
+        <DockPanel>
+            <!-- Menu -->
+            <Menu DockPanel.Dock="Top">
+                <MenuItem
+                    Header="Youtube Downloader"
                     Click="OnClickViewYoutube" />
-                <MenuItem 
-                    Header="Media Archive" 
+                <MenuItem
+                    Header="Media Archive"
                     Click="OnClickViewArchive" />
-            </MenuItem>
-        </Menu>
-
-        <ContentControl x:Name="MainContent" />
-    </DockPanel>
+                <MenuItem
+                    Header="Settings"
+                    Click="OnClickAppSettings" />
+            </Menu>
+            <!-- Main Content -->
+            <ContentControl Opacity="1" x:Name="MainContent" />
+        </DockPanel>
+    </Grid>
+    
 </Window>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoutubeExplode;
@@ -23,7 +24,7 @@ public sealed class YoutubeDownloaderService( string videoUrl )
     List<string>? _videoSteamQualities;
 
     public string? VideoName => _video?.Title;
-    public string? VideoThumbnail => _video?.Thumbnails?.FirstOrDefault()?.Url;
+    public string? VideoThumbnail => _video?.Thumbnails.FirstOrDefault()?.Url;
 
     public async Task<bool> GetStreamManifest()
     {
@@ -31,15 +32,42 @@ public sealed class YoutubeDownloaderService( string videoUrl )
         _video = await _youtube.Videos.GetAsync( videoUrl );
         return _streamManifest is not null && _video is not null;
     }
-    public List<string> GetStreamInfo( int steamType )
+    public List<string> GetStreamInfo( StreamType steamType )
     {
         return steamType switch
         {
-            0 => GetMixedStreams(),
-            1 => GetAudioStreams(),
-            2 => GetVideoStreams(),
+            StreamType.Mixed => GetMixedStreams(),
+            StreamType.Audio => GetAudioStreams(),
+            StreamType.Video => GetVideoStreams(),
             _ => throw new Exception( "Invalid Stream Type!" )
         };
+    }
+    public async Task<bool> Download( string filepath, StreamType type, int quality )
+    {
+        try
+        {
+            switch ( type )
+            {
+                case StreamType.Mixed:
+                    await DownloadMixed( filepath, quality );
+                    break;
+                case StreamType.Audio:
+                    await DownloadAudio( filepath, quality );
+                    break;
+                case StreamType.Video:
+                    await DownloadVideo( filepath, quality );
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return true;
+        }
+        catch ( Exception e )
+        {
+            Console.WriteLine( e + e.Message );
+            return false;
+        }
     }
     
     List<string> GetMixedStreams()
@@ -91,5 +119,46 @@ public sealed class YoutubeDownloaderService( string videoUrl )
         }
 
         return _videoSteamQualities;
+    }
+
+    async Task DownloadMixed( string outputDirectory, int selection )
+    {
+        if ( _mixedStreams is null || _mixedStreams.Count <= 0 )
+            throw new Exception( "Internal App Error: No mixed streams found!!!" );
+
+        MuxedStreamInfo selectedStream = _mixedStreams[ selection ];
+        string path = GetDownloadPath( outputDirectory, selectedStream.Container.Name );
+        await _youtube.Videos.Streams.DownloadAsync( selectedStream, path );
+    }
+    async Task DownloadAudio( string outputDirectory, int selection )
+    {
+        if ( _audioStreams is null || _audioStreams.Count <= 0 )
+            throw new Exception( "Internal App Error: No audio streams found!!!" );
+
+        AudioOnlyStreamInfo selectedStream = _audioStreams[ selection ];
+        string path = GetDownloadPath( outputDirectory, selectedStream.Container.Name );
+        await _youtube.Videos.Streams.DownloadAsync( selectedStream, path );
+    }
+    async Task DownloadVideo( string outputDirectory, int selection )
+    {
+        if ( _videoStreams is null || _videoStreams.Count <= 0 )
+            throw new Exception( "Internal App Error: No video streams found!!!" );
+
+        VideoOnlyStreamInfo selectedStream = _videoStreams[ selection ];
+        string path = GetDownloadPath( outputDirectory, selectedStream.Container.Name );
+        await _youtube.Videos.Streams.DownloadAsync( selectedStream, path );
+    }
+
+    string GetDownloadPath( string outputDirectory, string fileExtension )
+    {
+        string videoName = SanitizeVideoName( _video!.Title );
+        string fileName = $"{videoName}.{fileExtension}";
+        return Path.Combine( outputDirectory, fileName );
+
+        static string SanitizeVideoName( string videoName )
+        {
+            return Path.GetInvalidFileNameChars().Aggregate( videoName,
+                ( current, invalidChar ) => current.Replace( invalidChar, '-' ) );
+        }
     }
 }

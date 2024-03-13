@@ -3,7 +3,7 @@
              x:Class="dlTubeAvalonia.App"
              xmlns:local="using:dlTubeAvalonia"
              xmlns:services="clr-namespace:dlTubeAvalonia.Services"
-             RequestedThemeVariant="Default">
+             RequestedThemeVariant="Dark">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
              
     <Application.DataTemplates>

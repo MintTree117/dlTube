@@ -1,3 +1,6 @@
+using System.Threading.Tasks;
+using dlTubeAvalonia.Models;
+
 namespace dlTubeAvalonia.Services;
 
 using System;
@@ -28,5 +31,54 @@ public static class AppConfig
             throw new InvalidOperationException( "UserSettingsPath is not set in appsettings.json." );
 
         return userSettingsPath;
+    }
+
+    public static async Task<AppSettingsModel?> LoadSettings( string appSettingsPath )
+    {
+        if ( !File.Exists( appSettingsPath ) )
+            return null;
+
+        try
+        {
+            string json = await File.ReadAllTextAsync( appSettingsPath );
+            AppSettingsModel? settings = JsonSerializer.Deserialize<AppSettingsModel>( json );
+            return settings;
+        }
+        catch ( Exception e )
+        {
+            Console.WriteLine( e );
+            return null;
+        }
+    }
+    public static AppSettingsModel? LoadSettingsS( string appSettingsPath )
+    {
+        if ( !File.Exists( appSettingsPath ) )
+            return null;
+
+        try
+        {
+            string json = File.ReadAllText( appSettingsPath );
+            AppSettingsModel? settings = JsonSerializer.Deserialize<AppSettingsModel>( json );
+            return settings;
+        }
+        catch ( Exception e )
+        {
+            Console.WriteLine( e );
+            return null;
+        }
+    }
+    public static async Task<bool> SaveSettings( string appSettingsPath, AppSettingsModel settings )
+    {
+        try
+        {
+            string json = JsonSerializer.Serialize( settings, new JsonSerializerOptions { WriteIndented = true } );
+            await File.WriteAllTextAsync( appSettingsPath, json );
+            return true;
+        }
+        catch ( Exception e )
+        {
+            Console.WriteLine( e );
+            return false;
+        }
     }
 }

@@ -1,7 +1,6 @@
 using System;
-using System.IO;
 using System.Reactive;
-using System.Text.Json;
+using System.Threading.Tasks;
 using dlTubeAvalonia.Models;
 using dlTubeAvalonia.Services;
 using ReactiveUI;
@@ -13,14 +12,14 @@ public sealed class AppSettingsViewModel : ReactiveObject
     readonly string _appSettingsPath;
     
     string _downloadLocation = "";
-    bool _downloadLocationChanged = false;
+    bool _settingsChanged = false;
 
     // Define a command for the save action
-    public ReactiveCommand<Unit, Unit> SaveDownloadLocationCommand { get; }
+    public ReactiveCommand<Unit, Unit> SaveChangesCommand { get; }
 
     public AppSettingsViewModel()
     {
-        SaveDownloadLocationCommand = ReactiveCommand.Create( SaveSettings );
+        SaveChangesCommand = ReactiveCommand.CreateFromTask( SaveSettings );
         _appSettingsPath = AppConfig.GetUserSettingsPath();
         LoadSettings();
     }
@@ -31,36 +30,26 @@ public sealed class AppSettingsViewModel : ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged( ref _downloadLocation, value );
-            DownloadLocationChanged = true;
+            SettingsChanged = true;
         }
     }
-    public bool DownloadLocationChanged
+    public bool SettingsChanged
     {
-        get => _downloadLocationChanged;
-        set => this.RaiseAndSetIfChanged( ref _downloadLocationChanged, value );
+        get => _settingsChanged;
+        set => this.RaiseAndSetIfChanged( ref _settingsChanged, value );
     }
 
     async void LoadSettings()
     {
-        if ( !File.Exists( _appSettingsPath ) )
+        AppSettingsModel? settings = await AppConfig.LoadSettings( _appSettingsPath );
+
+        if ( settings is null )
             return;
 
-        try
-        {
-            string json = await File.ReadAllTextAsync( _appSettingsPath );
-            AppSettingsModel? settings = JsonSerializer.Deserialize<AppSettingsModel>( json );
-
-            if ( settings is null )
-                return;
-
-            DownloadLocation = settings.DownloadLocation;
-        }
-        catch ( Exception e )
-        {
-            Console.WriteLine( e );
-        }
+        DownloadLocation = settings.DownloadLocation;
+        SettingsChanged = false;
     }
-    async void SaveSettings()
+    async Task SaveSettings()
     {
         Console.WriteLine( $"Saving Download Location: {DownloadLocation}" );
 
@@ -69,15 +58,8 @@ public sealed class AppSettingsViewModel : ReactiveObject
             DownloadLocation = this.DownloadLocation
         };
 
-        try
-        {
-            string json = JsonSerializer.Serialize( settings, new JsonSerializerOptions { WriteIndented = true } );
-            await File.WriteAllTextAsync( _appSettingsPath, json );
-            DownloadLocationChanged = false;   
-        }
-        catch ( Exception e )
-        {
-            Console.WriteLine( e );
-        }
+        bool success = await AppConfig.SaveSettings( _appSettingsPath, settings );
+
+        SettingsChanged = !success;
     }
 }
