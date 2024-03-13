@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using dlTubeAvalonia.Models;
 
@@ -80,5 +82,28 @@ public static class AppConfig
             Console.WriteLine( e );
             return false;
         }
+    }
+
+    public static async Task<List<byte>?> LoadImageBytesFromUrlAsync( string imageUrl )
+    {
+        try
+        {
+            using var client = new HttpClient();
+            HttpResponseMessage response = await client.GetAsync( imageUrl );
+
+            if ( response.IsSuccessStatusCode )
+            {
+                await using Stream stream = await response.Content.ReadAsStreamAsync();
+                using var memoryStream = new MemoryStream();
+                await stream.CopyToAsync( memoryStream ); // Copy the stream to a MemoryStream
+                return new List<byte>( memoryStream.ToArray() ); // Convert to List<byte>
+            }
+        }
+        catch ( Exception ex )
+        {
+            Console.WriteLine( $"Failed to load image from URL: {ex.Message}" );
+        }
+
+        return null;
     }
 }
