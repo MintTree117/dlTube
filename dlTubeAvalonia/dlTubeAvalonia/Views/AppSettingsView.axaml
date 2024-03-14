@@ -4,38 +4,50 @@
 	xmlns="https://github.com/avaloniaui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels">
-	
-	<StackPanel
+
+	<Panel
+		MaxWidth="560"
 		HorizontalAlignment="Center"
-		Width="400" 
-		Height="400">
-		<TextBlock
-			Margin="0 0 0 30"
-			HorizontalAlignment="Left"
-			FontWeight="Bold"
-			FontSize="40"
-			TextDecorations="Underline"
-			Text="App Settings" />
-		<TextBlock
-			Margin="0 0 0 10" 
-			HorizontalAlignment="Left"
-			Text="Download Location" />
-		<TextBox 
-			Width="400" Margin="0 0 0 0" 
-			HorizontalAlignment="Center"
-			Text="{Binding DownloadLocation}" />
-		<Button
-			Width="400"
-			Margin="0,20,0,10"
-			Padding="20,8"
-			HorizontalContentAlignment="Center"
-			Background='MediumSeaGreen'
-			BorderThickness="3"
-			BorderBrush="LimeGreen"
-			HorizontalAlignment="Center"
-			IsEnabled="{Binding SettingsChanged}"
-			Command="{Binding SaveChangesCommand}"
-			Content="Save Changes" />
-	</StackPanel>
+		VerticalAlignment="Center"
+		Background="#cc000000">
+		<Border
+			BorderBrush="DarkGray"
+			BorderThickness="1"
+			CornerRadius="5">
+			<StackPanel
+				HorizontalAlignment="Center"
+				VerticalAlignment="Center"
+				MaxWidth="460"
+				Margin="50,30,50,50">
+				<TextBlock
+					Margin="0 0 0 30"
+					HorizontalAlignment="Left"
+					FontWeight="Bold"
+					FontSize="40"
+					TextDecorations="Underline"
+					Text="App Settings" />
+				<TextBlock
+					Margin="0 0 0 10"
+					HorizontalAlignment="Left"
+					Text="Download Location" />
+				<TextBox
+					Width="400" Margin="0 0 0 0"
+					HorizontalAlignment="Center"
+					Text="{Binding DownloadLocation}" />
+				<Button
+					Width="400"
+					Margin="0,20,0,10"
+					Padding="20,8"
+					HorizontalContentAlignment="Center"
+					Background='MediumSeaGreen'
+					BorderThickness="3"
+					BorderBrush="LimeGreen"
+					HorizontalAlignment="Center"
+					IsEnabled="{Binding SettingsChanged}"
+					Command="{Binding SaveChangesCommand}"
+					Content="Save Changes" />
+			</StackPanel>
+		</Border>
+	</Panel>
 	
 </UserControl>

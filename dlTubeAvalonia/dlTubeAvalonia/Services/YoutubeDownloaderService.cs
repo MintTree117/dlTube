@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using YoutubeExplode;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
@@ -17,6 +18,7 @@ public sealed class YoutubeDownloaderService( string videoUrl )
     StreamManifest? _streamManifest;
     Video? _video;
     byte[]? _thumbnailBytes;
+    IFFmpegService? _fFmpegService;
     
     List<MuxedStreamInfo>? _mixedStreams;
     List<AudioOnlyStreamInfo>? _audioStreams;
@@ -31,6 +33,8 @@ public sealed class YoutubeDownloaderService( string videoUrl )
 
     public async Task<bool> GetStreamManifest()
     {
+        _fFmpegService = Program.ServiceProvider.GetService<IFFmpegService>();
+        
         try
         {
             _streamManifest = await _youtube.Videos.Streams.GetManifestAsync( videoUrl );
@@ -187,6 +191,9 @@ public sealed class YoutubeDownloaderService( string videoUrl )
     async Task AddThumbnail( string videoPath )
     {
         if ( _thumbnailBytes is null )
+            return;
+
+        if ( !await _fFmpegService?.CheckFFmpegInstallationAsync() )
             return;
 
         string thumbnailPath = Path.Combine( Path.GetTempPath(), "thumbnail.jpg" );

@@ -34,6 +34,11 @@ public static class AppConfig
 
         return userSettingsPath;
     }
+    public static string GetDownloadPath()
+    {
+        AppSettingsModel settings = AppConfig.LoadSettingsS( AppConfig.GetUserSettingsPath() ) ?? new AppSettingsModel();
+        return settings.DownloadLocation;
+    }
 
     public static async Task<AppSettingsModel?> LoadSettings( string appSettingsPath )
     {
