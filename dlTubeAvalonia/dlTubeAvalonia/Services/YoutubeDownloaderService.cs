@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using dlTubeAvalonia.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using YoutubeExplode;
 using YoutubeExplode.Videos;

@@ -4,6 +4,42 @@
 	xmlns="https://github.com/avaloniaui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels">
+
+	<Grid RowDefinitions="Auto,*">
+		<!-- Top bar -->
+		<Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
+			<Button Grid.Column="0" Content="Menu" Margin="5" HorizontalAlignment="Left" Click="ToggleMenu" />
+
+			<TextBox Grid.Column="1" Watermark="Search..." Margin="5" HorizontalAlignment="Stretch" />
+
+			<StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+				<ComboBox Width="150" Margin="5" ItemsSource="{Binding StreamTypes}" SelectedItem="{Binding SelectedStreamType}" />
+				<ComboBox Width="150" Margin="5" ItemsSource="{Binding SortTypes}" SelectedItem="{Binding SelectedSortType}" />
+			</StackPanel>
+		</Grid>
+
+		<!-- Search Results -->
+		<ListBox Grid.Row="1" Margin="5" >
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<StackPanel>
+						<!--<TextBlock FontWeight="Bold" Text="{Binding Title}" />-->
+						<!-- Add more details as needed -->
+					</StackPanel>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+
+		<!-- Pop-out Menu (Overlay) -->
+		<Border Grid.Row="1" HorizontalAlignment="Left" Width="200" Background="LightGray" IsVisible="{Binding IsMenuOpen}"
+		        ZIndex="1000">
+			<StackPanel>
+				<!-- Menu content here -->
+				<TextBlock Text="Menu Item 1" />
+				<TextBlock Text="Menu Item 2" />
+				<!-- Add more menu items as needed -->
+			</StackPanel>
+		</Border>
+	</Grid>
 	
-	<TextBlock Text="Browse the Archive"></TextBlock>
 </UserControl>

@@ -1,4 +1,4 @@
-namespace dlTubeAvalonia;
+namespace dlTubeAvalonia.Enums;
 
 public enum StreamType
 {

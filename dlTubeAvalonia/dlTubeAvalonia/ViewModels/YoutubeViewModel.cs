@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using dlTubeAvalonia.Enums;
 using dlTubeAvalonia.Services;
 using ReactiveUI;
 
@@ -40,7 +41,7 @@ public sealed class YoutubeViewModel : ReactiveObject
     public YoutubeViewModel()
     {
         SelectedStreamType = StreamTypes[ 0 ];
-        SelectedStreamQuality = _streamQualities[ 0 ];
+        SelectedStreamQuality = StreamQualities[ 0 ];
         LoadDefaultImage();
 
         DownloadCommand = ReactiveCommand.CreateFromTask( Download ); // validate and fetch is called on button click and is bound to the reactive model
