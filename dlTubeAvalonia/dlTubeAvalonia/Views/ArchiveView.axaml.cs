@@ -14,7 +14,6 @@ public sealed partial class ArchiveView : UserControl
         this.DataContext = new ArchiveViewModel();
         _viewModel = this.DataContext as ArchiveViewModel;
         InitializeComponent();
-
     }
     void InitializeComponent()
     {

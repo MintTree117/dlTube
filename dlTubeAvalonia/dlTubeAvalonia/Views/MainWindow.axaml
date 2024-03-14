@@ -3,7 +3,6 @@
         xmlns:vm="using:dlTubeAvalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:views="clr-namespace:dlTubeAvalonia.Views"
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
         x:Class="dlTubeAvalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -42,11 +41,27 @@
                     Header="Media Archive"
                     Click="OnClickViewArchive" />
                 <MenuItem
-                    Header="Settings"
+                    Header="App Settings"
                     Click="OnClickAppSettings" />
+                <MenuItem
+                    Header="Login"
+                    IsVisible="{Binding ShowLogin}"
+                    Click="OnClickLogin" />
+                <MenuItem
+                    Header="Account"
+                    IsVisible="{Binding IsAuthenticated}">
+                    <MenuItem
+                        Header="Settings"
+                        Click="OnClickAccountSettings" />
+                    <MenuItem
+                        Header="Logout"
+                        Click="OnClickLogout" />
+                </MenuItem>
             </Menu>
             <!-- Main Content -->
-            <ContentControl Opacity="1" x:Name="MainContent" />
+            <ContentControl 
+                Opacity="1" 
+                x:Name="MainContent" />
         </DockPanel>
     </Grid>
     

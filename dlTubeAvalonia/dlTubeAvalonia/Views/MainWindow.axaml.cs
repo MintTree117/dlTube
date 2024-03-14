@@ -28,4 +28,16 @@ public sealed partial class MainWindow : Window
     {
         MainContent.Content = new AppSettingsView();
     }
+    void OnClickLogin( object? sender, RoutedEventArgs args )
+    {
+        MainContent.Content = new LoginView();
+    }
+    void OnClickLogout( object? sender, RoutedEventArgs args )
+    {
+        MainContent.Content = _youtubeView;
+    }
+    void OnClickAccountSettings( object? sender, RoutedEventArgs args )
+    {
+        
+    }
 }
