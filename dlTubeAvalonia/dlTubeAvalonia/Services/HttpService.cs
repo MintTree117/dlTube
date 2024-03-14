@@ -4,11 +4,11 @@ using System.Collections.Specialized;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using System.Web;
+using Microsoft.Extensions.Logging;
 
 namespace dlTubeAvalonia.Services;
 
-public class HttpService( HttpClient _http )
+public class HttpService( HttpClient _http, ILogger<HttpService>? _logger ) : IHttpService
 {
     public async Task<ApiReply<T?>> TryGetRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
     {
@@ -70,23 +70,25 @@ public class HttpService( HttpClient _http )
         if ( parameters is null )
             return apiPath;
 
-        NameValueCollection query = HttpUtility.ParseQueryString( string.Empty );
+        NameValueCollection query = [ ];
 
         foreach ( KeyValuePair<string, object> param in parameters )
         {
-            query[ param.Key ] = param.Value.ToString();
+            query.Add( param.Key, param.Value.ToString() );
         }
 
         return $"{apiPath}?{query}";
     }
-    static async Task<ApiReply<T?>> HandleHttpResponse<T>( HttpResponseMessage httpResponse )
+    async Task<ApiReply<T?>> HandleHttpResponse<T>( HttpResponseMessage httpResponse )
     {
+        // Handle string edge-case: json has trouble with strings
         if ( typeof( T ) == typeof( string ) )
         {
             string responseString = await httpResponse.Content.ReadAsStringAsync();
             return new ApiReply<T?>( ( T ) ( object ) responseString );
         }
         
+        // Early out if operation was successful
         if ( httpResponse.IsSuccessStatusCode )
         {
             var getReply = await httpResponse.Content.ReadFromJsonAsync<T>();
@@ -96,39 +98,16 @@ public class HttpService( HttpClient _http )
                 : new ApiReply<T?>( ServiceErrorType.NotFound, "No data returned from request" );
         }
         
+        // Handle http error code
         string errorContent = await httpResponse.Content.ReadAsStringAsync();
-        
-        switch ( httpResponse.StatusCode )
-        {
-            case System.Net.HttpStatusCode.BadRequest:
-                //_logger.LogError( $"{requestTypeName}: Bad request: {errorContent}" );
-                return new ApiReply<T?>( ServiceErrorType.ValidationError, errorContent );
-
-            case System.Net.HttpStatusCode.NotFound:
-                //_logger.LogError( $"{requestTypeName}: Not found: {errorContent}" );
-                return new ApiReply<T?>( ServiceErrorType.NotFound, errorContent );
-
-            case System.Net.HttpStatusCode.Unauthorized:
-                //_logger.LogError( $"{requestTypeName}: Unauthorized: {errorContent}" );
-                return new ApiReply<T?>( ServiceErrorType.Unauthorized, errorContent );
-
-            case System.Net.HttpStatusCode.Conflict:
-                //_logger.LogError( $"{requestTypeName}: Conflict: {errorContent}" );
-                return new ApiReply<T?>( ServiceErrorType.Conflict, errorContent );
-
-            case System.Net.HttpStatusCode.InternalServerError:
-                //_logger.LogError( $"{requestTypeName}: Server error: {errorContent}" );
-                return new ApiReply<T?>( ServiceErrorType.ServerError, errorContent );
-
-            default:
-                //_logger.LogError( $"{requestTypeName}: Other error: {httpResponse.StatusCode}, Content: {errorContent}" );
-                return new ApiReply<T?>( ServiceErrorType.ServerError, $"Error: {httpResponse.StatusCode}" );
-        }
+        ServiceErrorType errorType = ApiReply<object>.GetHttpServiceErrorType( httpResponse.StatusCode );
+        _logger?.LogError( $"{errorContent}" );
+        return new ApiReply<T?>( errorType, errorContent );
     }
     
     ApiReply<T?> HandleHttpException<T>( Exception e, string requestType )
     {
-        //_logger.LogError( e, $"{requestType}: Exception occurred while sending API request." );
+        _logger?.LogError( e, $"{requestType}: Exception occurred while sending API request." );
         return new ApiReply<T?>( ServiceErrorType.ServerError, e.Message );
     }
     void SetAuthHttpHeader( string? token )

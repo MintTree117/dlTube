@@ -1,23 +1,26 @@
+using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class FFmpegService : IFFmpegService
+public sealed class FFmpegService( ILogger<FFmpegService>? _logger ) : IFFmpegService
 {
     bool? _isFFmpegInstalled;
 
     public async Task<bool> CheckFFmpegInstallationAsync()
     {
-        _isFFmpegInstalled ??= await IsFFmpegInstalledAsync();
+        _isFFmpegInstalled ??= await IsFFmpegInstalledAsync( _logger );
         return _isFFmpegInstalled.Value;
     }
 
-    static async Task<bool> IsFFmpegInstalledAsync()
+    static async Task<bool> IsFFmpegInstalledAsync( ILogger<FFmpegService>? logger )
     {
         try
         {
-            using Process process = new Process();
+            // FFmpeg process
+            using Process process = new();
             process.StartInfo.FileName = "ffmpeg";
             process.StartInfo.Arguments = "-version";
             process.StartInfo.RedirectStandardOutput = true;
@@ -32,14 +35,17 @@ public sealed class FFmpegService : IFFmpegService
             string error = await process.StandardError.ReadToEndAsync();
 
             await process.WaitForExitAsync();
+            
+            bool success = process.ExitCode == 0 && !string.IsNullOrWhiteSpace( output );
 
-            // A simple check. If ffmpeg is not recognized, an error is typically thrown.
-            // Additionally, you might check if the output contains version information.
-            return process.ExitCode == 0 && !string.IsNullOrWhiteSpace( output );
+            if ( !success )
+                logger?.LogError( $"FFmpeg initialization fail: {error}" );
+
+            return success;
         }
-        catch
+        catch( Exception e )
         {
-            // An exception is likely thrown if ffmpeg is not installed or not in the PATH
+            logger?.LogError( e, e.Message );
             return false;
         }
     }

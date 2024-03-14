@@ -32,7 +32,7 @@ public sealed class YoutubeViewModel : ReactiveObject
     string _resultMessage = string.Empty;
 
     readonly string _downloadPath;
-    YoutubeDownloaderService? _dlService;
+    IYoutubeService? _dlService;
     bool _isLinkBoxEnabled;
     bool _isSettingsEnabled;
     
@@ -126,7 +126,7 @@ public sealed class YoutubeViewModel : ReactiveObject
         }
 
         VideoName = LoadingVideoName;
-        _dlService = new YoutubeDownloaderService( _youtubeLink );
+        _dlService = new YoutubeService( _youtubeLink );
 
         if ( !await _dlService.GetStreamManifest() )
         {
