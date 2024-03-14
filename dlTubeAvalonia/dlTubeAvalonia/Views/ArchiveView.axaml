@@ -14,11 +14,11 @@
 			VerticalAlignment="Center"
 			IsVisible="{Binding ShowLoginPrompt}">
 			<TextBlock 
-				Text="Please log in to view the archive" 
-				HorizontalAlignment="Center" />
-			<Button
-				Content="Login/Register" 
-				Command="{Binding ShowLoginFormCommand}" />
+				Text="Please log in to view the archive"
+				FontWeight="Bold"
+				FontSize="48"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Center" />
 		</StackPanel>
 		<!-- Main Content -->
 		<Grid 

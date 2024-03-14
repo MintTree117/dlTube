@@ -1,9 +1,79 @@
 <UserControl xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="dlTubeAvalonia.Views.LoginView">
-    <StackPanel 
-        Margin="20">
-        <TextBlock 
-            Text="Login" />
-    </StackPanel>
+    
+    <Border
+        BorderBrush="DarkGray"
+        BorderThickness="1"
+        CornerRadius="5"
+        Width="480"
+        Padding="40"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center"
+        Background="#cc000000">
+        <StackPanel>
+            <!-- Login Text -->
+            <TextBlock 
+                Text="Login"
+                TextDecorations="Underline"
+                FontWeight="Bold" 
+                FontSize="28"
+                HorizontalAlignment="Left" 
+                Margin="0,0,0,25" />
+            <!-- Username/Email Input -->
+            <TextBox 
+                Watermark="Email or Username"
+                Padding="15"
+                Margin="0,0,0,10" />
+            <!-- Password Input -->
+            <TextBox 
+                Watermark="Password"
+                Padding="15"
+                Margin="0,0,0,5" />
+            <!-- Forgot Password Button -->
+            <Button
+                Content="Reset Password"
+                Margin="0,0,0,10"
+                FontSize="10"
+                Background="Transparent"
+                HorizontalAlignment="Left" />
+            <!-- Submit Login Button -->
+            <Button
+                Content="Login"
+                Padding="20,20"
+                Margin="0,0,0,30"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"/>
+            
+            <!-- Or Register Text -->
+            <TextBlock 
+                Text="Register"
+                TextDecorations="Underline"
+                FontWeight="Bold"
+                FontSize="28" 
+                HorizontalAlignment="Left" 
+                Margin="0,0,0,25" />
+            <!-- Email Input for Registration -->
+            <TextBox 
+                Watermark="Email"
+                Padding="15"
+                Margin="0,0,0,10" />
+            <!-- Username Input for Registration -->
+            <TextBox 
+                Watermark="Username (Register)"
+                Padding="15"
+                Margin="0,0,0,10" />
+            <!-- Password Input for Registration -->
+            <TextBox 
+                Watermark="Password (Register)"
+                Padding="15"
+                Margin="0,0,0,20" />
+            <!-- Submit Register Button -->
+            <Button
+                Content="Register"
+                Padding="20,20"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center" />
+        </StackPanel>
+    </Border>
 </UserControl>
