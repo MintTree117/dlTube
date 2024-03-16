@@ -13,12 +13,13 @@ namespace dlTubeAvalonia.ViewModels;
 
 public sealed class YoutubeSearchViewModel : ReactiveObject
 {
+    List<int> _resultsPerPageCount = [ 10, 20, 30, 50, 100, 200 ];
     List<string> _resultsPerPage = [ "Show 10", "Show 20", "Show 30", "Show 50", "Show 100", "Show 200" ];
     string _selectedResultsPerPage = "Show 10";
     
     readonly YoutubeSearchService _searchService;
     string _searchText = string.Empty;
-    IReadOnlyList<ISearchResult> _searchResults = [ ];
+    IReadOnlyList<VideoSearchResult> _searchResults = [ ];
 
     public ReactiveCommand<Unit, Unit> SearchCommand { get; }
     public ReactiveCommand<string, Unit> CopyUrlCommand { get; }
@@ -36,7 +37,7 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
         get => _searchText;
         set => this.RaiseAndSetIfChanged( ref _searchText, value );
     }
-    public IReadOnlyList<ISearchResult> SearchResults
+    public IReadOnlyList<VideoSearchResult> SearchResults
     {
         get => _searchResults; 
         set => this.RaiseAndSetIfChanged( ref _searchResults, value );
@@ -57,12 +58,14 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
         if ( !_resultsPerPage.Contains( _selectedResultsPerPage ) )
             return;
 
-        if ( !int.TryParse( _selectedResultsPerPage, out int resultPerPage ) )
+        //if ( !int.TryParse( _selectedResultsPerPage, out int resultPerPage ) )
+        //return;
+
+        int index = _resultsPerPage.IndexOf( _selectedResultsPerPage );
+        if ( index < 0 || index > _resultsPerPageCount.Count )
             return;
         
-        Console.WriteLine("About to search");
-        
-        SearchResults = await _searchService.GetStreams( _searchText, resultPerPage );
+        SearchResults = await _searchService.GetStreams( _searchText, _resultsPerPageCount[ index ] );
     }
     async Task CopyUrlToClipboard( string url )
     {

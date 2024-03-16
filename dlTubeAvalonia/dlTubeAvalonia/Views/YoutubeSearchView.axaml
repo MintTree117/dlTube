@@ -49,7 +49,7 @@
         <ScrollViewer 
             Grid.Row="1"
             Padding="10">
-            <ItemsControl 
+            <ItemsControl
                 ItemsSource="{Binding SearchResults}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -71,6 +71,11 @@
                                     IsReadOnly="True"
                                     Background="Transparent"
                                     Text="{Binding Url}" />
+                                <!-- Duration -->
+                                <TextBlock
+                                    Margin="0,0,0,10"
+                                    FontWeight="Bold"
+                                    Text="{Binding Duration}" />
                             </StackPanel>
                             <Button
                                 Grid.Column="1"

@@ -11,7 +11,7 @@ public sealed class YoutubeSearchService
     const int MaxSearchResults = 200;
     readonly YoutubeClient _youtube = new();
 
-    public async Task<IReadOnlyList<ISearchResult>> GetStreams( string query, int resultsPerPage )
+    public async Task<IReadOnlyList<VideoSearchResult>> GetStreams( string query, int resultsPerPage )
     {
         IAsyncEnumerator<VideoSearchResult> enumerator = 
             _youtube.Search.GetVideosAsync( query ).GetAsyncEnumerator();
@@ -27,9 +27,9 @@ public sealed class YoutubeSearchService
         {
             VideoSearchResult c = enumerator.Current;
 
-            if ( !( c is null || string.IsNullOrWhiteSpace( c.Title ) || string.IsNullOrWhiteSpace( c.Url ) ) )
+            //if ( !( c is null || string.IsNullOrWhiteSpace( c.Title ) || string.IsNullOrWhiteSpace( c.Url ) ) )
                 results.Add( c );
-
+            
             hasResults = await enumerator.MoveNextAsync();
         }
 
