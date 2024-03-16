@@ -25,38 +25,47 @@
     </Window.Background>
     
     <!-- Content -->
-    <Grid >
+    <Grid>
         <!-- Background -->
         <Image Source="avares://dlTubeAvalonia/Assets/dsotm.jpg" Stretch="Fill" />
-        <Border Background="#AA000000" /> <!-- Semi-transparent overlay -->
+        <!-- Semi-transparent overlay -->
+        <Border Background="#AA000000" />
         <!-- Main -->
         <DockPanel>
             <!-- Menu -->
             <Menu DockPanel.Dock="Top"
                   Background="#292f3b"
                   BorderBrush="DarkGray">
+                <!-- Youtube Downloader -->
                 <MenuItem
                     Header="Youtube Downloader"
                     Click="OnClickViewYoutubeDownloader" />
+                <!-- Youtube Search -->
                 <MenuItem
                     Header="Youtube Search"
                     Click="OnClickViewYoutubeSearch" />
+                <!-- Private Archive -->
                 <MenuItem
-                    Header="Media Archive"
+                    Header="Private Archive"
                     Click="OnClickViewArchive" />
+                <!-- App Settings -->
                 <MenuItem
                     Header="App Settings"
                     Click="OnClickAppSettings" />
+                <!-- Login -->
                 <MenuItem
                     Header="Login"
                     IsVisible="{Binding ShowLogin}"
                     Click="OnClickLogin" />
+                <!-- Account -->
                 <MenuItem
                     Header="Account"
                     IsVisible="{Binding IsAuthenticated}">
+                    <!-- Account Settings -->
                     <MenuItem
                         Header="Settings"
                         Click="OnClickAccountSettings" />
+                    <!-- Logout -->
                     <MenuItem
                         Header="Logout"
                         Click="OnClickLogout" />

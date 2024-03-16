@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using dlTubeAvalonia.Enums;
@@ -7,6 +8,7 @@ namespace dlTubeAvalonia.Services;
 public interface IYoutubeDownloaderService
 {
     string? VideoName { get; }
+    TimeSpan? VideoDuration { get; }
     string? VideoThumbnail { get; }
     
     Task<bool> GetStreamManifest();

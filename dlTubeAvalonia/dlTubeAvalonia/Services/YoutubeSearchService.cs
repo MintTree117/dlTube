@@ -27,7 +27,7 @@ public sealed class YoutubeSearchService
         {
             VideoSearchResult c = enumerator.Current;
 
-            //if ( !( c is null || string.IsNullOrWhiteSpace( c.Title ) || string.IsNullOrWhiteSpace( c.Url ) ) )
+            if ( !( c is null || string.IsNullOrWhiteSpace( c.Title ) || string.IsNullOrWhiteSpace( c.Url ) ) )
                 results.Add( c );
             
             hasResults = await enumerator.MoveNextAsync();

@@ -9,8 +9,8 @@ public partial class YoutubeSearchView : UserControl
 {
     public YoutubeSearchView()
     {
-        this.DataContext = new YoutubeSearchViewModel();
         InitializeComponent();
+        this.DataContext = new YoutubeSearchViewModel();
     }
     void InitializeComponent()
     {

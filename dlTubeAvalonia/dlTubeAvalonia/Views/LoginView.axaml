@@ -2,78 +2,80 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="dlTubeAvalonia.Views.LoginView">
     
+    <!-- Content Wrapper -->
     <Border
-        BorderBrush="#404040"
-        BorderThickness="1"
-        CornerRadius="5"
-        Width="480"
-        Padding="40"
         HorizontalAlignment="Center"
         VerticalAlignment="Center"
+        BorderThickness="1"
+        Width="480"
+        Padding="40"
+        CornerRadius="5"
+        BorderBrush="#404040"
         Background="#cc000000">
+        <!-- Content -->
         <StackPanel>
             <!-- Login Text -->
-            <TextBlock 
-                Text="Login"
-                TextDecorations="Underline"
-                FontWeight="Bold" 
+            <TextBlock
+                HorizontalAlignment="Left"
+                Margin="0,0,0,25"
                 FontSize="28"
-                HorizontalAlignment="Left" 
-                Margin="0,0,0,25" />
+                FontWeight="Bold"
+                TextDecorations="Underline"
+                Text="Login" />
             <!-- Username/Email Input -->
-            <TextBox 
-                Watermark="Email or Username"
+            <TextBox
+                Margin="0,0,0,10"
                 Padding="15"
-                Margin="0,0,0,10" />
+                Watermark="Email or Username" />
             <!-- Password Input -->
-            <TextBox 
-                Watermark="Password"
+            <TextBox
+                Margin="0,0,0,5"
                 Padding="15"
-                Margin="0,0,0,5" />
+                Watermark="Password" />
             <!-- Forgot Password Button -->
             <Button
-                Content="Reset Password"
+                HorizontalAlignment="Left"
                 Margin="0,0,0,10"
                 FontSize="10"
                 Background="Transparent"
-                HorizontalAlignment="Left" />
+                Content="Reset Password" />
             <!-- Submit Login Button -->
             <Button
-                Content="Login"
-                Padding="20,20"
-                Margin="0,0,0,30"
                 HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Center"/>
+                HorizontalContentAlignment="Center"
+                Margin="0,0,0,30"
+                Padding="20,20"
+                Content="Login" />
             
             <!-- Or Register Text -->
-            <TextBlock 
-                Text="Register"
-                TextDecorations="Underline"
+            <TextBlock
+                HorizontalAlignment="Left"
+                Margin="0,0,0,25"
+                FontSize="28"
                 FontWeight="Bold"
-                FontSize="28" 
-                HorizontalAlignment="Left" 
-                Margin="0,0,0,25" />
+                TextDecorations="Underline"
+                Text="Register" />
             <!-- Email Input for Registration -->
-            <TextBox 
-                Watermark="Email"
+            <TextBox
+                Margin="0,0,0,10"
                 Padding="15"
-                Margin="0,0,0,10" />
+                Watermark="Email" />
             <!-- Username Input for Registration -->
-            <TextBox 
-                Watermark="Username (Register)"
+            <TextBox
+                Margin="0,0,0,10"
                 Padding="15"
-                Margin="0,0,0,10" />
+                Watermark="Username (Register)" />
             <!-- Password Input for Registration -->
-            <TextBox 
-                Watermark="Password (Register)"
+            <TextBox
+                Margin="0,0,0,20"
                 Padding="15"
-                Margin="0,0,0,20" />
+                Watermark="Password (Register)" />
             <!-- Submit Register Button -->
             <Button
-                Content="Register"
-                Padding="20,20"
                 HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Center" />
+                HorizontalContentAlignment="Center"
+                Padding="20,20"
+                Content="Register"/>
         </StackPanel>
     </Border>
 </UserControl>

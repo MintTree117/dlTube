@@ -10,17 +10,16 @@ namespace dlTubeAvalonia.ViewModels;
 public sealed class AppSettingsViewModel : ReactiveObject
 {
     readonly string _appSettingsPath;
-    
-    string _downloadLocation = "";
-    bool _settingsChanged = false;
 
-    // Define a command for the save action
+    string _downloadLocation = string.Empty;
+    bool _settingsChanged;
+    
     public ReactiveCommand<Unit, Unit> SaveChangesCommand { get; }
 
     public AppSettingsViewModel()
     {
-        SaveChangesCommand = ReactiveCommand.CreateFromTask( SaveSettings );
         _appSettingsPath = AppConfig.GetUserSettingsPath();
+        SaveChangesCommand = ReactiveCommand.CreateFromTask( SaveSettings );
         LoadSettings();
     }
 
@@ -41,10 +40,7 @@ public sealed class AppSettingsViewModel : ReactiveObject
 
     async void LoadSettings()
     {
-        AppSettingsModel? settings = await AppConfig.LoadSettings( _appSettingsPath );
-
-        if ( settings is null )
-            return;
+        AppSettingsModel? settings = await AppConfig.LoadSettings( _appSettingsPath ) ?? new AppSettingsModel();
 
         DownloadLocation = settings.DownloadLocation;
         SettingsChanged = false;
@@ -52,14 +48,13 @@ public sealed class AppSettingsViewModel : ReactiveObject
     async Task SaveSettings()
     {
         Console.WriteLine( $"Saving Download Location: {DownloadLocation}" );
-
+        
         AppSettingsModel settings = new()
         {
             DownloadLocation = this.DownloadLocation
         };
 
         bool success = await AppConfig.SaveSettings( _appSettingsPath, settings );
-
         SettingsChanged = !success;
     }
 }

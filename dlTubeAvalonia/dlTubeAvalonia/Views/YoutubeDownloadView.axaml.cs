@@ -9,7 +9,7 @@ public sealed partial class YoutubeDownloadView : UserControl
     public YoutubeDownloadView()
     {
         InitializeComponent();
-        this.DataContext = new YoutubeViewModel();
+        this.DataContext = new YoutubeDownloaderViewModel();
     }
     void InitializeComponent()
     {

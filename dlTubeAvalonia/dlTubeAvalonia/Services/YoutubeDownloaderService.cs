@@ -30,6 +30,7 @@ public sealed class YoutubeDownloaderService( string videoUrl ) : IYoutubeDownlo
     List<string>? _videoSteamQualities;
 
     public string? VideoName => _video?.Title;
+    public TimeSpan? VideoDuration => _video?.Duration;
     public string? VideoThumbnail => _video?.Thumbnails.FirstOrDefault()?.Url;
 
     public async Task<bool> GetStreamManifest()

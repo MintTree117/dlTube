@@ -1,98 +1,99 @@
 <UserControl 
 	x:Class="dlTubeAvalonia.Views.YoutubeDownloadView"
-	x:DataType="viewModels:YoutubeViewModel"
+	x:DataType="viewModels:YoutubeDownloaderViewModel"
 	xmlns="https://github.com/avaloniaui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels">
 	
     <!-- Wrapper -->
 	<Border
-        MaxWidth="560"
-        Padding="40"
         HorizontalAlignment="Center"
         VerticalAlignment="Center"
-        Background="#cc000000"
-        BorderBrush="#404040"
+        MinWidth="480"
+        MaxWidth="560"
+        Padding="40"
         BorderThickness="1"
-        CornerRadius="5">
+        CornerRadius="5"
+        BorderBrush="#404040"
+        Background="#cc000000">
         <!-- Content -->
         <StackPanel>
             <!-- Page Title -->
             <TextBlock
-                Margin="0 0 0 30"
                 HorizontalAlignment="Center"
-                FontWeight="Bold"
+                Margin="0 0 0 30"
                 FontSize="28"
+                FontWeight="Bold"
                 TextDecorations="Underline"
                 Text="Youtube Downloader" />
-            <!-- Video Meta -->
+            <!-- Video Title -->
             <TextBlock
+                HorizontalAlignment="Center"
                 Margin="0,0,0,10"
                 FontWeight="Bold"
-                HorizontalAlignment="Center"
                 TextWrapping="Wrap"
                 Text="{Binding VideoName}" />
-            <Image 
+            <!-- Video Image -->
+            <Image
+                HorizontalAlignment="Center"
                 Width="460" 
                 Height="150" 
-                Margin="0,0,0,25" 
-                HorizontalAlignment="Center"
-                Source="{Binding VideoThumbnailBitmap}" />
+                Margin="0,0,0,25"
+                Source="{Binding VideoImageBitmap}" />
             <!-- Link Box -->
             <TextBlock
+                HorizontalAlignment="Left"
                 Margin="0,0,0,7"
                 FontWeight="Bold"
-                HorizontalAlignment="Left"
                 Text="Link" />
             <TextBox
+                HorizontalAlignment="Stretch"
                 Margin="0,0,0,15"
                 Padding="20,20,20,20"
-                HorizontalAlignment="Stretch" 
                 Watermark="Paste link here"
                 Text="{Binding YoutubeLink}" 
                 IsEnabled="{Binding IsLinkBoxEnabled} "/>
             <!-- File Type -->
-            <TextBlock 
+            <TextBlock
+                HorizontalAlignment="Left"
                 Margin="0,0,0,7"
                 FontWeight="Bold"
-                HorizontalAlignment="Left"
                 Text="Type" />
-            <ComboBox 
+            <ComboBox
+                HorizontalAlignment="Stretch" 
                 Margin="0,0,0,15"
                 Padding="20,20,20,20"
-                HorizontalAlignment="Stretch" 
                 ItemsSource="{Binding StreamTypes}" 
                 SelectedItem="{Binding SelectedStreamType}" 
                 IsEnabled="{Binding IsSettingsEnabled}" />
             <!-- Quality -->
             <TextBlock
+                HorizontalAlignment="Left"
                 Margin="0,0,0,7"
                 FontWeight="Bold"
-                HorizontalAlignment="Left"
                 Text="Quality" />
-            <ComboBox 
+            <ComboBox
+                HorizontalAlignment="Stretch"
                 Margin="0,0,0,25"
                 Padding="20,20,20,20"
-                HorizontalAlignment="Stretch"
                 ItemsSource="{Binding StreamQualities}" 
                 SelectedItem="{Binding SelectedStreamQuality}"
                 IsEnabled="{Binding IsSettingsEnabled}" />
             <!-- Submit -->
-            <Button 
-                Margin="0,10,0, 0"
-                Padding="30,20"
+            <Button
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Center"
-                Content="Download"
+                Margin="0,10,0, 0"
+                Padding="30,20"
                 Command="{Binding DownloadCommand}"
-                IsEnabled="{Binding IsSettingsEnabled}" />
+                IsEnabled="{Binding IsSettingsEnabled}"
+                Content="Download" />
             <!-- Result Message -->
             <TextBlock
+                HorizontalAlignment="Left"
                 Margin="0,10,0,0"
                 FontWeight="Bold"
-                HorizontalAlignment="Left"
                 Text="{Binding ResultMessage}" />
             </StackPanel>
     </Border>
-    
 </UserControl>

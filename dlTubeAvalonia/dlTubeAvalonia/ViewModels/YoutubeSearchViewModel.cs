@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using dlTubeAvalonia.Enums;
 using dlTubeAvalonia.Services;
 using ReactiveUI;
 using YoutubeExplode.Search;
@@ -13,12 +15,15 @@ namespace dlTubeAvalonia.ViewModels;
 
 public sealed class YoutubeSearchViewModel : ReactiveObject
 {
-    List<int> _resultsPerPageCount = [ 10, 20, 30, 50, 100, 200 ];
-    List<string> _resultsPerPage = [ "Show 10", "Show 20", "Show 30", "Show 50", "Show 100", "Show 200" ];
-    string _selectedResultsPerPage = "Show 10";
-    
     readonly YoutubeSearchService _searchService;
+    readonly List<int> _resultsPerPageCount = [ 10, 20, 30, 50, 100, 200 ];
+    
+    List<string> _sortTypes = Enum.GetNames<YoutubeSortType>().ToList();
+    List<string> _resultsPerPage = [ "Show 10", "Show 20", "Show 30", "Show 50", "Show 100", "Show 200" ];
+    string _selectedSortType = string.Empty;
+    string _selectedResultsPerPage = string.Empty;
     string _searchText = string.Empty;
+    
     IReadOnlyList<VideoSearchResult> _searchResults = [ ];
 
     public ReactiveCommand<Unit, Unit> SearchCommand { get; }
@@ -31,7 +36,35 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
         SearchCommand = ReactiveCommand.CreateFromTask( Search );
         CopyUrlCommand = ReactiveCommand.CreateFromTask<string>( async ( url ) => { await CopyUrlToClipboard( url ); } );
     }
-
+    
+    public List<string> SortTypes
+    {
+        get => _sortTypes;
+        set
+        {
+            this.RaiseAndSetIfChanged( ref _sortTypes, value );
+            OnSort();
+        }
+    }
+    public List<string> ResultsPerPage
+    {
+        get => _resultsPerPage;
+        set
+        {
+            this.RaiseAndSetIfChanged( ref _resultsPerPage, value );
+            OnSort();
+        }
+    }
+    public string SelectedSortType
+    {
+        get => _selectedSortType;
+        set => this.RaiseAndSetIfChanged( ref _selectedSortType, value );
+    }
+    public string SelectedResultsPerPage
+    {
+        get => _selectedResultsPerPage;
+        set => this.RaiseAndSetIfChanged( ref _selectedResultsPerPage, value );
+    }
     public string SearchText
     {
         get => _searchText;
@@ -39,31 +72,19 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
     }
     public IReadOnlyList<VideoSearchResult> SearchResults
     {
-        get => _searchResults; 
+        get => _searchResults;
         set => this.RaiseAndSetIfChanged( ref _searchResults, value );
-    }
-    public List<string> ResultsPerPage
-    {
-        get => _resultsPerPage;
-        set => this.RaiseAndSetIfChanged( ref _resultsPerPage, value );
-    }
-    public string SelectedResultsPerPage
-    {
-        get => _selectedResultsPerPage;
-        set => this.RaiseAndSetIfChanged( ref _selectedResultsPerPage, value );
     }
 
     async Task Search()
     {
         if ( !_resultsPerPage.Contains( _selectedResultsPerPage ) )
-            return;
-
-        //if ( !int.TryParse( _selectedResultsPerPage, out int resultPerPage ) )
-        //return;
-
+            throw new Exception( "Invalid _selectedResultsPerPage" );
+        
         int index = _resultsPerPage.IndexOf( _selectedResultsPerPage );
+        
         if ( index < 0 || index > _resultsPerPageCount.Count )
-            return;
+            throw new Exception( "Invalid _selectedResultsPerPage" );
         
         SearchResults = await _searchService.GetStreams( _searchText, _resultsPerPageCount[ index ] );
     }
@@ -79,5 +100,18 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
         }
 
         await mainWindow.Clipboard.SetTextAsync( url );
+    }
+    void OnSort()
+    {
+        if ( !Enum.TryParse( _selectedSortType, out YoutubeSortType type ) )
+            throw new Exception( "Invalid _selectedSortType!" );
+
+        SearchResults = type switch
+        {
+            YoutubeSortType.Default => SearchResults,
+            YoutubeSortType.Alphabetical => _searchResults.OrderBy( r => r.Title ).ToList(),
+            YoutubeSortType.Duration => _searchResults.OrderBy( r => r.Duration ).ToList(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 }
