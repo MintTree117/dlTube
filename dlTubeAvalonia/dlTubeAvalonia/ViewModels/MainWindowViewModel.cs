@@ -4,7 +4,7 @@ namespace dlTubeAvalonia.ViewModels;
 
 public sealed class MainWindowViewModel : ReactiveObject
 {
-    const string DefaultMenuAccountName = "Login";
+    const string DefaultMenuAccountText = "Login";
     
     bool _ShowLogin;
     bool _IsAuthenticated;
@@ -14,7 +14,7 @@ public sealed class MainWindowViewModel : ReactiveObject
     public MainWindowViewModel()
     {
         ShowLogin = true;
-        _MenuAccountName = DefaultMenuAccountName;
+        _MenuAccountName = DefaultMenuAccountText;
     }
     
     public bool ShowLogin
