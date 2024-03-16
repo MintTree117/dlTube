@@ -6,12 +6,14 @@
     xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels">
     
     <!-- Content -->
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,*" IsEnabled="{Binding IsFree}">
         <!-- Header Wrapper -->
         <Border 
             Grid.Row="0"
             Height="60"
             Padding="10"
+            BorderThickness="0,0,0,1"
+            BorderBrush="DarkGray"
             Background="Black">
             <!-- Search Bar, Button, Dropdowns -->
             <Grid
@@ -25,7 +27,7 @@
                     VerticalContentAlignment="Center"
                     Margin="0,0,5,0"
                     Watermark="Search YouTube..."
-                    Text="{Binding SearchText}" />
+                    Text="{Binding SearchText}"/>
                 <!-- Search Button -->
                 <Button 
                     Grid.Column="1"
@@ -35,8 +37,9 @@
                     Margin="0,0,5,0"
                     BorderBrush="DarkGray"
                     BorderThickness="1"
-                    Content="Search"
-                    Command="{Binding SearchCommand}" />
+                    Command="{Binding SearchCommand}">
+                    <PathIcon Data="{StaticResource search_regular}" />
+                </Button>
                 <!-- Sort Dropdown -->
                 <ComboBox
                     Grid.Column="2"
@@ -61,14 +64,18 @@
         </Border>
         
         <!-- Search Results Wrapped In ScrollView -->
-        <ScrollViewer Grid.Row="1" Padding="10">
+        <ScrollViewer 
+            Grid.Row="1" 
+            Margin="0,0,0,10"
+            Padding="10,0,10,0">
             <ItemsControl ItemsSource="{Binding SearchResults}">
                 <ItemsControl.ItemTemplate>
                     <!-- Search Result Item -->
                     <DataTemplate>
                         <!-- Wrapper -->
                         <Border
-                            Margin="0,0,0,20"
+                            Margin="0"
+                            Padding="10"
                             BorderThickness="0,0,0,1"
                             BorderBrush="DarkGray"
                             Background="#AA000000">
@@ -96,6 +103,7 @@
                                     <!-- Url -->
                                     <TextBox
                                         Grid.Column="0"
+                                        VerticalContentAlignment="Center"
                                         BorderThickness="0"
                                         Background="Transparent"
                                         IsReadOnly="True"
@@ -105,9 +113,12 @@
                                         Grid.Column="1"
                                         VerticalAlignment="Stretch"
                                         VerticalContentAlignment="Center"
-                                        Content="Copy"
+                                        Padding="10"
+                                        CornerRadius="5"
                                         CommandParameter="{Binding Url}"
-                                        Click="OnClickCopy" />
+                                        Click="OnClickCopy">
+                                        <PathIcon Data="{StaticResource copy_regular}" />
+                                    </Button>
                                 </Grid>
                             </StackPanel>
                         </Border>

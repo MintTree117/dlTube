@@ -16,21 +16,26 @@ namespace dlTubeAvalonia.ViewModels;
 public sealed class YoutubeSearchViewModel : ReactiveObject
 {
     readonly YoutubeSearchService _searchService;
-    readonly List<int> _resultsPerPageCount = [ 10, 20, 30, 50, 100, 200 ];
-    
-    List<string> _sortTypes = Enum.GetNames<YoutubeSortType>().ToList();
-    List<string> _resultsPerPage = [ "Show 10", "Show 20", "Show 30", "Show 50", "Show 100", "Show 200" ];
+    readonly List<YoutubeSortType> _sortTypesDefinition = Enum.GetValues<YoutubeSortType>().ToList();
+    readonly List<int> _resultsPerPageDefinition = [ 10, 20, 30, 50, 100, 200 ];
+
+    List<string> _sortTypes = [ ];
+    List<string> _resultsPerPage = [ ];
     string _selectedSortType = string.Empty;
     string _selectedResultsPerPage = string.Empty;
     string _searchText = string.Empty;
     
     IReadOnlyList<VideoSearchResult> _searchResults = [ ];
 
+    bool _isFree = true;
+
     public ReactiveCommand<Unit, Unit> SearchCommand { get; }
     public ReactiveCommand<string, Unit> CopyUrlCommand { get; }
     
     public YoutubeSearchViewModel()
     {
+        SortTypes = GetSortTypeNames();
+        ResultsPerPage = GetResultsPerPageNames( _resultsPerPageDefinition );
         _searchService = new YoutubeSearchService();
         SelectedSortType = _sortTypes[ 0 ];
         SelectedResultsPerPage = _resultsPerPage[ 0 ];
@@ -76,6 +81,11 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
         get => _searchResults;
         set => this.RaiseAndSetIfChanged( ref _searchResults, value );
     }
+    public bool IsFree
+    {
+        get => _isFree;
+        set => this.RaiseAndSetIfChanged( ref _isFree, value );
+    }
 
     async Task Search()
     {
@@ -84,10 +94,21 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
         
         int index = _resultsPerPage.IndexOf( _selectedResultsPerPage );
         
-        if ( index < 0 || index > _resultsPerPageCount.Count )
+        if ( index < 0 || index > _resultsPerPageDefinition.Count )
             throw new Exception( "Invalid _selectedResultsPerPage" );
+
+        IsFree = false;
+
+        try
+        {
+            SearchResults = await _searchService.GetStreams( _searchText, _resultsPerPageDefinition[ index ] );
+        }
+        catch ( Exception e )
+        {
+            Console.WriteLine( e );
+        }
         
-        SearchResults = await _searchService.GetStreams( _searchText, _resultsPerPageCount[ index ] );
+        IsFree = true;
     }
     async Task CopyUrlToClipboard( string url )
     {
@@ -102,18 +123,51 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
 
         await mainWindow.Clipboard.SetTextAsync( url );
     }
+
+    static List<string> GetSortTypeNames()
+    {
+        List<string> types = Enum.GetNames<YoutubeSortType>().ToList();
+
+        for ( int i = 0; i < types.Count; i++ )
+            types[ i ] = $"Sort: {types[ i ]}";
+
+        return types;
+    }
+    static List<string> GetResultsPerPageNames( IEnumerable<int> values )
+    {
+        List<string> names = [ ];
+        names.AddRange( from value in values select $"Show: {value}" );
+        return names;
+    }
     
     void OnChangeSortDropdown()
     {
-        if ( !Enum.TryParse( _selectedSortType, out YoutubeSortType type ) )
+        IsFree = false;
+
+        try
+        {
+            TrySort();
+        }
+        catch ( Exception e )
+        {
+            Console.WriteLine( e );
+        }
+
+        IsFree = true;
+    }
+    void TrySort()
+    {
+        int index = _sortTypes.IndexOf( _selectedSortType );
+
+        if ( index < 0 || index > _sortTypesDefinition.Count )
             throw new Exception( "Invalid _selectedSortType!" );
 
-        SearchResults = type switch
+        SearchResults = _sortTypesDefinition[ index ] switch
         {
             YoutubeSortType.Default => SearchResults,
             YoutubeSortType.Alphabetical => _searchResults.OrderBy( r => r.Title ).ToList(),
             YoutubeSortType.Duration => _searchResults.OrderBy( r => r.Duration ).ToList(),
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new Exception( "Invalid _sortTypesDefinition!" )
         };
     }
     void OnChangeResultsPerPageDropdown()
