@@ -1,0 +1,89 @@
+<UserControl 
+    x:Class="dlTubeAvalonia.Views.YoutubeSearchView"
+    x:DataType="viewModels:YoutubeSearchViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels">
+    
+    <Grid
+        RowDefinitions="Auto,*">
+        <!-- Search Bar, Button, and Dropdown -->
+        <Border 
+            Grid.Row="0"
+            Padding="10"
+            Background="Black">
+            <Grid
+                ColumnDefinitions="*,Auto,Auto"
+                HorizontalAlignment="Stretch">
+                <!-- Search Bar -->
+                <TextBox 
+                    Grid.Column="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"
+                    Margin="0,0,5,0"
+                    Watermark="Search YouTube..."
+                    Text="{Binding SearchText}" />
+                <!-- Search Button -->
+                <Button 
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Stretch"
+                    Margin="0,0,5,0"
+                    BorderBrush="DarkGray"
+                    BorderThickness="1"
+                    Content="Search"
+                    Command="{Binding SearchCommand}" />
+                <!-- Results Dropdown -->
+                <ComboBox 
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Width="150"
+                    Margin="0,0,5,0"
+                    ItemsSource="{Binding ResultsPerPage}"
+                    SelectedItem="{Binding SelectedResultsPerPage}" />
+            </Grid>
+        </Border>
+        
+        <!-- Search Results Display Wrapped in ScrollView -->
+        <ScrollViewer 
+            Grid.Row="1"
+            Padding="10">
+            <ItemsControl 
+                ItemsSource="{Binding SearchResults}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid
+                            ColumnDefinitions="*,Auto"
+                            Margin="0,0,0,10"
+                            Background="#AA000000">
+                            <StackPanel
+                                Grid.Column="0"
+                                HorizontalAlignment="Stretch">
+                                <!-- Title -->
+                                <TextBlock
+                                    Margin="0,0,0,10"
+                                    FontWeight="Bold"
+                                    Text="{Binding Title}" />
+                                <!-- Url -->
+                                <TextBox
+                                    BorderThickness="0"
+                                    IsReadOnly="True"
+                                    Background="Transparent"
+                                    Text="{Binding Url}" />
+                            </StackPanel>
+                            <Button
+                                Grid.Column="1"
+                                CommandParameter="{Binding Url}"
+                                VerticalAlignment="Stretch"
+                                VerticalContentAlignment="Center"
+                                Content="Copy"
+                                Click="OnClickCopy" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        
+    </Grid>
+</UserControl>

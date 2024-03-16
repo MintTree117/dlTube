@@ -34,9 +34,6 @@
 				Margin="0,20,0,10"
 				Padding="20,8"
 				HorizontalContentAlignment="Center"
-				Background='MediumSeaGreen'
-				BorderThickness="3"
-				BorderBrush="LimeGreen"
 				HorizontalAlignment="Center"
 				IsEnabled="{Binding SettingsChanged}"
 				Command="{Binding SaveChangesCommand}"

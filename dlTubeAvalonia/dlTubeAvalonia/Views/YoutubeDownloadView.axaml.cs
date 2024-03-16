@@ -4,9 +4,9 @@ using dlTubeAvalonia.ViewModels;
 
 namespace dlTubeAvalonia.Views;
 
-public sealed partial class YoutubeView : UserControl
+public sealed partial class YoutubeDownloadView : UserControl
 {
-    public YoutubeView()
+    public YoutubeDownloadView()
     {
         InitializeComponent();
         this.DataContext = new YoutubeViewModel();

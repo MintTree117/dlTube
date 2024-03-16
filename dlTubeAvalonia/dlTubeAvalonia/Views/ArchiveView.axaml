@@ -27,7 +27,7 @@
         	<!-- Top Bar -->
         	<Grid
         		Grid.Row="0" 
-        		ColumnDefinitions="Auto,*,Auto">
+        		ColumnDefinitions="Auto,*,Auto,Auto">
         		<!-- Side Menu Toggle -->
         		<Button 
         			Grid.Column="0" 
@@ -40,9 +40,13 @@
         			Watermark="Search..." 
         			Margin="5" 
         			HorizontalAlignment="Stretch" />
+		        <Button 
+			        Grid.Column="2"
+			        Content="Search"
+			        Command="{Binding SearchCommand}"/>
         		<!-- Search Filters -->
         		<StackPanel 
-        			Grid.Column="2" 
+        			Grid.Column="3" 
         			Orientation="Horizontal" 
         			HorizontalAlignment="Right">
         			<!-- Stream Type Filter -->

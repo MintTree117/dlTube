@@ -13,7 +13,7 @@ using YoutubeExplode.Videos.Streams;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class YoutubeService( string videoUrl ) : IYoutubeService
+public sealed class YoutubeDownloaderService( string videoUrl ) : IYoutubeDownloaderService
 {
     readonly YoutubeClient _youtube = new();
     StreamManifest? _streamManifest;

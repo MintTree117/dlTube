@@ -4,7 +4,7 @@ using dlTubeAvalonia.Enums;
 
 namespace dlTubeAvalonia.Services;
 
-public interface IYoutubeService
+public interface IYoutubeDownloaderService
 {
     string? VideoName { get; }
     string? VideoThumbnail { get; }

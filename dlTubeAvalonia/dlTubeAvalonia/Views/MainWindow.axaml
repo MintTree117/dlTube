@@ -3,6 +3,7 @@
         xmlns:vm="using:dlTubeAvalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:dlTubeAvalonia="clr-namespace:dlTubeAvalonia"
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
         x:Class="dlTubeAvalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -24,7 +25,7 @@
     </Window.Background>
     
     <!-- Content -->
-    <Grid>
+    <Grid >
         <!-- Background -->
         <Image Source="avares://dlTubeAvalonia/Assets/dsotm.jpg" Stretch="Fill" />
         <Border Background="#AA000000" /> <!-- Semi-transparent overlay -->
@@ -36,7 +37,10 @@
                   BorderBrush="DarkGray">
                 <MenuItem
                     Header="Youtube Downloader"
-                    Click="OnClickViewYoutube" />
+                    Click="OnClickViewYoutubeDownloader" />
+                <MenuItem
+                    Header="Youtube Search"
+                    Click="OnClickViewYoutubeSearch" />
                 <MenuItem
                     Header="Media Archive"
                     Click="OnClickViewArchive" />

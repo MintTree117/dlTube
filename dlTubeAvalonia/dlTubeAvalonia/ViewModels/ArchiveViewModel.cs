@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using System.Threading.Tasks;
 using dlTubeAvalonia.Enums;
 using dlTubeAvalonia.Models;
+using dlTubeAvalonia.Services;
+using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 
 namespace dlTubeAvalonia.ViewModels;
@@ -16,19 +19,29 @@ public sealed class ArchiveViewModel : ReactiveObject
 
     string _selectedStreamType;
     string _selectedSortType;
-    
-    bool _ShowLoginPrompt;
-    bool _IsUserAuthenticated;
+
+    bool _ShowLoginPrompt = false;
+    bool _IsUserAuthenticated = true;
     bool _IsMenuOpen;
+
+    readonly IArchiveService _archiveService;
     
     public ObservableCollection<ArchiveItem> SearchResults { get; set; } = [];
-    public ReactiveCommand<Unit, Unit> ShowLoginFormCommand { get; }
+    public ReactiveCommand<Unit, ApiReply<ArchiveSearch?>> SearchCommand { get; }
 
     public ArchiveViewModel()
     {
         _selectedStreamType = _streamTypes[ 0 ];
         _selectedSortType = _sortTypes[ 0 ];
-        _ShowLoginPrompt = true;
+        _archiveService = Program.ServiceProvider.GetService<IArchiveService>();
+        SearchCommand = ReactiveCommand.CreateFromTask( SearchArchive );
+    }
+
+    public async Task<ApiReply<ArchiveSearch?>> SearchArchive()
+    {
+        ApiReply<ArchiveSearch?> reply = await _archiveService.SearchVideosAsync( null );
+
+        return reply;
     }
     
     public List<string> StreamTypes
