@@ -45,8 +45,8 @@
                     VerticalContentAlignment="Center"
                     Width="150"
                     Margin="0,0,5,0"
-                    ItemsSource="{Binding ResultsPerPage}"
-                    SelectedItem="{Binding SelectedResultsPerPage}" />
+                    ItemsSource="{Binding SortTypes}"
+                    SelectedItem="{Binding SelectedSortType}" />
                 <!-- Results Dropdown -->
                 <ComboBox 
                     Grid.Column="3"
@@ -55,8 +55,8 @@
                     VerticalContentAlignment="Center"
                     Width="150"
                     Margin="0,0,5,0"
-                    ItemsSource="{Binding SortTypes}"
-                    SelectedItem="{Binding SelectedSortType}" />
+                    ItemsSource="{Binding ResultsPerPage}"
+                    SelectedItem="{Binding SelectedResultsPerPage}" />
             </Grid>
         </Border>
         

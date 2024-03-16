@@ -32,6 +32,7 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
     public YoutubeSearchViewModel()
     {
         _searchService = new YoutubeSearchService();
+        SelectedSortType = _sortTypes[ 0 ];
         SelectedResultsPerPage = _resultsPerPage[ 0 ];
         SearchCommand = ReactiveCommand.CreateFromTask( Search );
         CopyUrlCommand = ReactiveCommand.CreateFromTask<string>( async ( url ) => { await CopyUrlToClipboard( url ); } );
@@ -40,30 +41,30 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
     public List<string> SortTypes
     {
         get => _sortTypes;
-        set
-        {
-            this.RaiseAndSetIfChanged( ref _sortTypes, value );
-            OnSort();
-        }
+        set => this.RaiseAndSetIfChanged( ref _sortTypes, value );
     }
     public List<string> ResultsPerPage
     {
         get => _resultsPerPage;
-        set
-        {
-            this.RaiseAndSetIfChanged( ref _resultsPerPage, value );
-            OnSort();
-        }
+        set => this.RaiseAndSetIfChanged( ref _resultsPerPage, value );
     }
     public string SelectedSortType
     {
         get => _selectedSortType;
-        set => this.RaiseAndSetIfChanged( ref _selectedSortType, value );
+        set
+        {
+            this.RaiseAndSetIfChanged( ref _selectedSortType, value );
+            OnChangeSortDropdown();
+        }
     }
     public string SelectedResultsPerPage
     {
         get => _selectedResultsPerPage;
-        set => this.RaiseAndSetIfChanged( ref _selectedResultsPerPage, value );
+        set
+        {
+            this.RaiseAndSetIfChanged( ref _selectedResultsPerPage, value );
+            OnChangeResultsPerPageDropdown();
+        }
     }
     public string SearchText
     {
@@ -101,7 +102,8 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
 
         await mainWindow.Clipboard.SetTextAsync( url );
     }
-    void OnSort()
+    
+    void OnChangeSortDropdown()
     {
         if ( !Enum.TryParse( _selectedSortType, out YoutubeSortType type ) )
             throw new Exception( "Invalid _selectedSortType!" );
@@ -113,5 +115,12 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
             YoutubeSortType.Duration => _searchResults.OrderBy( r => r.Duration ).ToList(),
             _ => throw new ArgumentOutOfRangeException()
         };
+    }
+    void OnChangeResultsPerPageDropdown()
+    {
+        if ( string.IsNullOrWhiteSpace( _searchText ) )
+            return;
+        
+        SearchCommand.Execute();
     }
 }
