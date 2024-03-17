@@ -12,6 +12,6 @@
   
     <Application.Styles>
         <FluentTheme />
-        <StyleInclude Source="avares://dlTubeAvalonia/Icons.axaml" />
+        <StyleInclude Source="avares://dlTubeAvaloniaDesktop/Icons.axaml" />
     </Application.Styles>
 </Application>

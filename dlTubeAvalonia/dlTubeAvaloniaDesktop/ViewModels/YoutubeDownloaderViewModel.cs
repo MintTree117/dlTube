@@ -23,7 +23,7 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
     const string InvalidVideoName = "Invalid Video Link";
     const string SuccessDownloadMessage = "Download success!";
     const string FailDownloadMessage = "Failed to download!";
-    const string DefaultVideoImage = "avares://dlTubeAvalonia/Assets/defaultplayer.png";
+    const string DefaultVideoImage = "avares://dlTubeAvaloniaDesktop/Assets/defaultplayer.png";
     const string DefaultVideoQuality = "None";
 
     readonly string _downloadPath;
