@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
@@ -20,20 +19,21 @@ public sealed class ArchiveViewModel : ReactiveObject
     string _selectedStreamType;
     string _selectedSortType;
 
-    bool _ShowLoginPrompt = false;
-    bool _IsUserAuthenticated = true;
+    bool _ShowLoginPrompt = true;
+    bool _IsUserAuthenticated;
     bool _IsMenuOpen;
 
-    readonly IArchiveService _archiveService;
+    List<ArchiveItem> _searchResults = [ ];
+
+    readonly ArchiveService _archiveService;
     
-    public ObservableCollection<ArchiveItem> SearchResults { get; set; } = [];
     public ReactiveCommand<Unit, ApiReply<ArchiveSearch?>> SearchCommand { get; }
 
     public ArchiveViewModel()
     {
         _selectedStreamType = _streamTypes[ 0 ];
         _selectedSortType = _sortTypes[ 0 ];
-        _archiveService = Program.ServiceProvider.GetService<IArchiveService>();
+        _archiveService = Program.ServiceProvider.GetService<ArchiveService>() ?? throw new Exception( "Failed to get archive service!" );
         SearchCommand = ReactiveCommand.CreateFromTask( SearchArchive );
     }
 
@@ -78,5 +78,10 @@ public sealed class ArchiveViewModel : ReactiveObject
     {
         get => _IsMenuOpen;
         set => this.RaiseAndSetIfChanged( ref _IsMenuOpen, value );
+    }
+    public List<ArchiveItem> SearchResults
+    {
+        get => _searchResults;
+        set => this.RaiseAndSetIfChanged( ref _searchResults, value );
     }
 }

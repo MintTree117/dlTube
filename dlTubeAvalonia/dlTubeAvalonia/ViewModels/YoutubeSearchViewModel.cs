@@ -8,8 +8,10 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using dlTubeAvalonia.Enums;
 using dlTubeAvalonia.Services;
+using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using YoutubeExplode.Search;
+using YoutubeExplode.Videos;
 
 namespace dlTubeAvalonia.ViewModels;
 
@@ -26,7 +28,7 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
     string _searchText = string.Empty;
     
     IReadOnlyList<VideoSearchResult> _searchResults = [ ];
-
+    
     bool _isFree = true;
 
     public ReactiveCommand<Unit, Unit> SearchCommand { get; }
@@ -36,7 +38,7 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
     {
         SortTypes = GetSortTypeNames();
         ResultsPerPage = GetResultsPerPageNames( _resultsPerPageDefinition );
-        _searchService = new YoutubeSearchService();
+        _searchService = Program.ServiceProvider.GetService<YoutubeSearchService>() ?? throw new Exception( "Failed to get Youtube Search Service!" );
         SelectedSortType = _sortTypes[ 0 ];
         SelectedResultsPerPage = _resultsPerPage[ 0 ];
         SearchCommand = ReactiveCommand.CreateFromTask( Search );
@@ -146,7 +148,18 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
 
         try
         {
-            TrySort();
+            int index = _sortTypes.IndexOf( _selectedSortType );
+
+            if ( index < 0 || index > _sortTypesDefinition.Count )
+                throw new Exception( "Invalid _selectedSortType!" );
+
+            SearchResults = _sortTypesDefinition[ index ] switch
+            {
+                YoutubeSortType.Default => SearchResults,
+                YoutubeSortType.Alphabetical => _searchResults.OrderBy( r => r.Title ).ToList(),
+                YoutubeSortType.Duration => _searchResults.OrderBy( r => r.Duration ).ToList(),
+                _ => throw new Exception( "Invalid _sortTypesDefinition!" )
+            };
         }
         catch ( Exception e )
         {
@@ -154,21 +167,6 @@ public sealed class YoutubeSearchViewModel : ReactiveObject
         }
 
         IsFree = true;
-    }
-    void TrySort()
-    {
-        int index = _sortTypes.IndexOf( _selectedSortType );
-
-        if ( index < 0 || index > _sortTypesDefinition.Count )
-            throw new Exception( "Invalid _selectedSortType!" );
-
-        SearchResults = _sortTypesDefinition[ index ] switch
-        {
-            YoutubeSortType.Default => SearchResults,
-            YoutubeSortType.Alphabetical => _searchResults.OrderBy( r => r.Title ).ToList(),
-            YoutubeSortType.Duration => _searchResults.OrderBy( r => r.Duration ).ToList(),
-            _ => throw new Exception( "Invalid _sortTypesDefinition!" )
-        };
     }
     void OnChangeResultsPerPageDropdown()
     {

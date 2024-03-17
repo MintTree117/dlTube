@@ -26,7 +26,12 @@ sealed class Program
 
     static void ConfigureServices( IServiceCollection services )
     {
-        services.AddSingleton<IFFmpegService, FFmpegService>();
+        services.AddScoped<HttpService>();
+        services.AddScoped<YoutubeDownloaderService>();
+        services.AddScoped<YoutubeSearchService>();
+        services.AddSingleton<FFmpegService>();
+        services.AddScoped<ArchiveService>();
+        services.AddLogging( configure => { } );
     }
 
     static AppBuilder BuildAvaloniaApp()

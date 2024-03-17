@@ -8,75 +8,132 @@
 	<!-- Content -->
 	<Panel>
 		<!-- Login Prompt -->
-		<StackPanel 
-			Orientation="Vertical" 
-			HorizontalAlignment="Center" 
+		<TextBlock
+			HorizontalAlignment="Center"
 			VerticalAlignment="Center"
-			IsVisible="{Binding ShowLoginPrompt}">
-			<TextBlock 
-				Text="Please log in to view the archive"
-				FontWeight="Bold"
-				FontSize="48"
-				HorizontalAlignment="Center"
-				VerticalAlignment="Center" />
-		</StackPanel>
+			FontSize="48"
+			FontWeight="Bold"
+			IsVisible="{Binding ShowLoginPrompt}"
+			Text="Please log in to view the archive" />
 		<!-- Main Content -->
 		<Grid 
 			RowDefinitions="Auto,*"
 			IsVisible="{Binding IsUserAuthenticated}">
         	<!-- Top Bar -->
-        	<Grid
-        		Grid.Row="0" 
-        		ColumnDefinitions="Auto,*,Auto,Auto">
-        		<!-- Side Menu Toggle -->
-        		<Button 
-        			Grid.Column="0" 
-        			Content="Menu" 
-        			Margin="5" 
-        			HorizontalAlignment="Left" Click="ToggleMenu" />
-        		<!-- Search Bar -->
-        		<TextBox 
-        			Grid.Column="1" 
-        			Watermark="Search..." 
-        			Margin="5" 
-        			HorizontalAlignment="Stretch" />
-		        <Button 
-			        Grid.Column="2"
-			        Content="Search"
-			        Command="{Binding SearchCommand}"/>
-        		<!-- Search Filters -->
-        		<StackPanel 
-        			Grid.Column="3" 
-        			Orientation="Horizontal" 
-        			HorizontalAlignment="Right">
-        			<!-- Stream Type Filter -->
-        			<ComboBox 
-        				Width="150" 
-        				Margin="5" 
-        				ItemsSource="{Binding StreamTypes}" 
-        				SelectedItem="{Binding SelectedStreamType}" />
-        			<!-- Stream Sort Filter -->
-        			<ComboBox 
-        				Width="150" 
-        				Margin="5" 
-        				ItemsSource="{Binding SortTypes}" 
-        				SelectedItem="{Binding SelectedSortType}" />
-        		</StackPanel>
-        	</Grid>
+	        <Border 
+		        Grid.Row="0"
+		        Height="60"
+		        BorderThickness="0,0,0,1"
+		        Padding="10"
+		        BorderBrush="DarkGray"
+		        Background="Black">
+	            <Grid
+	                ColumnDefinitions="Auto,*,Auto,Auto">
+	                <!-- Side Menu Toggle -->
+	                <Button
+	                    Grid.Column="0"
+	                    HorizontalAlignment="Left"
+	                    VerticalAlignment="Stretch"
+	                    VerticalContentAlignment="Center"
+	                    BorderThickness="1"
+	                    Margin="5,0"
+	                    BorderBrush="DarkGray"
+	                    Click="ToggleMenu">
+	                    <PathIcon Data="{StaticResource apps_list_regular}" />
+	                </Button>
+	                <!-- Search Bar -->
+	                <TextBox 
+	                    Grid.Column="1"
+	                    HorizontalAlignment="Stretch"
+	                    VerticalAlignment="Stretch"
+	                    VerticalContentAlignment="Center"
+	                    Margin="5,0"
+	                    Watermark="Search..." />
+	                <Button 
+	                    Grid.Column="2"
+	                    VerticalAlignment="Stretch"
+	                    VerticalContentAlignment="Center"
+	                    BorderThickness="1"
+	                    Margin="5,0"
+	                    BorderBrush="DarkGray"
+	                    Command="{Binding SearchCommand}">
+	                    <PathIcon Data="{StaticResource search_regular}" />
+	                </Button>
+	                <!-- Search Filters -->
+	                <StackPanel
+	                    Grid.Column="3"
+	                    HorizontalAlignment="Right"
+	                    Orientation="Horizontal">	
+	                    <!-- Stream Type Filter -->
+	                    <ComboBox
+		                    VerticalAlignment="Stretch"
+		                    VerticalContentAlignment="Center"
+	                        Width="150"
+	                        Margin="5,0"
+	                        ItemsSource="{Binding StreamTypes}" 
+	                        SelectedItem="{Binding SelectedStreamType}" />
+	                    <!-- Stream Sort Filter -->
+	                    <ComboBox
+		                    VerticalAlignment="Stretch"
+		                    VerticalContentAlignment="Center"
+	                        Width="150" 
+	                        Margin="5,0"
+	                        ItemsSource="{Binding SortTypes}" 
+	                        SelectedItem="{Binding SelectedSortType}" />
+	                </StackPanel>
+	            </Grid>
+	        </Border>
+
         	
         	<!-- TODO - Make variable views -->
-        	
-        	<!-- Search Results -->
-        	<ListBox Grid.Row="1" Margin="5" >
-        		<ListBox.ItemTemplate>
-        			<DataTemplate>
-        				<StackPanel>
-        					<!--<TextBlock FontWeight="Bold" Text="{Binding Title}" />-->
-        					<!-- Add more details as needed -->
-        				</StackPanel>
-        			</DataTemplate>
-        		</ListBox.ItemTemplate>
-        	</ListBox>
+
+	        <!-- Search Results Wrapped In ScrollView -->
+	        <ScrollViewer
+		        Grid.Row="1"
+		        Margin="0,0,0,10"
+		        Padding="10,0,10,0">
+		        <ItemsControl ItemsSource="{Binding SearchResults}">
+			        <ItemsControl.ItemTemplate>
+				        <!-- Search Result Item -->
+				        <DataTemplate>
+					        <!-- Wrapper -->
+					        <Border
+						        Margin="0"
+						        Padding="10"
+						        BorderThickness="0,0,0,1"
+						        BorderBrush="DarkGray"
+						        Background="#AA000000">
+						        <!-- Content -->
+						        <Grid ColumnDefinitions="75,*,Auto">
+							        <Image 
+								        Grid.Column="0"
+								        VerticalAlignment="Stretch" />
+							        <StackPanel Grid.Column="1">
+								        <TextBlock
+									        HorizontalAlignment="Left"
+									        VerticalAlignment="Center"
+									        FontWeight="Bold"
+									        Text="{Binding Title}" />
+								        <TextBlock
+									        HorizontalAlignment="Left"
+									        VerticalAlignment="Center"
+									        FontStyle="Italic"
+									        Text="{Binding Author}" />
+								        <TextBlock
+									        HorizontalAlignment="Left"
+									        VerticalAlignment="Center"
+									        Text="{Binding Duration}" />
+							        </StackPanel>
+							        <Button 
+								        Grid.Column="2">
+								        <PathIcon Data="{StaticResource cloud_download_regular}" />
+							        </Button>
+						        </Grid>
+					        </Border>
+				        </DataTemplate>
+			        </ItemsControl.ItemTemplate>
+		        </ItemsControl>
+	        </ScrollViewer>
     
         	<!-- Pop-out Menu (Overlay) -->
         	<Border Grid.Row="1" 

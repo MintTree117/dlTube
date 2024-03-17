@@ -7,19 +7,23 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using dlTubeAvalonia.Enums;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using YoutubeExplode;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class YoutubeDownloaderService( string videoUrl ) : IYoutubeDownloaderService
+public sealed class YoutubeDownloaderService
 {
+    readonly ILogger<YoutubeDownloaderService>? _logger = Program.ServiceProvider.GetService<ILogger<YoutubeDownloaderService>>();
+    readonly string _videoUrl;
     readonly YoutubeClient _youtube = new();
+    readonly FFmpegService? _fFmpegService;
+    
     StreamManifest? _streamManifest;
     Video? _video;
     byte[]? _thumbnailBytes;
-    IFFmpegService? _fFmpegService;
     
     List<MuxedStreamInfo>? _mixedStreams;
     List<AudioOnlyStreamInfo>? _audioStreams;
@@ -33,20 +37,35 @@ public sealed class YoutubeDownloaderService( string videoUrl ) : IYoutubeDownlo
     public TimeSpan? VideoDuration => _video?.Duration;
     public string? VideoThumbnail => _video?.Thumbnails.FirstOrDefault()?.Url;
 
-    public async Task<bool> GetStreamManifest()
+    public YoutubeDownloaderService( string videoUrl )
     {
-        _fFmpegService = Program.ServiceProvider.GetService<IFFmpegService>();
+        _videoUrl = videoUrl;
         
         try
         {
-            _streamManifest = await _youtube.Videos.Streams.GetManifestAsync( videoUrl );
-            _video = await _youtube.Videos.GetAsync( videoUrl );
-            return _streamManifest is not null && _video is not null;
+            _fFmpegService = Program.ServiceProvider.GetService<FFmpegService>();
         }
         catch ( Exception e )
         {
-            Console.WriteLine( e );
-            return false;
+            _logger?.LogError( e, e.Message );
+        }
+    }
+    
+    public async Task<ApiReply<bool>> GetStreamManifest()
+    {
+        try
+        {
+            _streamManifest = await _youtube.Videos.Streams.GetManifestAsync( _videoUrl );
+            _video = await _youtube.Videos.GetAsync( _videoUrl );
+            
+            return _streamManifest is not null && _video is not null
+                ? new ApiReply<bool>( true )
+                : new ApiReply<bool>( ServiceErrorType.NotFound );
+        }
+        catch ( Exception e )
+        {
+            _logger?.LogError( e, e.Message );
+            return new ApiReply<bool>( ServiceErrorType.ServerError );
         }
     }
     public async Task<byte[]?> GetThumbnailBytes()
@@ -67,32 +86,46 @@ public sealed class YoutubeDownloaderService( string videoUrl ) : IYoutubeDownlo
             _ => throw new Exception( "Invalid Stream Type!" )
         };
     }
-    public async Task<bool> Download( string filepath, StreamType type, int quality )
+
+    public async Task<ApiReply<bool>> Download( string filepath, StreamType type, int quality )
     {
         try
         {
-            switch ( type )
+            IStreamInfo? streamInfo = type switch
             {
-                case StreamType.Mixed:
-                    await DownloadMixed( filepath, quality );
-                    break;
-                case StreamType.Audio:
-                    await DownloadAudio( filepath, quality );
-                    break;
-                case StreamType.Video:
-                    await DownloadVideo( filepath, quality );
-                    break;
-                default:
-                    Console.WriteLine( "Invalid stream type!" );
-                    throw new ArgumentOutOfRangeException();
-            }
+                StreamType.Mixed => GetMixedInfo( filepath, quality ),
+                StreamType.Audio => GetAudioInfo( filepath, quality ),
+                StreamType.Video => GetVideoInfo( filepath, quality ),
+                _ => throw new ArgumentOutOfRangeException( nameof( type ), type, null )
+            };
 
-            return true;
+            if ( streamInfo is null )
+                return new ApiReply<bool>( ServiceErrorType.NotFound );
+
+            string path = GetDownloadPath( filepath, streamInfo.Container.Name );
+            
+            await _youtube.Videos.Streams.DownloadAsync( streamInfo, path );
+            await AddThumbnail( path );
+            
+            return new ApiReply<bool>( true );
         }
         catch ( Exception e )
         {
             Console.WriteLine( e + e.Message );
-            return false;
+            return new ApiReply<bool>( ServiceErrorType.ServerError );
+        }
+    }
+
+    string GetDownloadPath( string outputDirectory, string fileExtension )
+    {
+        string videoName = SanitizeVideoName( _video!.Title );
+        string fileName = $"{videoName}.{fileExtension}";
+        return Path.Combine( outputDirectory, fileName );
+
+        static string SanitizeVideoName( string videoName )
+        {
+            return Path.GetInvalidFileNameChars().Aggregate( videoName,
+                ( current, invalidChar ) => current.Replace( invalidChar, '-' ) );
         }
     }
     
@@ -107,7 +140,7 @@ public sealed class YoutubeDownloaderService( string videoUrl ) : IYoutubeDownlo
         for ( int i = 0; i < _mixedStreams.Count; i++ )
         {
             MuxedStreamInfo stream = _mixedStreams[ i ];
-            _mixedSteamQualities.Add( $"{i + 1}: {stream.VideoResolution}px - {stream.Bitrate}bps - {stream.Container}" );
+            _mixedSteamQualities.Add( $"{i + 1} : {stream.VideoResolution} px - {stream.Bitrate} bps - {stream.Container}" );
         }
 
         return _mixedSteamQualities;
@@ -124,7 +157,7 @@ public sealed class YoutubeDownloaderService( string videoUrl ) : IYoutubeDownlo
         for ( int i = 0; i < _audioStreams.Count; i++ )
         {
             AudioOnlyStreamInfo stream = _audioStreams[ i ];
-            _audioSteamQualities.Add( $"{i + 1}: {stream.Bitrate}bps - {stream.Container}" );
+            _audioSteamQualities.Add( $"{i + 1} : {stream.Bitrate} bps - {stream.Container}" );
         }
 
         return _audioSteamQualities;
@@ -141,55 +174,34 @@ public sealed class YoutubeDownloaderService( string videoUrl ) : IYoutubeDownlo
         for ( int i = 0; i < _videoStreams.Count; i++ )
         {
             VideoOnlyStreamInfo stream = _videoStreams[ i ];
-            _videoSteamQualities.Add( $"{i + 1}: {stream.VideoResolution}px - {stream.Container}" );
+            _videoSteamQualities.Add( $"{i + 1} : {stream.VideoResolution} px - {stream.Container}" );
         }
 
         return _videoSteamQualities;
     }
-
-    string GetDownloadPath( string outputDirectory, string fileExtension )
-    {
-        string videoName = SanitizeVideoName( _video!.Title );
-        string fileName = $"{videoName}.{fileExtension}";
-        return Path.Combine( outputDirectory, fileName );
-
-        static string SanitizeVideoName( string videoName )
-        {
-            return Path.GetInvalidFileNameChars().Aggregate( videoName,
-                ( current, invalidChar ) => current.Replace( invalidChar, '-' ) );
-        }
-    }
     
-    async Task DownloadMixed( string outputDirectory, int selection )
+    IStreamInfo GetMixedInfo( string outputDirectory, int selection )
     {
         if ( _mixedStreams is null || _mixedStreams.Count <= 0 )
             throw new Exception( "Internal App Error: No mixed streams found!!!" );
 
-        MuxedStreamInfo selectedStream = _mixedStreams[ selection ];
-        string path = GetDownloadPath( outputDirectory, selectedStream.Container.Name );
-        await _youtube.Videos.Streams.DownloadAsync( selectedStream, path );
-        await AddThumbnail( path );
+        return _mixedStreams[ selection ];
     }
-    async Task DownloadAudio( string outputDirectory, int selection )
+    IStreamInfo GetAudioInfo( string outputDirectory, int selection )
     {
         if ( _audioStreams is null || _audioStreams.Count <= 0 )
             throw new Exception( "Internal App Error: No audio streams found!!!" );
 
-        AudioOnlyStreamInfo selectedStream = _audioStreams[ selection ];
-        string path = GetDownloadPath( outputDirectory, selectedStream.Container.Name );
-        await _youtube.Videos.Streams.DownloadAsync( selectedStream, path );
-        await AddThumbnail( path );
+        return _audioStreams[ selection ];
     }
-    async Task DownloadVideo( string outputDirectory, int selection )
+    IStreamInfo GetVideoInfo( string outputDirectory, int selection )
     {
         if ( _videoStreams is null || _videoStreams.Count <= 0 )
             throw new Exception( "Internal App Error: No video streams found!!!" );
 
-        VideoOnlyStreamInfo selectedStream = _videoStreams[ selection ];
-        string path = GetDownloadPath( outputDirectory, selectedStream.Container.Name );
-        await _youtube.Videos.Streams.DownloadAsync( selectedStream, path );
-        await AddThumbnail( path );
+        return _videoStreams[ selection ];
     }
+    
     async Task AddThumbnail( string videoPath )
     {
         if ( _thumbnailBytes is null )

@@ -13,7 +13,8 @@ public enum ServiceErrorType
     Conflict,
     ServerError,
     NetworkError,
-    BadRequest
+    BadRequest,
+    AppError
 }
 
 public sealed record ApiReply<T>

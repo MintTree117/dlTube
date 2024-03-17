@@ -8,12 +8,16 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using dlTubeAvalonia.Enums;
 using dlTubeAvalonia.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 
 namespace dlTubeAvalonia.ViewModels;
 
 public sealed class YoutubeDownloaderViewModel : ReactiveObject
 {
+    readonly ILogger<YoutubeDownloaderViewModel>? _logger;
+    
     const string DefaultVideoName = "No Video Selected";
     const string LoadingVideoName = "Loading Video...";
     const string InvalidVideoName = "Invalid Video Link";
@@ -34,14 +38,17 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
     string _resultMessage = string.Empty;
     bool _isLinkBoxEnabled;
     bool _isSettingsEnabled;
+    bool _hasResultMessage;
     
-    IYoutubeDownloaderService? _dlService;
+    YoutubeDownloaderService? _dlService;
     
     public ReactiveCommand<Unit, Unit> DownloadCommand { get; }
     ReactiveCommand<Unit, Unit> LoadDataCommand { get; } // private command for easy async execution of method
     
     public YoutubeDownloaderViewModel()
     {
+        _logger = Program.ServiceProvider.GetService<ILogger<YoutubeDownloaderViewModel>>();
+        
         _downloadPath = AppConfig.GetDownloadPath();
         
         SelectedStreamType = StreamTypes[ 0 ];
@@ -112,6 +119,11 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
         get => _isSettingsEnabled;
         set => this.RaiseAndSetIfChanged( ref _isSettingsEnabled, value );
     }
+    public bool HasResultMessage
+    {
+        get => _hasResultMessage;
+        set => this.RaiseAndSetIfChanged( ref _hasResultMessage, value );
+    }
 
     async Task HandleNewLink()
     {
@@ -122,10 +134,14 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
         
         _dlService = new YoutubeDownloaderService( _youtubeLink );
 
-        if ( !await _dlService.GetStreamManifest() )
+        ApiReply<bool> reply = await _dlService.GetStreamManifest();
+        
+        if ( !reply.Success )
         {
-            Console.WriteLine( "Failed to obtain stream manifest!" );
+            _logger?.LogError( $"Failed to obtain stream manifest! {reply.PrintDetails()}" );
             VideoName = InvalidVideoName;
+            ResultMessage = reply.PrintDetails();
+            HasResultMessage = true;
             _dlService = null;
             return;
         }
@@ -138,22 +154,38 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
     }
     async Task DownloadStream()
     {
-        if ( _dlService is null || !Enum.TryParse( _selectedStreamTypeName, out StreamType streamType ) )
+        if ( _dlService is null )
+        {
+            _logger?.LogError( "Youtube download service is null!" );
+            ResultMessage = PrintError( ServiceErrorType.AppError.ToString() );
             return;
+        }
+
+        if ( !Enum.TryParse( _selectedStreamTypeName, out StreamType streamType ) )
+        {
+            _logger?.LogError( "Invalid Stream Type!" );
+            ResultMessage = PrintError( ServiceErrorType.AppError.ToString() );
+            return;
+        }
 
         if ( !_streamQualities.Contains( _selectedStreamQualityName ) )
+        {
+            _logger?.LogError( "Invalid _selectedStreamQualityName!" );
+            ResultMessage = PrintError( ServiceErrorType.AppError.ToString() );
             return;
+        }
 
         IsLinkBoxEnabled = false;
         IsSettingsEnabled = false;
 
-        bool success = await _dlService.Download(
+        ApiReply<bool> reply = await _dlService.Download(
             _downloadPath, streamType, _streamQualities.IndexOf( _selectedStreamQualityName ) );
 
-        ResultMessage = success
+        ResultMessage = reply.Success
             ? SuccessDownloadMessage
-            : FailDownloadMessage;
+            : PrintError( reply.PrintDetails() );
 
+        HasResultMessage = true;
         IsLinkBoxEnabled = true;
         IsSettingsEnabled = true;
     }
@@ -169,6 +201,11 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
         }
     }
 
+    static string PrintError( string message )
+    {
+        return $"{FailDownloadMessage} : {message}";
+    }
+
     void ResetFieldsAndData()
     {
         IsSettingsEnabled = false;
@@ -178,6 +215,8 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
         SelectedStreamQuality = StreamQualities[ 0 ];
         ResultMessage = string.Empty;
         _dlService = null;
+        HasResultMessage = false;
+        ResultMessage = string.Empty;
     }
     void LoadDefaultImage()
     {

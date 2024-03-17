@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace dlTubeAvalonia.Services;
 
-public class HttpService( HttpClient _http, ILogger<HttpService>? _logger ) : IHttpService
+public class HttpService( HttpClient _http, ILogger<HttpService>? _logger )
 {
     public async Task<ApiReply<T?>> TryGetRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
     {

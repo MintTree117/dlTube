@@ -108,6 +108,17 @@
                                         Background="Transparent"
                                         IsReadOnly="True"
                                         Text="{Binding Url}" />
+                                    <!-- Play Audio Button -->
+                                    <!--<Button
+                                        Grid.Column="1"
+                                        VerticalAlignment="Stretch"
+                                        VerticalContentAlignment="Center"
+                                        Padding="10"
+                                        CornerRadius="5"
+                                        CommandParameter="{Binding Id}"
+                                        Click="OnClickPlay">
+                                        <PathIcon Data="{StaticResource caret_right_regular}" />
+                                    </Button>-->
                                     <!-- Copy Url Button -->
                                     <Button
                                         Grid.Column="1"

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class FFmpegService( ILogger<FFmpegService>? _logger ) : IFFmpegService
+public sealed class FFmpegService( ILogger<FFmpegService>? _logger )
 {
     bool? _isFFmpegInstalled;
 
@@ -14,7 +14,6 @@ public sealed class FFmpegService( ILogger<FFmpegService>? _logger ) : IFFmpegSe
         _isFFmpegInstalled ??= await IsFFmpegInstalledAsync( _logger );
         return _isFFmpegInstalled.Value;
     }
-
     static async Task<bool> IsFFmpegInstalledAsync( ILogger<FFmpegService>? logger )
     {
         try
