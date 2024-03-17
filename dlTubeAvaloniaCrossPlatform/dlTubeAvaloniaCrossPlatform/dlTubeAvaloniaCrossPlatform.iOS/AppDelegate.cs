@@ -1,4 +1,4 @@
-/*using Foundation;
+using Foundation;
 using UIKit;
 using Avalonia;
 using Avalonia.Controls;
@@ -22,4 +22,4 @@ public partial class AppDelegate : AvaloniaAppDelegate<App>
             .WithInterFont()
             .UseReactiveUI();
     }
-}*/
+}

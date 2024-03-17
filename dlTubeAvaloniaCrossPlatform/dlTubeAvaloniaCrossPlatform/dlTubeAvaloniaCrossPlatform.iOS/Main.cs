@@ -1,4 +1,4 @@
-/*using UIKit;
+using UIKit;
 
 namespace dlTubeAvaloniaCrossPlatform.iOS;
 
@@ -11,4 +11,4 @@ public class Application
         // you can specify it here.
         UIApplication.Main( args, null, typeof( AppDelegate ) );
     }
-}*/
+}
