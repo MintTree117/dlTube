@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dlTubeAvaloniaCrossPlatform", "dlTubeAvaloniaCrossPlatform\dlTubeAvaloniaCrossPlatform\dlTubeAvaloniaCrossPlatform.csproj", "{52306096-C802-40B6-8B3F-37AB27703F87}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dlTubeAvaloniaCrossPlatform.Android", "dlTubeAvaloniaCrossPlatform\dlTubeAvaloniaCrossPlatform.Android\dlTubeAvaloniaCrossPlatform.Android.csproj", "{E278AB78-6DBF-4877-999F-BA46C147E686}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dlTubeAvaloniaCrossPlatform.Desktop", "dlTubeAvaloniaCrossPlatform\dlTubeAvaloniaCrossPlatform.Desktop\dlTubeAvaloniaCrossPlatform.Desktop.csproj", "{64C5A36F-005F-41B9-9937-3521EFCA8499}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{52306096-C802-40B6-8B3F-37AB27703F87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52306096-C802-40B6-8B3F-37AB27703F87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52306096-C802-40B6-8B3F-37AB27703F87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52306096-C802-40B6-8B3F-37AB27703F87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E278AB78-6DBF-4877-999F-BA46C147E686}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E278AB78-6DBF-4877-999F-BA46C147E686}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E278AB78-6DBF-4877-999F-BA46C147E686}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{E278AB78-6DBF-4877-999F-BA46C147E686}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E278AB78-6DBF-4877-999F-BA46C147E686}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E278AB78-6DBF-4877-999F-BA46C147E686}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{64C5A36F-005F-41B9-9937-3521EFCA8499}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64C5A36F-005F-41B9-9937-3521EFCA8499}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64C5A36F-005F-41B9-9937-3521EFCA8499}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64C5A36F-005F-41B9-9937-3521EFCA8499}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
