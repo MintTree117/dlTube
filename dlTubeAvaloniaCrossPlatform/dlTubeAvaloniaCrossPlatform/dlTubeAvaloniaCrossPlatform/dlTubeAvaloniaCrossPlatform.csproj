@@ -43,10 +43,6 @@
         <DependentUpon>MainWindowDesktop.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
-      <Compile Update="Views\Mobile\MainViewMobile.axaml.cs">
-        <DependentUpon>MainViewMobile.axaml</DependentUpon>
-        <SubType>Code</SubType>
-      </Compile>
       <Compile Update="Views\LoginView.axaml.cs">
         <DependentUpon>LoginViewDesktop.axaml</DependentUpon>
         <SubType>Code</SubType>
@@ -61,6 +57,14 @@
       </Compile>
       <Compile Update="Views\Mobile\YoutubeSearchViewMobile.axaml.cs">
         <DependentUpon>YoutubeSearchViewMobile.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Mobile\MainViewMobileWrapper.axaml.cs">
+        <DependentUpon>MainViewMobileWrapper.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Mobile\MainViewMobile.axaml.cs">
+        <DependentUpon>MainViewMobile.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
     </ItemGroup>

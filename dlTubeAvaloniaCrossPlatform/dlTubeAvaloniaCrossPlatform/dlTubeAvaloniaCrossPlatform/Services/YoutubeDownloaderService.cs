@@ -64,7 +64,7 @@ public sealed class YoutubeDownloaderService
         catch ( Exception e )
         {
             _logger?.LogError( e, e.Message );
-            return new ApiReply<bool>( ServiceErrorType.ServerError );
+            return new ApiReply<bool>( ServiceErrorType.ServerError, $"{e} : {e.Message}" );
         }
     }
     public async Task<byte[]?> GetThumbnailBytes()

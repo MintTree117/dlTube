@@ -48,8 +48,6 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
     {
         _logger = null; // Program.ServiceProvider.GetService<ILogger<YoutubeDownloaderViewModel>>();
         
-        _downloadPath = AppConfig.GetDownloadPath();
-        
         SelectedStreamType = StreamTypes[ 0 ];
         SelectedStreamQuality = StreamQualities[ 0 ];
         IsLinkBoxEnabled = true;
@@ -58,6 +56,8 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
 
         DownloadCommand = ReactiveCommand.CreateFromTask( DownloadStream );
         LoadDataCommand = ReactiveCommand.CreateFromTask( HandleNewLink );
+
+        _downloadPath = AppConfig.GetDownloadPath();
     }
     
     public string YoutubeLink
@@ -138,7 +138,7 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
         if ( !reply.Success )
         {
             _logger?.LogError( $"Failed to obtain stream manifest! {reply.PrintDetails()}" );
-            VideoName = InvalidVideoName;
+            VideoName = reply.PrintDetails(); //InvalidVideoName;
             ResultMessage = reply.PrintDetails();
             HasResultMessage = true;
             _dlService = null;

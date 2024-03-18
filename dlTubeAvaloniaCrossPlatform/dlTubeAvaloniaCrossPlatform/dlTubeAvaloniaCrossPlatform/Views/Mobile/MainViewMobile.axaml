@@ -1,49 +1,104 @@
-<UserControl 
-	x:Class="dlTubeAvaloniaCrossPlatform.Views.Mobile.MainViewMobile"
-	x:DataType="viewModels:MainViewModel"
-	xmlns="https://github.com/avaloniaui"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	xmlns:viewModels="clr-namespace:dlTubeAvaloniaCrossPlatform.ViewModels"
-	xmlns:dlTubeAvaloniaCrossPlatform="clr-namespace:dlTubeAvaloniaCrossPlatform">
+<UserControl
+    x:Class="dlTubeAvaloniaCrossPlatform.Views.Mobile.MainViewMobile"
+    x:DataType="viewModels:MainViewModel"
+    mc:Ignorable="d"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModels="clr-namespace:dlTubeAvaloniaCrossPlatform.ViewModels"
+    xmlns:dlTubeAvaloniaCrossPlatform="clr-namespace:dlTubeAvaloniaCrossPlatform"
+    xmlns:mobile="clr-namespace:dlTubeAvaloniaCrossPlatform.Views.Mobile">
 
-	<Design.DataContext>
-		<!-- This only sets the DataContext for the previewer in an IDE,
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-		<viewModels:MainViewModel />
-	</Design.DataContext>
-	
-	<Panel>
-		<!-- Main Content -->
-		<ContentControl
-			Opacity="1"
-			x:Name="MainContent" />
-		
-		<!-- Pop-out Menu (Overlay) -->
-		<Border
-			HorizontalAlignment="Stretch"
-			Background="DarkBlue"
-			ZIndex="1000"
-			IsVisible="{Binding ShowMobileMenu}">
-			<StackPanel>
-				<!-- Menu Content -->
-				<TextBlock Text="Menu Item 1" />
-				<TextBlock Text="Menu Item 2" />
-			</StackPanel>
-		</Border>
+        <viewModels:MainViewModel />
+    </Design.DataContext>
 
-		<!-- Floating Button in Bottom Right Corner -->
-		<Button
-			HorizontalAlignment="Right"
-			VerticalAlignment="Bottom"
-			Width="50" 
-			Height="50"
-			Margin="0,0,10,10"
-			ZIndex="1001"
-			Click="OnClickToggleMenu">
-			<PathIcon Data="{StaticResource apps_list_regular}" />
-		</Button>
-		
-	</Panel>
+    <Panel>
+        <!-- Background -->
+        <Image Source="avares://dlTubeAvaloniaCrossPlatform/Assets/dsotm.jpg" Stretch="Fill" />
+        <!-- Semi-transparent overlay -->
+        <Border Background="#AA000000" />
+        <!-- Pop-out Menu (Overlay) -->
+        <Border
+            HorizontalAlignment="Stretch"
+            Background="DarkBlue"
+            ZIndex="1000"
+            IsVisible="{Binding ShowMobileMenu}">
+            <!-- Menu Content -->
+            <StackPanel>
+                <Button
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    VerticalContentAlignment="Center"
+                    Padding="15"
+                    Height="100"
+                    Content="Downloader"
+                    Click="OnClickViewDownloader">
+                </Button>
+                <Button
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    VerticalContentAlignment="Center"
+                    Padding="15"
+                    Height="100"
+                    Content="Youtube"
+                    Click="OnClickViewYoutube">
+                </Button>
+                <Button
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    VerticalContentAlignment="Center"
+                    Padding="15"
+                    Height="100"
+                    Content="Archive"
+                    Click="OnClickViewArchive">
+                </Button>
+                <Button
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    VerticalContentAlignment="Center"
+                    Padding="15"
+                    Height="100"
+                    Content="Settings"
+                    Click="OnClickAppSettings">
+                </Button>
+                <Button
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    VerticalContentAlignment="Center"
+                    Padding="15"
+                    Height="100"
+                    Content="Login"
+                    Click="OnClickLogin">
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- Floating Button in Bottom Right Corner -->
+        <Button
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Width="50"
+            Height="50"
+            Margin="0,0,10,10"
+            Padding="15"
+            ZIndex="1001"
+            BorderBrush="DarkGray"
+            BorderThickness="1"
+            x:Name="Buu"
+            Click="OnClickToggleMenu">
+            <PathIcon Data="{StaticResource apps_list_regular}" />
+        </Button>
+        
+        <!-- TODO: Figure out why binding by x:Name in code behind file isn't working -->
+        <!-- Main Content -->
+        <!--<ContentControl
+            Opacity="1"
+            x:Name="MainContent" />-->
+        <mobile:MainViewMobileWrapper />
+
+    </Panel>
 </UserControl>
