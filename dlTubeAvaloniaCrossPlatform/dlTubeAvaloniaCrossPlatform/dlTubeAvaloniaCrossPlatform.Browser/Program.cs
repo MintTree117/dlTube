@@ -9,7 +9,7 @@ using dlTubeAvaloniaCrossPlatform;
 
 internal sealed partial class Program
 {
-    private static Task Main( string[] args ) => BuildAvaloniaApp()
+    static Task Main( string[] args ) => BuildAvaloniaApp()
         .WithInterFont()
         .UseReactiveUI()
         .StartBrowserAppAsync( "out" );

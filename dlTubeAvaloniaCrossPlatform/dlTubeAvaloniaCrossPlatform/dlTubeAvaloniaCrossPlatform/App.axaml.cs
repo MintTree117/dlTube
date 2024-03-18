@@ -3,6 +3,9 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using dlTubeAvaloniaCrossPlatform.ViewModels;
 using dlTubeAvaloniaCrossPlatform.Views;
+using dlTubeAvaloniaCrossPlatform.Views.Mobile;
+using MainViewDesktop = dlTubeAvaloniaCrossPlatform.Views.Desktop.MainViewDesktop;
+using MainWindowDesktop = dlTubeAvaloniaCrossPlatform.Views.Desktop.MainWindowDesktop;
 
 namespace dlTubeAvaloniaCrossPlatform;
 
@@ -12,22 +15,24 @@ public partial class App : Application
     {
         AvaloniaXamlLoader.Load( this );
     }
-
+    
     public override void OnFrameworkInitializationCompleted()
     {
-        if ( ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop )
+        // Desktop vs Responsive view is determined here: entry point for Avalonia UI
+        switch ( ApplicationLifetime )
         {
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainViewModel()
-            };
-        }
-        else if ( ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform )
-        {
-            singleViewPlatform.MainView = new MainView
-            {
-                DataContext = new MainViewModel()
-            };
+            case IClassicDesktopStyleApplicationLifetime desktop:
+                desktop.MainWindow = new MainWindowDesktop
+                {
+                    DataContext = new MainViewModel()
+                };
+                return;
+            case ISingleViewApplicationLifetime singleViewPlatform:
+                singleViewPlatform.MainView = new MainViewMobile()
+                {
+                    DataContext = new MainViewModel()
+                };
+                break;
         }
 
         base.OnFrameworkInitializationCompleted();

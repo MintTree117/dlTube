@@ -1,0 +1,49 @@
+<UserControl 
+	x:Class="dlTubeAvaloniaCrossPlatform.Views.Mobile.MainViewMobile"
+	x:DataType="viewModels:MainViewModel"
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:viewModels="clr-namespace:dlTubeAvaloniaCrossPlatform.ViewModels"
+	xmlns:dlTubeAvaloniaCrossPlatform="clr-namespace:dlTubeAvaloniaCrossPlatform">
+
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<viewModels:MainViewModel />
+	</Design.DataContext>
+	
+	<Panel>
+		<!-- Main Content -->
+		<ContentControl
+			Opacity="1"
+			x:Name="MainContent" />
+		
+		<!-- Pop-out Menu (Overlay) -->
+		<Border
+			HorizontalAlignment="Stretch"
+			Background="DarkBlue"
+			ZIndex="1000"
+			IsVisible="{Binding ShowMobileMenu}">
+			<StackPanel>
+				<!-- Menu Content -->
+				<TextBlock Text="Menu Item 1" />
+				<TextBlock Text="Menu Item 2" />
+			</StackPanel>
+		</Border>
+
+		<!-- Floating Button in Bottom Right Corner -->
+		<Button
+			HorizontalAlignment="Right"
+			VerticalAlignment="Bottom"
+			Width="50" 
+			Height="50"
+			Margin="0,0,10,10"
+			ZIndex="1001"
+			Click="OnClickToggleMenu">
+			<PathIcon Data="{StaticResource apps_list_regular}" />
+		</Button>
+		
+	</Panel>
+</UserControl>

@@ -17,5 +17,51 @@
         <PackageReference Include="Avalonia.ReactiveUI" Version="$(AvaloniaVersion)"/>
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+        <PackageReference Include="YoutubeExplode" Version="6.3.13" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\Desktop\ArchiveViewDesktop.axaml.cs">
+        <DependentUpon>ArchiveView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Desktop\YoutubeSearchViewDesktop.axaml.cs">
+        <DependentUpon>YoutubeSearchView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Desktop\AppNavViewDesktop.axaml.cs">
+        <DependentUpon>AppNavView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Desktop\MainViewDesktop.axaml.cs">
+        <DependentUpon>MainViewDesktop.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Desktop\MainWindowDesktop.axaml.cs">
+        <DependentUpon>MainWindowDesktop.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Mobile\MainViewMobile.axaml.cs">
+        <DependentUpon>MainViewMobile.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\LoginView.axaml.cs">
+        <DependentUpon>LoginViewDesktop.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\AppSettingsView.axaml.cs">
+        <DependentUpon>AppSettingsViewDesktop.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\YoutubeDownloadView.axaml.cs">
+        <DependentUpon>YoutubeDownloadViewDesktop.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Mobile\YoutubeSearchViewMobile.axaml.cs">
+        <DependentUpon>YoutubeSearchViewMobile.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 </Project>
