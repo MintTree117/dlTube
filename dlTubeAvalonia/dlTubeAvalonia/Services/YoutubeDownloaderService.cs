@@ -93,9 +93,9 @@ public sealed class YoutubeDownloaderService
         {
             IStreamInfo? streamInfo = type switch
             {
-                StreamType.Mixed => GetMixedInfo( filepath, quality ),
-                StreamType.Audio => GetAudioInfo( filepath, quality ),
-                StreamType.Video => GetVideoInfo( filepath, quality ),
+                StreamType.Mixed => GetMixedInfo( quality ),
+                StreamType.Audio => GetAudioInfo( quality ),
+                StreamType.Video => GetVideoInfo( quality ),
                 _ => throw new ArgumentOutOfRangeException( nameof( type ), type, null )
             };
 
@@ -180,21 +180,21 @@ public sealed class YoutubeDownloaderService
         return _videoSteamQualities;
     }
     
-    IStreamInfo GetMixedInfo( string outputDirectory, int selection )
+    IStreamInfo GetMixedInfo( int selection )
     {
         if ( _mixedStreams is null || _mixedStreams.Count <= 0 )
             throw new Exception( "Internal App Error: No mixed streams found!!!" );
 
         return _mixedStreams[ selection ];
     }
-    IStreamInfo GetAudioInfo( string outputDirectory, int selection )
+    IStreamInfo GetAudioInfo( int selection )
     {
         if ( _audioStreams is null || _audioStreams.Count <= 0 )
             throw new Exception( "Internal App Error: No audio streams found!!!" );
 
         return _audioStreams[ selection ];
     }
-    IStreamInfo GetVideoInfo( string outputDirectory, int selection )
+    IStreamInfo GetVideoInfo( int selection )
     {
         if ( _videoStreams is null || _videoStreams.Count <= 0 )
             throw new Exception( "Internal App Error: No video streams found!!!" );

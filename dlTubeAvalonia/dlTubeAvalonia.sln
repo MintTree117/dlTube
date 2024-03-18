@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dlTubeAvaloniaDesktop", "dlTubeAvaloniaDesktop\dlTubeAvaloniaDesktop.csproj", "{9F4FD95D-AF22-4CF6-A71C-E4BD81DA62A2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dlTubeAvalonia", "dlTubeAvalonia\dlTubeAvalonia.csproj", "{9F4FD95D-AF22-4CF6-A71C-E4BD81DA62A2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

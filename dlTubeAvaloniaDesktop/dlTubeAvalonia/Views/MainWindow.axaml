@@ -8,7 +8,7 @@
         x:Class="dlTubeAvalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="dlTubeAvaloniaDesktop">
+        Title="dlTubeAvalonia">
 
     <!-- Data Context -->
     <Design.DataContext>
@@ -20,14 +20,14 @@
     <!-- Window Background -->
     <Window.Background>
         <ImageBrush
-            Source="avares://dlTubeAvaloniaDesktop/Assets/dsotm.jpg"
+            Source="avares://dlTubeAvalonia/Assets/dsotm.jpg"
             Stretch="UniformToFill" />
     </Window.Background>
     
     <!-- Content -->
     <Grid>
         <!-- Background -->
-        <Image Source="avares://dlTubeAvaloniaDesktop/Assets/dsotm.jpg" Stretch="Fill" />
+        <Image Source="avares://dlTubeAvalonia/Assets/dsotm.jpg" Stretch="Fill" />
         <!-- Semi-transparent overlay -->
         <Border Background="#AA000000" />
         <!-- Main -->
