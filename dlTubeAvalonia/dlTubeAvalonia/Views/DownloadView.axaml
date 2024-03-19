@@ -1,6 +1,6 @@
 <UserControl 
-	x:Class="dlTubeAvalonia.Views.YoutubeDownloadView"
-	x:DataType="viewModels:YoutubeDownloaderViewModel"
+	x:Class="dlTubeAvalonia.Views.DownloadView"
+	x:DataType="viewModels:DownloaderViewModel"
 	xmlns="https://github.com/avaloniaui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels">
@@ -21,11 +21,15 @@
             <!-- Page Title -->
             <TextBlock
                 HorizontalAlignment="Center"
-                Margin="0 0 0 30"
-                FontSize="28"
+                FontSize="36"
                 FontWeight="Bold"
-                TextDecorations="Underline"
                 Text="Youtube Downloader" />
+            <!-- Title Separator -->
+            <Border
+                HorizontalAlignment="Stretch"
+                Margin="0 0 0 30"
+                BorderThickness="2"
+                BorderBrush="DarkGray" />
             <!-- Video Title -->
             <TextBlock
                 HorizontalAlignment="Center"

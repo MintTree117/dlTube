@@ -4,20 +4,23 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
-using dlTubeAvalonia.Enums;
-using dlTubeAvalonia.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using ReactiveUI;
+using dlTubeAvalonia.Enums;
+using dlTubeAvalonia.Services;
 
 namespace dlTubeAvalonia.ViewModels;
 
-public sealed class YoutubeDownloaderViewModel : ReactiveObject
+public sealed class DownloaderViewModel : ReactiveObject
 {
-    readonly ILogger<YoutubeDownloaderViewModel>? _logger;
+    // Services
+    readonly ILogger<DownloaderViewModel>? _logger;
+    YoutubeDownloaderService? _dlService;
     
+    // Constants
     const string DefaultVideoName = "No Video Selected";
     const string LoadingVideoName = "Loading Video...";
     const string InvalidVideoName = "Invalid Video Link";
@@ -27,27 +30,33 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
     const string DefaultVideoQuality = "None";
 
     readonly string _downloadPath;
-    
-    string _youtubeLink = string.Empty;
-    string _videoName = DefaultVideoName;
+
+    // Property Field List Values
     Bitmap? _videoImageBitmap;
     List<string> _streamTypes = Enum.GetNames<StreamType>().ToList();
     List<string> _streamQualities = [ DefaultVideoQuality ];
+    string _youtubeLink = string.Empty;
+    string _videoName = DefaultVideoName;
     string _selectedStreamTypeName = null!;
     string _selectedStreamQualityName = string.Empty;
     string _resultMessage = string.Empty;
     bool _isLinkBoxEnabled;
     bool _isSettingsEnabled;
     bool _hasResultMessage;
-    
-    YoutubeDownloaderService? _dlService;
-    
+
+    // Commands
     public ReactiveCommand<Unit, Unit> DownloadCommand { get; }
-    ReactiveCommand<Unit, Unit> LoadDataCommand { get; } // private command for easy async execution of method
-    
-    public YoutubeDownloaderViewModel()
+    ReactiveCommand<Unit, Unit> LoadDataCommand { get; } // Private command for easy async execution of method
+    ReactiveCommand<Unit, Unit> NewStreamCommand { get; }
+
+    // Constructor
+    public DownloaderViewModel()
     {
-        _logger = Program.ServiceProvider.GetService<ILogger<YoutubeDownloaderViewModel>>();
+        LoadDataCommand = ReactiveCommand.CreateFromTask( HandleNewLink );
+        DownloadCommand = ReactiveCommand.CreateFromTask( DownloadStream );
+        NewStreamCommand = ReactiveCommand.CreateFromTask( HandleNewStreamType );
+        
+        _logger = Program.ServiceProvider.GetService<ILogger<DownloaderViewModel>>();
         
         _downloadPath = AppConfig.GetDownloadPath();
         
@@ -56,25 +65,9 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
         IsLinkBoxEnabled = true;
 
         LoadDefaultImage();
+    }
 
-        DownloadCommand = ReactiveCommand.CreateFromTask( DownloadStream );
-        LoadDataCommand = ReactiveCommand.CreateFromTask( HandleNewLink );
-    }
-    
-    public string YoutubeLink
-    {
-        get => _youtubeLink;
-        set
-        {
-            this.RaiseAndSetIfChanged( ref _youtubeLink, value );
-            LoadDataCommand.Execute();
-        }
-    }
-    public string VideoName
-    {
-        get => _videoName;
-        set => this.RaiseAndSetIfChanged( ref _videoName, value );
-    }
+    // Reactive Properties
     public Bitmap? VideoImageBitmap
     {
         get => _videoImageBitmap;
@@ -90,13 +83,27 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
         get => _streamQualities;
         set => this.RaiseAndSetIfChanged( ref _streamQualities, value );
     }
+    public string YoutubeLink
+    {
+        get => _youtubeLink;
+        set
+        {
+            this.RaiseAndSetIfChanged( ref _youtubeLink, value );
+            LoadDataCommand.Execute();
+        }
+    }
+    public string VideoName
+    {
+        get => _videoName;
+        set => this.RaiseAndSetIfChanged( ref _videoName, value );
+    }
     public string SelectedStreamType
     {
         get => _selectedStreamTypeName;
         set
         {
             this.RaiseAndSetIfChanged( ref _selectedStreamTypeName, value );
-            HandleNewStreamType();
+            NewStreamCommand.Execute();
         }
     }
     public string SelectedStreamQuality
@@ -125,60 +132,42 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
         set => this.RaiseAndSetIfChanged( ref _hasResultMessage, value );
     }
 
+    // Command Delegates
     async Task HandleNewLink()
     {
-        ResetFieldsAndData();
-
-        if ( string.IsNullOrWhiteSpace( _youtubeLink ) )
+        if ( LinkIsEmptyAfterChangesApplied() )
             return;
         
         _dlService = new YoutubeDownloaderService( _youtubeLink );
 
-        ApiReply<bool> reply = await _dlService.GetStreamManifest();
+        ApiReply<bool> reply = await _dlService.TryInitialize();
         
         if ( !reply.Success )
         {
             _logger?.LogError( $"Failed to obtain stream manifest! {reply.PrintDetails()}" );
             VideoName = InvalidVideoName;
-            ResultMessage = reply.PrintDetails();
+            ResultMessage = PrintError( reply.ErrorType.ToString() ); //reply.PrintDetails();
             HasResultMessage = true;
             _dlService = null;
             return;
         }
 
         IsSettingsEnabled = true;
-        VideoName = ( _dlService.VideoName ?? DefaultVideoName ) + " - " + _dlService.VideoDuration;
+        VideoName = $"{_dlService.VideoName ?? DefaultVideoName} : Length = {_dlService.VideoDuration}";
 
-        await LoadImageFromYoutube();
-        HandleNewStreamType();
+        GetImageBytes();
+        await HandleNewStreamType();
     }
     async Task DownloadStream()
     {
-        if ( _dlService is null )
-        {
-            _logger?.LogError( "Youtube download service is null!" );
-            ResultMessage = PrintError( ServiceErrorType.AppError.ToString() );
+        if ( !ValidateDownloadParameters( out StreamType streamType ) )
             return;
-        }
-
-        if ( !Enum.TryParse( _selectedStreamTypeName, out StreamType streamType ) )
-        {
-            _logger?.LogError( "Invalid Stream Type!" );
-            ResultMessage = PrintError( ServiceErrorType.AppError.ToString() );
-            return;
-        }
-
-        if ( !_streamQualities.Contains( _selectedStreamQualityName ) )
-        {
-            _logger?.LogError( "Invalid _selectedStreamQualityName!" );
-            ResultMessage = PrintError( ServiceErrorType.AppError.ToString() );
-            return;
-        }
 
         IsLinkBoxEnabled = false;
         IsSettingsEnabled = false;
-
-        ApiReply<bool> reply = await _dlService.Download(
+        
+        // Execute Download
+        ApiReply<bool> reply = await _dlService!.Download(
             _downloadPath, streamType, _streamQualities.IndexOf( _selectedStreamQualityName ) );
 
         ResultMessage = reply.Success
@@ -189,24 +178,41 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
         IsLinkBoxEnabled = true;
         IsSettingsEnabled = true;
     }
-    async Task LoadImageFromYoutube()
-    {
-        byte[]? bytes = await _dlService!.GetThumbnailBytes();
 
-        if ( bytes is not null )
-        {
-            using MemoryStream memoryStream = new( bytes );
-            Bitmap newThumbnailBitmap = new( memoryStream );
-            VideoImageBitmap = newThumbnailBitmap;
-        }
-    }
-
+    // Private Methods
     static string PrintError( string message )
     {
         return $"{FailDownloadMessage} : {message}";
     }
+    async Task HandleNewStreamType()
+    {
+        if ( _dlService is null || !Enum.TryParse( _selectedStreamTypeName, out StreamType streamType ) )
+        {
+            _logger?.LogError( $"Failed to handle new stream type!" );
+            ResultMessage = PrintError( ServiceErrorType.AppError.ToString() );
+            return;
+        }
 
-    void ResetFieldsAndData()
+        List<string> streamQualities = await _dlService.GetStreamInfo( streamType );
+
+        StreamQualities = streamQualities.Count > 0
+            ? streamQualities
+            : [ DefaultVideoQuality ];
+
+        SelectedStreamQuality = StreamQualities[ 0 ];
+    }
+    void GetImageBytes()
+    {
+        byte[]? bytes = _dlService!.ThumbnailBytes;
+
+        if ( bytes is null )
+            return;
+
+        using MemoryStream memoryStream = new( bytes );
+        Bitmap newThumbnailBitmap = new( memoryStream );
+        VideoImageBitmap = newThumbnailBitmap;
+    }
+    bool LinkIsEmptyAfterChangesApplied()
     {
         IsSettingsEnabled = false;
         VideoName = string.IsNullOrWhiteSpace( _youtubeLink ) ? DefaultVideoName : LoadingVideoName;
@@ -217,25 +223,39 @@ public sealed class YoutubeDownloaderViewModel : ReactiveObject
         _dlService = null;
         HasResultMessage = false;
         ResultMessage = string.Empty;
+
+        return string.IsNullOrWhiteSpace( _youtubeLink );
     }
     void LoadDefaultImage()
     {
         VideoImageBitmap = new Bitmap( AssetLoader.Open( new Uri( DefaultVideoImage ) ) );
     }
-    void HandleNewStreamType()
+    bool ValidateDownloadParameters( out StreamType streamType )
     {
-        if ( _dlService is null || !Enum.TryParse( _selectedStreamTypeName, out StreamType streamType ) )
+        streamType = StreamType.Mixed; 
+        
+        // No Service
+        if ( _dlService is null )
         {
-            Console.WriteLine( "" );
-            return;   
+            _logger?.LogError( "Youtube download service is null!" );
+            ResultMessage = PrintError( ServiceErrorType.AppError.ToString() );
+            return false;
         }
-        
-        List<string> streamQualities = _dlService.GetStreamInfo( streamType );
+        // Invalid Selected Stream Type
+        if ( !Enum.TryParse( _selectedStreamTypeName, out streamType ) )
+        {
+            _logger?.LogError( "Invalid Stream Type!" );
+            ResultMessage = PrintError( ServiceErrorType.AppError.ToString() );
+            return false;
+        }
+        // Invalid Selected Stream Quality
+        if ( !_streamQualities.Contains( _selectedStreamQualityName ) )
+        {
+            _logger?.LogError( "Invalid _selectedStreamQualityName!" );
+            ResultMessage = PrintError( ServiceErrorType.AppError.ToString() );
+            return false;
+        }
 
-        StreamQualities = streamQualities.Count > 0
-            ? streamQualities
-            : [ DefaultVideoQuality ];
-        
-        SelectedStreamQuality = StreamQualities[ 0 ];
+        return true;
     }
 }

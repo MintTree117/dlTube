@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using dlTubeAvalonia.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using YoutubeExplode;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 
@@ -16,31 +15,63 @@ namespace dlTubeAvalonia.Services;
 
 public sealed class YoutubeDownloaderService
 {
-    readonly ILogger<YoutubeDownloaderService>? _logger = Program.ServiceProvider.GetService<ILogger<YoutubeDownloaderService>>();
-    readonly string _videoUrl;
-    readonly YoutubeClient _youtube = new();
-    readonly FFmpegService? _fFmpegService;
+    // Constants
+    const string TempThumbnailFileName = "thumbnail.jpg";
+    const string TempThumbnailConvertedFileName = "thumbnail_converted.jpg";
     
+    // Services
+    readonly ILogger<YoutubeDownloaderService>? _logger;
+    readonly YoutubeClientService? _youtubeService;
+    readonly FFmpegService? _ffmpegService;
+    readonly HttpClient? _http;
+    
+    // Video Url From Constructor
+    readonly string _videoUrl;
+    
+    // Stream Data
+    public string? VideoName => _video?.Title;
+    public TimeSpan? VideoDuration => _video?.Duration;
+    public string? VideoImage => _video?.Thumbnails.FirstOrDefault()?.Url;
+    public byte[]? ThumbnailBytes => _thumbnailBytes;
     StreamManifest? _streamManifest;
     Video? _video;
     byte[]? _thumbnailBytes;
+    bool _hasFFmeg;
     
-    List<MuxedStreamInfo>? _mixedStreams;
-    List<AudioOnlyStreamInfo>? _audioStreams;
-    List<VideoOnlyStreamInfo>? _videoStreams;
+    // Streams
+    List<MuxedStreamInfo> _mixedStreams = [ ];
+    List<AudioOnlyStreamInfo> _audioStreams = [ ];
+    List<VideoOnlyStreamInfo> _videoStreams = [ ];
     
+    // Stream Qualities
     List<string>? _mixedSteamQualities;
     List<string>? _audioSteamQualities;
     List<string>? _videoSteamQualities;
 
-    public string? VideoName => _video?.Title;
-    public TimeSpan? VideoDuration => _video?.Duration;
-    public string? VideoThumbnail => _video?.Thumbnails.FirstOrDefault()?.Url;
-
+    // Constructor
     public YoutubeDownloaderService( string videoUrl )
     {
         _videoUrl = videoUrl;
-        
+        _logger = Program.ServiceProvider.GetService<ILogger<YoutubeDownloaderService>>();
+        TryGetYoutubeClientService( ref _youtubeService );
+        TryGetFFmpegService( ref _ffmpegService );
+
+        if ( _ffmpegService is not null )
+            _http = new HttpClient();
+    }
+    void TryGetYoutubeClientService( ref YoutubeClientService? _clientService )
+    {
+        try
+        {
+            _clientService = Program.ServiceProvider.GetService<YoutubeClientService>();
+        }
+        catch ( Exception e )
+        {
+            _logger?.LogError( e, e.Message );
+        }
+    }
+    void TryGetFFmpegService( ref FFmpegService? _fFmpegService )
+    {
         try
         {
             _fFmpegService = Program.ServiceProvider.GetService<FFmpegService>();
@@ -49,14 +80,29 @@ public sealed class YoutubeDownloaderService
         {
             _logger?.LogError( e, e.Message );
         }
+        
     }
-    
-    public async Task<ApiReply<bool>> GetStreamManifest()
+
+    // Public Methods
+    public async Task<ApiReply<bool>> TryInitialize()
     {
+        // Youtube Client Service
+        if ( _youtubeService?.YoutubeClient is null )
+        {
+            const string YoutubeClientFailMessage = "Failed to initialize YoutubeClientService!";
+            _logger?.LogError( YoutubeClientFailMessage );
+            return new ApiReply<bool>( ServiceErrorType.AppError, YoutubeClientFailMessage );
+        }
+        
         try
         {
-            _streamManifest = await _youtube.Videos.Streams.GetManifestAsync( _videoUrl );
-            _video = await _youtube.Videos.GetAsync( _videoUrl );
+            _streamManifest = await _youtubeService.YoutubeClient.Videos.Streams.GetManifestAsync( _videoUrl );
+            _video = await _youtubeService.YoutubeClient.Videos.GetAsync( _videoUrl );
+            _hasFFmeg = _ffmpegService is not null && await _ffmpegService.CheckFFmpegInstallationAsync();
+            
+            // Get Video Image Data
+            if ( _hasFFmeg )
+                _thumbnailBytes = await GetThumbnailBytes();
             
             return _streamManifest is not null && _video is not null
                 ? new ApiReply<bool>( true )
@@ -68,44 +114,37 @@ public sealed class YoutubeDownloaderService
             return new ApiReply<bool>( ServiceErrorType.ServerError );
         }
     }
-    public async Task<byte[]?> GetThumbnailBytes()
-    {
-        if ( _thumbnailBytes is not null || _video?.Thumbnails[ 0 ].Url is null )
-            return _thumbnailBytes;
-
-        _thumbnailBytes = await LoadImageBytesFromUrlAsync( _video.Thumbnails[ 0 ].Url );
-        return _thumbnailBytes;
-    }
-    public List<string> GetStreamInfo( StreamType steamType )
+    public async Task<List<string>> GetStreamInfo( StreamType steamType )
     {
         return steamType switch
         {
-            StreamType.Mixed => GetMixedStreams(),
-            StreamType.Audio => GetAudioStreams(),
-            StreamType.Video => GetVideoStreams(),
+            StreamType.Mixed => await GetMixedStreams(),
+            StreamType.Audio => await GetAudioStreams(),
+            StreamType.Video => await GetVideoStreams(),
             _ => throw new Exception( "Invalid Stream Type!" )
         };
     }
-
-    public async Task<ApiReply<bool>> Download( string filepath, StreamType type, int quality )
+    public async Task<ApiReply<bool>> Download( string filepath, StreamType type, int qualityIndex )
     {
         try
         {
-            IStreamInfo? streamInfo = type switch
+            IStreamInfo streamInfo = type switch
             {
-                StreamType.Mixed => GetMixedInfo( quality ),
-                StreamType.Audio => GetAudioInfo( quality ),
-                StreamType.Video => GetVideoInfo( quality ),
+                StreamType.Mixed => _mixedStreams[ qualityIndex ],
+                StreamType.Audio => _mixedStreams[ qualityIndex ],
+                StreamType.Video => _mixedStreams[ qualityIndex ],
                 _ => throw new ArgumentOutOfRangeException( nameof( type ), type, null )
             };
 
-            if ( streamInfo is null )
-                return new ApiReply<bool>( ServiceErrorType.NotFound );
+            //if ( streamInfo is null )
+                //return new ApiReply<bool>( ServiceErrorType.NotFound );
 
-            string path = GetDownloadPath( filepath, streamInfo.Container.Name );
+            string path = ConstructDownloadPath( filepath, streamInfo.Container.Name );
             
-            await _youtube.Videos.Streams.DownloadAsync( streamInfo, path );
-            await AddThumbnail( path );
+            await _youtubeService!.YoutubeClient!.Videos.Streams.DownloadAsync( streamInfo, path );
+
+            if ( _hasFFmeg )
+                await AddImage( path );
             
             return new ApiReply<bool>( true );
         }
@@ -116,7 +155,66 @@ public sealed class YoutubeDownloaderService
         }
     }
 
-    string GetDownloadPath( string outputDirectory, string fileExtension )
+    // Get Streams
+    async Task<List<string>> GetMixedStreams()
+    {
+        return await Task.Run( () => {
+            if ( _mixedSteamQualities is not null )
+                return _mixedSteamQualities;
+
+            _mixedStreams = _streamManifest!.GetMuxedStreams().ToList();
+            _mixedSteamQualities = [ ];
+
+            for ( int i = 0; i < _mixedStreams.Count; i++ )
+            {
+                MuxedStreamInfo stream = _mixedStreams[ i ];
+                _mixedSteamQualities.Add( $"{i + 1} : {stream.VideoResolution} px - {stream.Bitrate} bps - {stream.Container}" );
+            }
+
+            return _mixedSteamQualities;
+        } );
+    }
+    async Task<List<string>> GetAudioStreams()
+    {
+        return await Task.Run( () => {
+            if ( _audioSteamQualities is not null )
+                return _audioSteamQualities;
+
+            _audioStreams = _streamManifest!.GetAudioOnlyStreams().ToList();
+
+            _audioSteamQualities = [ ];
+
+            for ( int i = 0; i < _audioStreams.Count; i++ )
+            {
+                AudioOnlyStreamInfo stream = _audioStreams[ i ];
+                _audioSteamQualities.Add( $"{i + 1} : {stream.Bitrate} bps - {stream.Container}" );
+            }
+
+            return _audioSteamQualities;
+        } );
+    }
+    async Task<List<string>> GetVideoStreams()
+    {
+        return await Task.Run( () => {
+            if ( _videoSteamQualities is not null )
+                return _videoSteamQualities;
+
+            _videoStreams = _streamManifest!.GetVideoOnlyStreams().ToList();
+
+            _videoSteamQualities = [ ];
+
+            for ( int i = 0; i < _videoStreams.Count; i++ )
+            {
+                VideoOnlyStreamInfo stream = _videoStreams[ i ];
+                _videoSteamQualities.Add( $"{i + 1} : {stream.VideoResolution} px - {stream.Container}" );
+            }
+
+            return _videoSteamQualities;
+        } );
+    }
+    
+    // Get Download Path
+    string ConstructDownloadPath( string outputDirectory, string fileExtension )
     {
         string videoName = SanitizeVideoName( _video!.Title );
         string fileName = $"{videoName}.{fileExtension}";
@@ -129,96 +227,30 @@ public sealed class YoutubeDownloaderService
         }
     }
     
-    List<string> GetMixedStreams()
+    // Image
+    async Task<byte[]?> GetThumbnailBytes()
     {
-        if ( _mixedSteamQualities is not null )
-            return _mixedSteamQualities;
+        if ( _thumbnailBytes is not null || _video?.Thumbnails[ 0 ].Url is null )
+            return _thumbnailBytes;
 
-        _mixedStreams = _streamManifest!.GetMuxedStreams().ToList();
-        _mixedSteamQualities = [ ];
-
-        for ( int i = 0; i < _mixedStreams.Count; i++ )
-        {
-            MuxedStreamInfo stream = _mixedStreams[ i ];
-            _mixedSteamQualities.Add( $"{i + 1} : {stream.VideoResolution} px - {stream.Bitrate} bps - {stream.Container}" );
-        }
-
-        return _mixedSteamQualities;
+        return _http is not null
+            ? _thumbnailBytes = await YoutubeImageService.LoadImageBytesFromUrlAsync( _video.Thumbnails[ 0 ].Url, _http )
+            : Array.Empty<byte>();
     }
-    List<string> GetAudioStreams()
+    async Task AddImage( string videoPath )
     {
-        if ( _audioSteamQualities is not null )
-            return _audioSteamQualities;
-
-        _audioStreams = _streamManifest!.GetAudioOnlyStreams().ToList();
-
-        _audioSteamQualities = [ ];
-
-        for ( int i = 0; i < _audioStreams.Count; i++ )
-        {
-            AudioOnlyStreamInfo stream = _audioStreams[ i ];
-            _audioSteamQualities.Add( $"{i + 1} : {stream.Bitrate} bps - {stream.Container}" );
-        }
-
-        return _audioSteamQualities;
-    }
-    List<string> GetVideoStreams()
-    {
-        if ( _videoSteamQualities is not null )
-            return _videoSteamQualities;
-
-        _videoStreams = _streamManifest!.GetVideoOnlyStreams().ToList();
-
-        _videoSteamQualities = [ ];
-
-        for ( int i = 0; i < _videoStreams.Count; i++ )
-        {
-            VideoOnlyStreamInfo stream = _videoStreams[ i ];
-            _videoSteamQualities.Add( $"{i + 1} : {stream.VideoResolution} px - {stream.Container}" );
-        }
-
-        return _videoSteamQualities;
-    }
-    
-    IStreamInfo GetMixedInfo( int selection )
-    {
-        if ( _mixedStreams is null || _mixedStreams.Count <= 0 )
-            throw new Exception( "Internal App Error: No mixed streams found!!!" );
-
-        return _mixedStreams[ selection ];
-    }
-    IStreamInfo GetAudioInfo( int selection )
-    {
-        if ( _audioStreams is null || _audioStreams.Count <= 0 )
-            throw new Exception( "Internal App Error: No audio streams found!!!" );
-
-        return _audioStreams[ selection ];
-    }
-    IStreamInfo GetVideoInfo( int selection )
-    {
-        if ( _videoStreams is null || _videoStreams.Count <= 0 )
-            throw new Exception( "Internal App Error: No video streams found!!!" );
-
-        return _videoStreams[ selection ];
-    }
-    
-    async Task AddThumbnail( string videoPath )
-    {
-        if ( _thumbnailBytes is null )
+        if ( _thumbnailBytes is null || !_hasFFmeg )
             return;
 
-        if ( !await _fFmpegService?.CheckFFmpegInstallationAsync() )
-            return;
-
-        string thumbnailPath = Path.Combine( Path.GetTempPath(), "thumbnail.jpg" );
-        string convertedThumbnailPath = Path.Combine( Path.GetTempPath(), "thumbnail_converted.jpg" );
+        string tempThumbnailPath = Path.Combine( Path.GetTempPath(), TempThumbnailFileName );
+        string tempConvertedThumbnailPath = Path.Combine( Path.GetTempPath(), TempThumbnailConvertedFileName );
         string tempVideoPath = Path.Combine( Path.GetTempPath(), $"video_temp{Path.GetExtension( videoPath )}" );
 
         try
         {
-            await File.WriteAllBytesAsync( thumbnailPath, _thumbnailBytes );
-            await CreateJpgCopyFFMPEG( thumbnailPath, convertedThumbnailPath );
-            await CreateVideoWithImageFFMPEG( videoPath, convertedThumbnailPath, tempVideoPath );
+            await File.WriteAllBytesAsync( tempThumbnailPath, _thumbnailBytes );
+            await CreateJpgCopyFFMPEG( tempThumbnailPath, tempConvertedThumbnailPath );
+            await CreateVideoWithImageFFMPEG( videoPath, tempConvertedThumbnailPath, tempVideoPath );
 
             if ( !File.Exists( tempVideoPath ) )
                 return;
@@ -228,44 +260,23 @@ public sealed class YoutubeDownloaderService
         }
         catch ( Exception e )
         {
-            Console.WriteLine( e );
+            _logger?.LogError( e, e.Message );
         }
         finally
         {
-            if ( File.Exists( thumbnailPath ) )
-                File.Delete( thumbnailPath );
-            if ( File.Exists( convertedThumbnailPath ) )
-                File.Delete( convertedThumbnailPath );
+            if ( File.Exists( tempThumbnailPath ) )
+                File.Delete( tempThumbnailPath );
+            
+            if ( File.Exists( tempConvertedThumbnailPath ) )
+                File.Delete( tempConvertedThumbnailPath );
+            
             if ( File.Exists( tempVideoPath ) )
                 File.Delete( tempVideoPath );
         }
     }
-    
-    static async Task<byte[]?> LoadImageBytesFromUrlAsync( string imageUrl )
-    {
-        try
-        {
-            using var client = new HttpClient();
-            HttpResponseMessage response = await client.GetAsync( imageUrl );
-
-            if ( response.IsSuccessStatusCode )
-            {
-                await using Stream stream = await response.Content.ReadAsStreamAsync();
-                using var memoryStream = new MemoryStream();
-                await stream.CopyToAsync( memoryStream ); // Copy the stream to a MemoryStream
-                return memoryStream.ToArray();
-            }
-        }
-        catch ( Exception ex )
-        {
-            Console.WriteLine( $"Failed to load image from URL: {ex.Message}" );
-        }
-
-        return null;
-    }
     static async Task CreateJpgCopyFFMPEG( string inputPath, string outputPath )
     {
-        var conversionProcessStartInfo = new ProcessStartInfo
+        ProcessStartInfo conversionProcessStartInfo = new()
         {
             FileName = "ffmpeg",
             Arguments = $"-i \"{inputPath}\" \"{outputPath}\"",
@@ -282,7 +293,7 @@ public sealed class YoutubeDownloaderService
     }
     static async Task CreateVideoWithImageFFMPEG( string videoPath, string convertedThumbnailPath, string tempOutputPath )
     {
-        var processStartInfo = new ProcessStartInfo
+        ProcessStartInfo processStartInfo = new()
         {
             FileName = "ffmpeg", // Or the full path to the ffmpeg executable
             Arguments = $"-i \"{videoPath}\" -i \"{convertedThumbnailPath}\" -map 0 -map 1 -c copy -disposition:v:1 attached_pic \"{tempOutputPath}\"",

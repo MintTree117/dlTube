@@ -26,6 +26,7 @@ sealed class Program
 
     static void ConfigureServices( IServiceCollection services )
     {
+        services.AddSingleton<YoutubeClientService>();
         services.AddScoped<HttpService>();
         services.AddScoped<YoutubeDownloaderService>();
         services.AddScoped<YoutubeSearchService>();

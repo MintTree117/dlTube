@@ -17,11 +17,15 @@
             <!-- Login Text -->
             <TextBlock
                 HorizontalAlignment="Left"
-                Margin="0,0,0,25"
                 FontSize="28"
                 FontWeight="Bold"
-                TextDecorations="Underline"
                 Text="Login" />
+            <!-- Login Text Separator -->
+            <Border
+                HorizontalAlignment="Stretch"
+                Margin="0 0 0 30"
+                BorderThickness="1"
+                BorderBrush="DarkGray" />
             <!-- Username/Email Input -->
             <TextBox
                 Margin="0,0,0,10"
@@ -47,14 +51,18 @@
                 Padding="20,20"
                 Content="Login" />
             
-            <!-- Or Register Text -->
+            <!-- Register Text -->
             <TextBlock
                 HorizontalAlignment="Left"
-                Margin="0,0,0,25"
                 FontSize="28"
                 FontWeight="Bold"
-                TextDecorations="Underline"
                 Text="Register" />
+            <!-- Register Text Separator -->
+            <Border
+                HorizontalAlignment="Stretch"
+                Margin="0 0 0 30"
+                BorderThickness="1"
+                BorderBrush="DarkGray" />
             <!-- Email Input for Registration -->
             <TextBox
                 Margin="0,0,0,10"

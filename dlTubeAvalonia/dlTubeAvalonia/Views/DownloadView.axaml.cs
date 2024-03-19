@@ -4,13 +4,14 @@ using dlTubeAvalonia.ViewModels;
 
 namespace dlTubeAvalonia.Views;
 
-public sealed partial class YoutubeDownloadView : UserControl
+public sealed partial class DownloadView : UserControl
 {
-    public YoutubeDownloadView()
+    public DownloadView()
     {
         InitializeComponent();
-        this.DataContext = new YoutubeDownloaderViewModel();
+        this.DataContext = new DownloaderViewModel();
     }
+    
     void InitializeComponent()
     {
         AvaloniaXamlLoader.Load( this );

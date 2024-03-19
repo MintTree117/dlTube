@@ -5,13 +5,13 @@ namespace dlTubeAvalonia.Views;
 
 public sealed partial class MainWindow : Window
 {
-    readonly YoutubeDownloadView _youtubeView;
+    readonly DownloadView _youtubeView;
     ArchiveView? _archiveView;
     
     public MainWindow()
     {
         InitializeComponent();
-        _youtubeView = new YoutubeDownloadView();
+        _youtubeView = new DownloadView();
         MainContent.Content = _youtubeView;
     }
 
@@ -21,7 +21,7 @@ public sealed partial class MainWindow : Window
     }
     void OnClickViewYoutubeSearch( object? sender, RoutedEventArgs args )
     {
-        MainContent.Content = new YoutubeSearchView();
+        MainContent.Content = new YoutubeView();
     }
     void OnClickViewArchive( object? sender, RoutedEventArgs args )
     {
