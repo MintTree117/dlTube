@@ -6,30 +6,35 @@ public sealed class MainWindowViewModel : ReactiveObject
 {
     const string DefaultMenuAccountText = "Login";
     
-    bool _ShowLogin;
-    bool _IsAuthenticated;
-
-    string _MenuAccountName;
+    bool _showLogin;
+    bool _isAuthenticated;
+    bool _isPopoutMenuOpen;
+    string _menuAccountName;
     
     public MainWindowViewModel()
     {
         ShowLogin = true;
-        _MenuAccountName = DefaultMenuAccountText;
+        _menuAccountName = DefaultMenuAccountText;
     }
     
     public bool ShowLogin
     {
-        get => _ShowLogin;
-        set => this.RaiseAndSetIfChanged( ref _ShowLogin, value );
+        get => _showLogin;
+        set => this.RaiseAndSetIfChanged( ref _showLogin, value );
     }
     public bool IsAuthenticated
     {
-        get => _IsAuthenticated;
-        set => this.RaiseAndSetIfChanged( ref _IsAuthenticated, value );
+        get => _isAuthenticated;
+        set => this.RaiseAndSetIfChanged( ref _isAuthenticated, value );
+    }
+    public bool IsPopoutMenuOpen
+    {
+        get => _isPopoutMenuOpen;
+        set => this.RaiseAndSetIfChanged( ref _isPopoutMenuOpen, value );
     }
     public string MenuAccountName
     {
-        get => _MenuAccountName;
-        set => this.RaiseAndSetIfChanged( ref _MenuAccountName, value );
+        get => _menuAccountName;
+        set => this.RaiseAndSetIfChanged( ref _menuAccountName, value );
     }
 }

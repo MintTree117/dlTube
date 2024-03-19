@@ -27,17 +27,17 @@ public sealed class DownloaderViewModel : ReactiveObject
     const string SuccessDownloadMessage = "Download success!";
     const string FailDownloadMessage = "Failed to download!";
     const string DefaultVideoImage = "avares://dlTubeAvalonia/Assets/defaultplayer.png";
-    const string DefaultVideoQuality = "None";
+    //const string DefaultVideoQuality = "None";
 
     readonly string _downloadPath;
 
     // Property Field List Values
     Bitmap? _videoImageBitmap;
     List<string> _streamTypes = Enum.GetNames<StreamType>().ToList();
-    List<string> _streamQualities = [ DefaultVideoQuality ];
+    List<string> _streamQualities = [ ];
     string _youtubeLink = string.Empty;
     string _videoName = DefaultVideoName;
-    string _selectedStreamTypeName = null!;
+    string _selectedStreamTypeName = string.Empty; // saves state between downloads for user convenience
     string _selectedStreamQualityName = string.Empty;
     string _resultMessage = string.Empty;
     bool _isLinkBoxEnabled;
@@ -60,8 +60,8 @@ public sealed class DownloaderViewModel : ReactiveObject
         
         _downloadPath = AppConfig.GetDownloadPath();
         
-        SelectedStreamType = StreamTypes[ 0 ];
-        SelectedStreamQuality = StreamQualities[ 0 ];
+        //SelectedStreamType = StreamTypes[ 0 ];
+        //SelectedStreamQuality = StreamQualities[ 0 ];
         IsLinkBoxEnabled = true;
 
         LoadDefaultImage();
@@ -97,7 +97,7 @@ public sealed class DownloaderViewModel : ReactiveObject
         get => _videoName;
         set => this.RaiseAndSetIfChanged( ref _videoName, value );
     }
-    public string SelectedStreamType
+    public string SelectedStreamType // saves state between downloads for user convenience
     {
         get => _selectedStreamTypeName;
         set
@@ -144,7 +144,7 @@ public sealed class DownloaderViewModel : ReactiveObject
         
         if ( !reply.Success )
         {
-            _logger?.LogError( $"Failed to obtain stream manifest! {reply.PrintDetails()}" );
+            _logger?.LogError( $"Failed to obtain stream manifest! Reply message: {reply.PrintDetails()}" );
             VideoName = InvalidVideoName;
             ResultMessage = PrintError( reply.ErrorType.ToString() ); //reply.PrintDetails();
             HasResultMessage = true;
@@ -160,7 +160,7 @@ public sealed class DownloaderViewModel : ReactiveObject
     }
     async Task DownloadStream()
     {
-        if ( !ValidateDownloadParameters( out StreamType streamType ) )
+        if ( !ValidateBeforeTryDownload( out StreamType streamType ) )
             return;
 
         IsLinkBoxEnabled = false;
@@ -197,9 +197,9 @@ public sealed class DownloaderViewModel : ReactiveObject
 
         StreamQualities = streamQualities.Count > 0
             ? streamQualities
-            : [ DefaultVideoQuality ];
+            : [ ];//[ DefaultVideoQuality ];
 
-        SelectedStreamQuality = StreamQualities[ 0 ];
+        SelectedStreamQuality = string.Empty;
     }
     void GetImageBytes()
     {
@@ -214,23 +214,24 @@ public sealed class DownloaderViewModel : ReactiveObject
     }
     bool LinkIsEmptyAfterChangesApplied()
     {
-        IsSettingsEnabled = false;
-        VideoName = string.IsNullOrWhiteSpace( _youtubeLink ) ? DefaultVideoName : LoadingVideoName;
-        LoadDefaultImage();
-        StreamQualities = [ DefaultVideoQuality ];
-        SelectedStreamQuality = StreamQualities[ 0 ];
-        ResultMessage = string.Empty;
-        _dlService = null;
-        HasResultMessage = false;
-        ResultMessage = string.Empty;
+        bool linkIsEmpty = string.IsNullOrWhiteSpace( _youtubeLink );
 
-        return string.IsNullOrWhiteSpace( _youtubeLink );
+        LoadDefaultImage();
+        IsSettingsEnabled = false;
+        HasResultMessage = false;
+        SelectedStreamType = string.Empty;
+        ResultMessage = string.Empty;
+        VideoName = linkIsEmpty ? DefaultVideoName : LoadingVideoName;
+        StreamQualities = [ ];
+        _dlService = null;
+
+        return linkIsEmpty;
     }
     void LoadDefaultImage()
     {
         VideoImageBitmap = new Bitmap( AssetLoader.Open( new Uri( DefaultVideoImage ) ) );
     }
-    bool ValidateDownloadParameters( out StreamType streamType )
+    bool ValidateBeforeTryDownload( out StreamType streamType )
     {
         streamType = StreamType.Mixed; 
         

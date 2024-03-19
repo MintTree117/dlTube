@@ -1,0 +1,49 @@
+<Styles
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	
+	<!-- Background -->
+	<Style Selector="Border.bg-overlay">
+		<Setter Property="Background" Value="rgba(10, 10, 10, 0.85)" />
+	</Style>
+	<Style Selector="Panel.bg-overlay">
+		<Setter Property="Background" Value="rgba(20, 20, 20, 0.75)" />
+	</Style>
+	<Style Selector="Grid.bg-overlay">
+		<Setter Property="Background" Value="rgba(20, 20, 20, 0.75)" />
+	</Style>
+	<!-- Buttons -->
+	<Style Selector="Button">
+		<Setter Property="Background" Value="#474747" />
+	</Style>
+	<Style Selector="Button:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="#707070" />
+		<Setter Property="BorderBrush" Value="#707070" />
+	</Style>
+
+	<!-- Combo Box -->
+	<Style Selector="ComboBox[IsEffectivelyEnabled=False].he">
+		<Setter Property="Background" Value="rgba(255,255,255,1)" />
+	</Style>
+	<!-- Combo Box -->
+	<Style Selector="ComboBox:disabled">
+		<Setter Property="Background" Value="rgba(255,255,255,1)" />
+	</Style>
+	<!-- Text Box -->
+	<Style Selector="TextBox:disabled /template/ ContentPresenter">
+		<Setter Property="Background" Value="#2b2b2b" />
+	</Style>
+	<!-- Page Title -->
+	<Style Selector="TextBlock.page-title">
+		<Setter Property="FontSize" Value="36" />
+		<Setter Property="FontWeight" Value="Bold" />
+		<Setter Property="Foreground" Value="WhiteSmoke" />
+	</Style>
+	<!-- Separator -->
+	<Style Selector="Border.title-separator">
+		<Setter Property="HorizontalAlignment" Value="Stretch" />
+		<Setter Property="Margin" Value="0 20 0 20" />
+		<Setter Property="BorderThickness" Value="0,0,0,2" />
+		<Setter Property="BorderBrush" Value="#707070" />
+	</Style>
+</Styles>

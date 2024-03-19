@@ -136,12 +136,13 @@
 	        </ScrollViewer>
     
         	<!-- Pop-out Menu (Overlay) -->
-        	<Border Grid.Row="1" 
-        	        HorizontalAlignment="Left" 
-        	        Width="200" 
-        	        Background="LightGray" 
-        	        ZIndex="1000"
-        	        IsVisible="{Binding IsMenuOpen}">
+        	<Border 
+		        Grid.Row="1" 
+		        HorizontalAlignment="Left" 
+		        Width="200" 
+		        Background="LightGray" 
+		        ZIndex="1000"
+		        IsVisible="{Binding IsMenuOpen}">
         		<StackPanel>
         			<!-- Menu Content -->
         			<TextBlock Text="Menu Item 1" />
