@@ -30,37 +30,44 @@ public sealed partial class MainWindow : Window
     void OnClickViewYoutubeDownloader( object? sender, RoutedEventArgs args )
     {
         MainContent.Content = _downloadView;
-        popout.IsVisible = false;
+        OnNewPage();
     }
     void OnClickViewYoutubeSearch( object? sender, RoutedEventArgs args )
     {
         _youtubeView ??= new YoutubeView();
         MainContent.Content = _youtubeView;
-        popout.IsVisible = false;
+        OnNewPage();
     }
     void OnClickViewArchive( object? sender, RoutedEventArgs args )
     {
         _archiveView ??= new ArchiveView();
         MainContent.Content = _archiveView;
-        popout.IsVisible = false;
+        OnNewPage();
     }
     void OnClickAppSettings( object? sender, RoutedEventArgs args )
     {
         MainContent.Content = new AppSettingsView();
-        popout.IsVisible = false;
+        OnNewPage();
     }
     void OnClickLogin( object? sender, RoutedEventArgs args )
     {
         MainContent.Content = new LoginView();
-        popout.IsVisible = false;
+        OnNewPage();
     }
     void OnClickAccountSettings( object? sender, RoutedEventArgs args )
     {
-        popout.IsVisible = false;
+        OnNewPage();
     }
     void OnClickLogout( object? sender, RoutedEventArgs args )
     {
         MainContent.Content = _downloadView;
+        OnNewPage();
+    }
+
+    void OnNewPage()
+    {
         popout.IsVisible = false;
+        MainContent.IsEnabled = true;
+        MainContentOverlay.IsVisible = false;
     }
 }
