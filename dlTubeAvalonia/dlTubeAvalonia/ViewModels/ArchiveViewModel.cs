@@ -16,7 +16,7 @@ public sealed class ArchiveViewModel : ReactiveObject
 {
     // Services
     readonly ILogger<ArchiveViewModel>? _logger;
-    readonly ArchiveService _archiveService;
+    readonly ArchiveService _archiveService = null!;
     
     // Property Field List Values
     readonly List<StreamFilterType> _streamTypeDefinitions = Enum.GetValues<StreamFilterType>().ToList();
@@ -24,11 +24,12 @@ public sealed class ArchiveViewModel : ReactiveObject
     readonly List<int> _resultCounts = [ 10, 20, 30, 50, 100, 200 ];
     
     // Property Fields
-    List<string> _categoryNames = [ "a, b, c" ];
+    int _searchCount = 0;
     List<ArchiveItem> _searchResults = [ ];
-    List<string> _streamTypes;
-    List<string> _sortTypes;
-    List<string> _resultCountNames;
+    List<string> _categoryNames = [ "a, b, c" ];
+    List<string> _streamTypes = [ ];
+    List<string> _sortTypes = [ ];
+    List<string> _resultCountNames = [ ];
     string _selectedCategoryName = string.Empty;
     string _selectedStreamType = string.Empty;
     string _selectedSortType = string.Empty;
@@ -40,12 +41,19 @@ public sealed class ArchiveViewModel : ReactiveObject
     bool _isFree = true;
     bool _hasError;
     
-    // Commands
-    public ReactiveCommand<Unit, ApiReply<ArchiveSearch?>> SearchCommand { get; }
+    // Command Definitions
+    public ReactiveCommand<Unit, Unit> SearchCommand { get; }
+    public ReactiveCommand<int, Unit> DownloadCommand { get; }
     
     // Constructor
     public ArchiveViewModel()
     {
+        SearchCommand = ReactiveCommand.CreateFromTask( SearchArchive );
+        DownloadCommand = ReactiveCommand.CreateFromTask<int>( async ( id ) => await DownloadArchiveItem( id ) );
+        
+        if ( !TryGetArchiveService( ref _archiveService! ) )
+            return;
+        
         _logger = Program.ServiceProvider.GetService<ILogger<ArchiveViewModel>>();
         
         _streamTypes = GetStreamFilterTypeNames();
@@ -56,16 +64,53 @@ public sealed class ArchiveViewModel : ReactiveObject
         SelectedStreamType = _streamTypes[ 0 ];
         SelectedSortType = _sortTypes[ 0 ];
         SelectedResultCountName = _resultCountNames[ 0 ];
-        _archiveService = Program.ServiceProvider.GetService<ArchiveService>() ?? throw new Exception( "Failed to get archive service!" );
-        SearchCommand = ReactiveCommand.CreateFromTask( SearchArchive );
 
         try
         {
-            LoadCategories();
+            //LoadCategories();
         }
         catch ( Exception e )
         {
             _logger?.LogError( e, e.Message );
+        }
+    }
+    
+    // Init Methods
+    bool TryGetArchiveService( ref ArchiveService? archiveService )
+    {
+        ArchiveService? service = Program.ServiceProvider.GetService<ArchiveService>();
+
+        if ( service is not null )
+        {
+            archiveService = service;
+            return true;
+        }
+
+        IsFree = false;
+        HasError = true;
+        ErrorMessage = "Failed to load archive service!";
+        return false;
+    }
+    async void LoadCategories()
+    {
+        ApiReply<List<ArchiveCategory>?> reply = await _archiveService.GetCategoriesAsync();
+
+        if ( !reply.Success || reply.Data is null )
+        {
+            HasError = true;
+            _logger?.LogError( reply.PrintDetails() );
+            ErrorMessage = reply.PrintDetails();
+            return;
+        }
+
+        CategoryNames = GetCategoryNames( reply.Data );
+        return;
+
+        static List<string> GetCategoryNames( IEnumerable<ArchiveCategory> categories )
+        {
+            List<string> names = [ ];
+            names.AddRange( from c in categories select c.Name );
+            return names;
         }
     }
     static List<string> GetStreamFilterTypeNames()
@@ -93,36 +138,51 @@ public sealed class ArchiveViewModel : ReactiveObject
         return names;
     }
     
-    // Command Definitions
-    async void LoadCategories()
+    // Command Delegates
+    public void CloseError()
     {
-        ApiReply<List<ArchiveCategory>?> reply = await _archiveService.GetCategoriesAsync();
+        HasError = false;
+        ErrorMessage = string.Empty;
+    }
+    async Task SearchArchive()
+    {
+        Dictionary<string, object> searchParams = [ ];
+
+        if ( !string.IsNullOrWhiteSpace( _selectedCategoryName ) )
+            searchParams.Add( "category", _selectedCategoryName );
+
+        if ( !string.IsNullOrWhiteSpace( _selectedStreamType ) )
+            searchParams.Add( "streamType", _streamTypeDefinitions[ _streamTypes.IndexOf( _selectedStreamType ) ] );
+
+        if ( !string.IsNullOrWhiteSpace( _selectedSortType ) )
+            searchParams.Add( "sortType", _sortTypesDefinition[ _sortTypes.IndexOf( _selectedSortType ) ] );
+
+        if ( !string.IsNullOrWhiteSpace( _selectedResultCountName ) )
+            searchParams.Add( "resultCount", _resultCounts[ _resultCountNames.IndexOf( _selectedResultCountName ) ] );
+        
+        ApiReply<ArchiveSearch?> reply = await _archiveService.SearchVideosAsync( searchParams );
 
         if ( !reply.Success || reply.Data is null )
         {
             HasError = true;
-            _logger?.LogError( reply.PrintDetails() );
             ErrorMessage = reply.PrintDetails();
             return;
         }
 
-        CategoryNames = GetCategoryNames( reply.Data );
-        return;
-
-        static List<string> GetCategoryNames( IEnumerable<ArchiveCategory> categories )
-        {
-            List<string> names = [ ];
-            names.AddRange( from c in categories select c.Name );
-            return names;
-        }
+        SearchCount = reply.Data.TotalMatches;
+        SearchResults = reply.Data.Items;
     }
-    async Task<ApiReply<ArchiveSearch?>> SearchArchive()
+    async Task DownloadArchiveItem( int itemId )
     {
-        ApiReply<ArchiveSearch?> reply = await _archiveService.SearchVideosAsync( null );
-        return reply;
+        
     }
 
     // Reactive Properties
+    public int SearchCount
+    {
+        get => _searchCount;
+        set => this.RaiseAndSetIfChanged( ref _searchCount, value );
+    }
     public List<ArchiveItem> SearchResults
     {
         get => _searchResults;
@@ -154,7 +214,7 @@ public sealed class ArchiveViewModel : ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged( ref _selectedCategoryName, value );
-            DefaultDropdownBehaviour();
+            OnChangeDropdownValue();
         }
     }
     public string SelectedStreamType
@@ -163,7 +223,7 @@ public sealed class ArchiveViewModel : ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged( ref _selectedStreamType, value );
-            DefaultDropdownBehaviour();
+            OnChangeDropdownValue();
         }
     }
     public string SelectedSortType
@@ -172,7 +232,7 @@ public sealed class ArchiveViewModel : ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged( ref _selectedSortType, value );
-            DefaultDropdownBehaviour();
+            OnChangeDropdownValue();
         }
     }
     public string SelectedResultCountName
@@ -181,7 +241,7 @@ public sealed class ArchiveViewModel : ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged( ref _selectedResultCountName, value );
-            DefaultDropdownBehaviour();
+            OnChangeDropdownValue();
         }
     }
     public string SearchText
@@ -216,7 +276,7 @@ public sealed class ArchiveViewModel : ReactiveObject
     }
     
     // Private Methods
-    void DefaultDropdownBehaviour()
+    void OnChangeDropdownValue()
     {
         if ( string.IsNullOrWhiteSpace( _searchText ) )
             return;

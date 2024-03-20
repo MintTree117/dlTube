@@ -11,10 +11,11 @@ public partial class YoutubeView : UserControl
     
     public YoutubeView()
     {
-        InitializeComponent();
         _viewModel = new YoutubeViewModel();
         this.DataContext = _viewModel;
+        InitializeComponent();
     }
+    
     void InitializeComponent()
     {
         AvaloniaXamlLoader.Load( this );
@@ -28,5 +29,10 @@ public partial class YoutubeView : UserControl
             : string.Empty;
         
         _viewModel.CopyUrlCommand.Execute( url );
+    }
+    void CloseErrorMessage( object? sender, RoutedEventArgs args )
+    {
+        ErrorMessage.IsVisible = false;
+        _viewModel.CloseError();
     }
 }

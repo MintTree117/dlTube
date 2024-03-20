@@ -18,7 +18,7 @@ namespace dlTubeAvalonia.ViewModels;
 
 public sealed class YoutubeViewModel : ReactiveObject
 {
-    // Services
+    // Services Definitions
     readonly ILogger<YoutubeViewModel>? _logger;
     readonly YoutubeSearchService? _youtubeSearchService;
     
@@ -39,7 +39,6 @@ public sealed class YoutubeViewModel : ReactiveObject
     
     // Commands
     public ReactiveCommand<Unit, Unit> YoutubeCommand { get; }
-    public ReactiveCommand<Unit, Unit> CloseErrorCommand { get; }
     public ReactiveCommand<Unit, Unit> SearchCommand { get; }
     public ReactiveCommand<string, Unit> CopyUrlCommand { get; }
     
@@ -54,7 +53,6 @@ public sealed class YoutubeViewModel : ReactiveObject
         SelectedSortType = _sortTypes[ 0 ];
         SelectedResultCountName = _resultCountNames[ 0 ];
         YoutubeCommand = ReactiveCommand.Create( GoToYoutube );
-        CloseErrorCommand = ReactiveCommand.Create( CloseError );
         SearchCommand = ReactiveCommand.CreateFromTask( Search );
         CopyUrlCommand = ReactiveCommand.CreateFromTask<string>( async ( url ) => { await CopyUrlToClipboard( url ); } );
     }
@@ -137,6 +135,11 @@ public sealed class YoutubeViewModel : ReactiveObject
     }
     
     // Command Delegates
+    public void CloseError()
+    {
+        HasError = false;
+        ErrorMessage = string.Empty;
+    }
     void GoToYoutube()
     {
         try
@@ -155,11 +158,6 @@ public sealed class YoutubeViewModel : ReactiveObject
             HasError = true;
             ErrorMessage = ServiceErrorType.AppError.ToString();
         }
-    }
-    void CloseError()
-    {
-        HasError = false;
-        ErrorMessage = string.Empty;
     }
     async Task Search()
     {
@@ -191,7 +189,8 @@ public sealed class YoutubeViewModel : ReactiveObject
         }
         
         // TODO: Make this mobile accessible
-        Window? mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop ? desktop.MainWindow : null;
+        Window? mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop 
+            ? desktop.MainWindow : null;
 
         if ( mainWindow?.Clipboard is null )
         {

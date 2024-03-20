@@ -14,14 +14,10 @@ public sealed class ArchiveService : HttpService
     const string ApiPathSearch = $"{ApiPath}/search";
     
     // Services
-    readonly ILogger<ArchiveService>? _logger;
+    readonly ILogger<ArchiveService>? _logger = Program.ServiceProvider.GetService<ILogger<ArchiveService>>();
     
     // Constructor
-    public ArchiveService()
-    {
-        _logger = Program.ServiceProvider.GetService<ILogger<ArchiveService>>();
-    }
-    
+
     // Public Methods
     public async Task<ApiReply<List<ArchiveCategory>?>> GetCategoriesAsync()
     {

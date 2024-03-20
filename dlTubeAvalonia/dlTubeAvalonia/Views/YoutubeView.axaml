@@ -52,7 +52,6 @@
                     Grid.Column="3"
                     Classes="SearchDropdown"
                     HorizontalAlignment="Right"
-                    Width="150"
                     Margin="0,0,5,0"
                     ItemsSource="{Binding SortTypes}"
                     SelectedItem="{Binding SelectedSortType}" />
@@ -61,7 +60,6 @@
                     Grid.Column="4"
                     Classes="SearchDropdown"
                     HorizontalAlignment="Right"
-                    Width="150"
                     ItemsSource="{Binding ResultCountNames}"
                     SelectedItem="{Binding SelectedResultCountName}" />
             </Grid>
@@ -70,7 +68,8 @@
         <!-- Error Message -->
         <StackPanel
             Grid.Row="1"
-            IsVisible="{Binding HasError}">
+            IsVisible="{Binding HasError}"
+            x:Name="ErrorMessage">
             <TextBlock
                 HorizontalAlignment="Left"
                 Margin="10"
@@ -80,7 +79,7 @@
                 HorizontalContentAlignment="Center"
                 Margin="10"
                 Padding="10"
-                Command="{Binding CloseErrorCommand}"
+                Click="CloseErrorMessage"
                 Content="Close">
             </Button>
         </StackPanel>
@@ -133,17 +132,6 @@
                                             BorderThickness="0"
                                             Background="Transparent"
                                             Text="{Binding Url}" />
-                                        <!-- Play Audio Button -->
-                                        <!--<Button
-                                            Grid.Column="1"
-                                            VerticalAlignment="Stretch"
-                                            VerticalContentAlignment="Center"
-                                            Padding="10"
-                                            CornerRadius="5"
-                                            CommandParameter="{Binding Id}"
-                                            Click="OnClickPlay">
-                                            <PathIcon Data="{StaticResource caret_right_regular}" />
-                                        </Button>-->
                                         <!-- Copy Url Button -->
                                         <Button
                                             Grid.Column="1"

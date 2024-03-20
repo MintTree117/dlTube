@@ -11,12 +11,18 @@ public sealed partial class ArchiveView : UserControl
     
     public ArchiveView()
     {
-        this.DataContext = new ArchiveViewModel();
-        _viewModel = this.DataContext as ArchiveViewModel;
+        _viewModel = new ArchiveViewModel();
+        this.DataContext = _viewModel;
         InitializeComponent();
     }
+    
     void InitializeComponent()
     {
         AvaloniaXamlLoader.Load( this );
+    }
+    void CloseErrorMessage( object? sender, RoutedEventArgs args )
+    {
+        ErrorMessage.IsVisible = false;
+        _viewModel.CloseError();
     }
 }
