@@ -4,14 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
-using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Media.Imaging;
 using ReactiveUI;
-using YoutubeExplode.Search;
 using dlTubeAvalonia.Enums;
 using dlTubeAvalonia.Models;
 using dlTubeAvalonia.Services;
@@ -22,7 +20,7 @@ public sealed class YoutubeViewModel : ReactiveObject
 {
     // Services
     readonly ILogger<YoutubeViewModel>? _logger;
-    readonly YoutubeSearchService? _searchService;
+    readonly YoutubeSearchService? _youtubeSearchService;
     
     // Property Field List Values
     readonly List<YoutubeSortType> _sortTypesDefinition = Enum.GetValues<YoutubeSortType>().ToList();
@@ -48,6 +46,9 @@ public sealed class YoutubeViewModel : ReactiveObject
     // Constructor
     public YoutubeViewModel()
     {
+        _logger = Program.ServiceProvider.GetService<ILogger<YoutubeViewModel>>();
+        TryGetYoutubeService( ref _youtubeSearchService! );
+        
         SortTypes = GetSortTypeNames();
         ResultCountNames = GetResultsPerPageNames( _resultCounts );
         SelectedSortType = _sortTypes[ 0 ];
@@ -56,9 +57,6 @@ public sealed class YoutubeViewModel : ReactiveObject
         CloseErrorCommand = ReactiveCommand.Create( CloseError );
         SearchCommand = ReactiveCommand.CreateFromTask( Search );
         CopyUrlCommand = ReactiveCommand.CreateFromTask<string>( async ( url ) => { await CopyUrlToClipboard( url ); } );
-        
-        _logger = Program.ServiceProvider.GetService<ILogger<YoutubeViewModel>>();
-        TryGetYoutubeService( ref _searchService! );
     }
     void TryGetYoutubeService( ref YoutubeSearchService service )
     {
@@ -114,7 +112,7 @@ public sealed class YoutubeViewModel : ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged( ref _selectedResultCountName, value );
-            OnChangeResultsPerPageDropdown();
+            OnChangeResultsDropdown();
         }
     }
     public string SearchText
@@ -172,7 +170,7 @@ public sealed class YoutubeViewModel : ReactiveObject
 
         try
         {
-            SearchResults = await _searchService!.GetStreams( _searchText, _resultCounts[ resultCountIndex ] );
+            SearchResults = await _youtubeSearchService!.GetStreams( _searchText, _resultCounts[ resultCountIndex ] );
         }
         catch ( Exception e )
         {
@@ -234,7 +232,7 @@ public sealed class YoutubeViewModel : ReactiveObject
             return false;
         }
         
-        if ( _searchService is null )
+        if ( _youtubeSearchService is null )
         {
             _logger?.LogError( "Search service is null!" );
             HasError = true;
@@ -295,7 +293,7 @@ public sealed class YoutubeViewModel : ReactiveObject
 
         IsFree = true;
     }
-    void OnChangeResultsPerPageDropdown()
+    void OnChangeResultsDropdown()
     {
         if ( string.IsNullOrWhiteSpace( _searchText ) )
             return;   

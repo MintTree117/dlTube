@@ -1,3 +1,5 @@
+using Avalonia.Media.Imaging;
+
 namespace dlTubeAvalonia.Models;
 
 public sealed record ArchiveItem
@@ -7,4 +9,5 @@ public sealed record ArchiveItem
     public string Author { get; init; } = string.Empty;
     public string Duration { get; init; } = string.Empty;
     public string ImageUrl { get; init; } = string.Empty;
+    public Bitmap? Image { get; init; }
 }

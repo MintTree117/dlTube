@@ -4,19 +4,29 @@ using System.Collections.Specialized;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace dlTubeAvalonia.Services;
 
-public class HttpService( HttpClient _http, ILogger<HttpService>? _logger )
+public class HttpService
 {
+    readonly HttpClient Http;
+    readonly ILogger<HttpService>? _logger;
+    
+    public HttpService()
+    {
+        Http = new HttpClient();
+        _logger = Program.ServiceProvider.GetService<ILogger<HttpService>>();
+    }
+    
     public async Task<ApiReply<T?>> TryGetRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
     {
         try
         {
             SetAuthHttpHeader( authToken );
             string path = BuildQueryString( apiPath, parameters );
-            HttpResponseMessage httpResponse = await _http.GetAsync( path );
+            HttpResponseMessage httpResponse = await Http.GetAsync( path );
             return await HandleHttpResponse<T?>( httpResponse );
         }
         catch ( Exception e )
@@ -29,7 +39,7 @@ public class HttpService( HttpClient _http, ILogger<HttpService>? _logger )
         try
         {
             SetAuthHttpHeader( authToken );
-            HttpResponseMessage httpResponse = await _http.PostAsJsonAsync( apiPath, body );
+            HttpResponseMessage httpResponse = await Http.PostAsJsonAsync( apiPath, body );
             return await HandleHttpResponse<T?>( httpResponse );
         }
         catch ( Exception e )
@@ -42,7 +52,7 @@ public class HttpService( HttpClient _http, ILogger<HttpService>? _logger )
         try
         {
             SetAuthHttpHeader( authToken );
-            HttpResponseMessage httpResponse = await _http.PutAsJsonAsync( apiPath, body );
+            HttpResponseMessage httpResponse = await Http.PutAsJsonAsync( apiPath, body );
             return await HandleHttpResponse<T?>( httpResponse );
         }
         catch ( Exception e )
@@ -56,7 +66,7 @@ public class HttpService( HttpClient _http, ILogger<HttpService>? _logger )
         {
             SetAuthHttpHeader( authToken );
             string path = BuildQueryString( apiPath, parameters );
-            HttpResponseMessage httpResponse = await _http.DeleteAsync( path );
+            HttpResponseMessage httpResponse = await Http.DeleteAsync( path );
             return await HandleHttpResponse<T?>( httpResponse );
         }
         catch ( Exception e )
@@ -112,7 +122,7 @@ public class HttpService( HttpClient _http, ILogger<HttpService>? _logger )
     }
     void SetAuthHttpHeader( string? token )
     {
-        _http.DefaultRequestHeaders.Authorization = !string.IsNullOrWhiteSpace( token )
+        Http.DefaultRequestHeaders.Authorization = !string.IsNullOrWhiteSpace( token )
             ? new System.Net.Http.Headers.AuthenticationHeaderValue( "Bearer", token )
             : null;
     }

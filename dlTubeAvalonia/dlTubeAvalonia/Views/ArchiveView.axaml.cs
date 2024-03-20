@@ -19,8 +19,4 @@ public sealed partial class ArchiveView : UserControl
     {
         AvaloniaXamlLoader.Load( this );
     }
-    void ToggleMenu( object sender, RoutedEventArgs e )
-    {
-        _viewModel.IsMenuOpen = !_viewModel.IsMenuOpen;
-    }
 }

@@ -16,11 +16,11 @@
         Margin="0,0,0,0">
         <!-- Page Title -->
         <TextBlock
-            Classes="page-title"
+            Classes="PageTitle"
             HorizontalAlignment="Center"
             Text="Youtube Downloader" />
         <!-- Title Separator -->
-        <Border Classes="title-separator "/>
+        <Border Classes="TitleSeparator"/>
         <!-- Video Title -->
         <TextBlock
             HorizontalAlignment="Center"

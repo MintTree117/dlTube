@@ -2,48 +2,101 @@
 	xmlns="https://github.com/avaloniaui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 	
-	<!-- Background -->
+	<!-- Backgrounds -->
 	<Style Selector="Border.bg-overlay">
 		<Setter Property="Background" Value="rgba(10, 10, 10, 0.85)" />
 	</Style>
 	<Style Selector="Panel.bg-overlay">
-		<Setter Property="Background" Value="rgba(20, 20, 20, 0.75)" />
+		<Setter Property="Background" Value="rgba(10, 10, 10, 0.85)" />
 	</Style>
 	<Style Selector="Grid.bg-overlay">
-		<Setter Property="Background" Value="rgba(20, 20, 20, 0.75)" />
+		<Setter Property="Background" Value="rgba(10, 10, 10, 0.85)" />
 	</Style>
+	
 	<!-- Buttons -->
 	<Style Selector="Button">
 		<Setter Property="Background" Value="#474747" />
 	</Style>
-	<Style Selector="Button:pointerover /template/ ContentPresenter">
-		<Setter Property="Background" Value="#707070" />
-		<Setter Property="BorderBrush" Value="#707070" />
-	</Style>
-
-	<!-- Combo Box -->
-	<Style Selector="ComboBox[IsEffectivelyEnabled=False].he">
-		<Setter Property="Background" Value="rgba(255,255,255,1)" />
-	</Style>
-	<!-- Combo Box -->
-	<Style Selector="ComboBox:disabled">
-		<Setter Property="Background" Value="rgba(255,255,255,1)" />
-	</Style>
-	<!-- Text Box -->
-	<Style Selector="TextBox:disabled /template/ ContentPresenter">
-		<Setter Property="Background" Value="#2b2b2b" />
-	</Style>
+	
 	<!-- Page Title -->
-	<Style Selector="TextBlock.page-title">
+	<Style Selector="TextBlock.PageTitle">
 		<Setter Property="FontSize" Value="36" />
 		<Setter Property="FontWeight" Value="Bold" />
 		<Setter Property="Foreground" Value="WhiteSmoke" />
 	</Style>
 	<!-- Separator -->
-	<Style Selector="Border.title-separator">
+	<Style Selector="Border.TitleSeparator">
 		<Setter Property="HorizontalAlignment" Value="Stretch" />
 		<Setter Property="Margin" Value="0 20 0 20" />
 		<Setter Property="BorderThickness" Value="0,0,0,2" />
 		<Setter Property="BorderBrush" Value="#707070" />
+	</Style>
+	
+	<!-- Search Header Wrapper -->
+	<Style Selector="Border.SearchHeaderWrapper">
+		<Setter Property="Padding" Value="10,15" />
+		<Setter Property="Background" Value="Black" />
+	</Style>
+	<!-- Logo Button -->
+	<Style Selector="Button.LogoButton">
+		<Setter Property="HorizontalAlignment" Value="Left" />
+		<Setter Property="VerticalAlignment" Value="Stretch" />
+		<Setter Property="VerticalContentAlignment" Value="Center" />
+		<Setter Property="Margin" Value="0,0,5,0" />
+		<Setter Property="Padding" Value="35,10" />
+		<Setter Property="BorderThickness" Value="1" />
+		<Setter Property="BorderBrush" Value="DarkGray" />
+		<Setter Property="CornerRadius" Value="5" />
+	</Style>
+	<!-- Search Bar -->
+	<Style Selector="TextBox.SearchBar">
+		<Setter Property="HorizontalAlignment" Value="Stretch" />
+		<Setter Property="VerticalAlignment" Value="Stretch" />
+		<Setter Property="VerticalContentAlignment" Value="Center" />
+		<Setter Property="Margin" Value="0,0,5,0" />
+		<Setter Property="Background" Value="Black" />
+	</Style>
+	<!-- Search Button -->
+	<Style Selector="Button.SearchButton">
+		<Setter Property="HorizontalAlignment" Value="Right" />
+		<Setter Property="VerticalAlignment" Value="Stretch" />
+		<Setter Property="VerticalContentAlignment" Value="Center" />
+		<Setter Property="Margin" Value="0,0,0,0" />
+		<Setter Property="Padding" Value="30,10" />
+		<Setter Property="BorderThickness" Value="1" />
+		<Setter Property="BorderBrush" Value="DarkGray" />
+		<Setter Property="Background" Value="Black" />
+	</Style>
+	<!-- Search Dropdown -->
+	<Style Selector="ComboBox.SearchDropdown">
+		<Setter Property="VerticalAlignment" Value="Stretch" />
+		<Setter Property="VerticalContentAlignment" Value="Center" />
+		<Setter Property="Padding" Value="30,10" />
+		<Setter Property="BorderThickness" Value="1" />
+		<Setter Property="BorderBrush" Value="DarkGray" />
+		<Setter Property="Background" Value="Black" />
+	</Style>
+
+	<!-- Search Results -->
+	<Style Selector="Border.SearchResultWrapper">
+		<Setter Property="Padding" Value="0,10" />
+		<Setter Property="BorderThickness" Value="0,0,0,1" />
+		<Setter Property="BorderBrush" Value="DarkGray" />
+		<Setter Property="Background" Value="Transparent" />
+	</Style>
+	<Style Selector="Border.SearchResultImageWrapper">
+		<Setter Property="HorizontalAlignment" Value="Left" />
+		<Setter Property="VerticalAlignment" Value="Stretch" />
+		<Setter Property="Width" Value="100" />
+		<Setter Property="Margin" Value="0,0,15,0" />
+		<Setter Property="Padding" Value="0,10" />
+		<Setter Property="BorderThickness" Value="1" />
+		<Setter Property="BorderBrush" Value="#4a4a4a" />
+		<Setter Property="Background" Value="Transparent" />
+	</Style>
+	<Style Selector="Image.SearchResultImage">
+		<Setter Property="HorizontalAlignment" Value="Stretch" />
+		<Setter Property="VerticalAlignment" Value="Stretch" />
+		<Setter Property="Stretch" Value="UniformToFill" />
 	</Style>
 </Styles>
