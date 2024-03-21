@@ -82,7 +82,7 @@
             HorizontalAlignment="Left"
             Margin="0,15,0,0"
             FontWeight="Bold"
-            IsVisible="{Binding HasResultMessage}"
+            IsVisible="{Binding HasMessage}"
             Text="{Binding ResultMessage}" />
         </StackPanel>
 </UserControl>

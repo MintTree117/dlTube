@@ -1,4 +1,5 @@
 using System;
+using System.Reactive;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
@@ -12,13 +13,13 @@ public abstract class BaseViewModel : ReactiveObject, IDisposable
     // Services
     protected readonly ILogger<BaseViewModel>? Logger;
     protected readonly SettingsService? SettingsService;
-
+    
+    // Reactive Property Fields
+    bool _hasMessage;
     string _message = string.Empty;
-    public string Message
-    {
-        get => _message;
-        set => this.RaiseAndSetIfChanged( ref _message, value );
-    }
+    
+    // Commands
+    public ReactiveCommand<Unit, Unit> CloseMessageCommand { get; }
     
     // Constructor
     public void Dispose()
@@ -31,7 +32,20 @@ public abstract class BaseViewModel : ReactiveObject, IDisposable
     protected BaseViewModel( ILogger<BaseViewModel>? logger )
     {
         Logger = logger;
+        CloseMessageCommand = ReactiveCommand.Create( CloseMessage );
         TryGetSettingsService( ref SettingsService );
+    }
+    
+    // Reactive Properties
+    public string Message
+    {
+        get => _message;
+        set => this.RaiseAndSetIfChanged( ref _message, value );
+    }
+    public bool HasMessage
+    {
+        get => _hasMessage;
+        set => this.RaiseAndSetIfChanged( ref _hasMessage, value );
     }
     
     // Methods
@@ -56,5 +70,9 @@ public abstract class BaseViewModel : ReactiveObject, IDisposable
         {
             Logger?.LogError( e, e.Message );
         }
+    }
+    void CloseMessage()
+    {
+        HasMessage = false;
     }
 }

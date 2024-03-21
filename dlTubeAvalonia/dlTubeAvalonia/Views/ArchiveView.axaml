@@ -3,7 +3,9 @@
 	x:DataType="viewModels:ArchiveViewModel"
 	xmlns="https://github.com/avaloniaui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels">
+	xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels"
+	xmlns:dlTubeAvalonia="clr-namespace:dlTubeAvalonia"
+	xmlns:views="clr-namespace:dlTubeAvalonia.Views">
 	
 	<!-- Content -->
 	<Grid RowDefinitions="Auto,*" IsEnabled="{Binding IsFree}">
@@ -75,93 +77,84 @@
 	        </Grid>
 		</Border>
 
-		<!-- Error Message -->
-		<StackPanel
-			Grid.Row="1"
-			IsVisible="{Binding HasMessage}"
-			x:Name="ErrorMessage">
-			<TextBlock
-				HorizontalAlignment="Left"
-				Margin="10"
-				Text="{Binding Message}" />
-			<Button
-				HorizontalAlignment="Center"
-				HorizontalContentAlignment="Center"
-				Margin="10"
-				Padding="10"
-				Content="Close"
-				Click="CloseErrorMessage">
-			</Button>
+		<!-- Body -->
+		<StackPanel Grid.Row="1">
+			
+			<!-- Message Box -->
+			<views:ResultMessage 
+				HideOnClose="True"
+				Text="{Binding Message}"
+				CloseCommand="{Binding CloseMessageCommand}"
+				IsVisible="{Binding HasMessage}" />
+		
+			<!-- Search Results Wrapped In ScrollView -->
+			<ScrollViewer
+				Margin="0,0,0,10"
+				Padding="10,0,10,0">
+				<ItemsControl ItemsSource="{Binding SearchResults}">
+					<ItemsControl.ItemTemplate>
+						<!-- Search Result Item -->
+						<DataTemplate>
+							<!-- Wrapper -->
+							<Border Classes="SearchResultWrapper">
+								<!-- Content -->
+								<Grid ColumnDefinitions="Auto,*,Auto">
+									<!-- Column 0: Video Image -->
+									<Border Grid.Column="0" Classes="SearchResultImageWrapper">
+										<Image Classes="SearchResultImage" Source="{Binding Image}" />
+									</Border>
+									<!-- Column 1: Video Info -->
+									<StackPanel Grid.Column="1">
+										<!-- Title -->
+										<TextBlock
+											HorizontalAlignment="Left"
+											Margin="0,0,0,0"
+											FontWeight="Bold"
+											Text="{Binding Title}" />
+										<!-- Info -->
+										<Grid ColumnDefinitions="*,*,*">
+											<!-- Author -->
+											<TextBlock 
+												Grid.Column="0"
+												HorizontalAlignment="Left"
+												Margin="0,0,0,0"
+												FontWeight="Bold"
+												Text="{Binding Author}" />
+											<!-- Duration -->
+											<TextBlock
+												Grid.Column="1"
+												HorizontalAlignment="Left"
+												Margin="0,0,0,0"
+												FontWeight="Bold"
+												Text="{Binding Duration}" />
+											<!-- Date -->
+											<TextBlock
+												Grid.Column="2"
+												HorizontalAlignment="Left"
+												Margin="0,0,0,0"
+												FontWeight="Bold"
+												Text="{Binding UploadDate}" />
+										</Grid>
+									</StackPanel>
+									<!-- Download Button -->
+									<Button 
+										Grid.Column="2"
+										VerticalAlignment="Stretch"
+										VerticalContentAlignment="Center"
+										Padding="10"
+										BorderBrush="DarkGray"
+										BorderThickness="1"
+										CornerRadius="5"
+										Tag="{Binding Id}"
+										Click="OnClickDownload">
+										<PathIcon Data="{StaticResource copy_regular}" />
+									</Button>
+								</Grid>
+							</Border>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
 		</StackPanel>
-
-		<!-- Search Results Wrapped In ScrollView -->
-		<ScrollViewer
-			Grid.Row="1"
-			Margin="0,0,0,10"
-			Padding="10,0,10,0">
-			<ItemsControl ItemsSource="{Binding SearchResults}">
-				<ItemsControl.ItemTemplate>
-					<!-- Search Result Item -->
-					<DataTemplate>
-						<!-- Wrapper -->
-						<Border Classes="SearchResultWrapper">
-							<!-- Content -->
-							<Grid ColumnDefinitions="Auto,*,Auto">
-								<!-- Column 0: Video Image -->
-								<Border Grid.Column="0" Classes="SearchResultImageWrapper">
-									<Image Classes="SearchResultImage" Source="{Binding Image}" />
-								</Border>
-								<!-- Column 1: Video Info -->
-								<StackPanel Grid.Column="1">
-									<!-- Title -->
-									<TextBlock
-										HorizontalAlignment="Left"
-										Margin="0,0,0,0"
-										FontWeight="Bold"
-										Text="{Binding Title}" />
-									<!-- Info -->
-									<Grid ColumnDefinitions="*,*,*">
-										<!-- Author -->
-										<TextBlock 
-											Grid.Column="0"
-											HorizontalAlignment="Left"
-											Margin="0,0,0,0"
-											FontWeight="Bold"
-											Text="{Binding Author}" />
-										<!-- Duration -->
-										<TextBlock
-											Grid.Column="1"
-											HorizontalAlignment="Left"
-											Margin="0,0,0,0"
-											FontWeight="Bold"
-											Text="{Binding Duration}" />
-										<!-- Date -->
-										<TextBlock
-											Grid.Column="2"
-											HorizontalAlignment="Left"
-											Margin="0,0,0,0"
-											FontWeight="Bold"
-											Text="{Binding UploadDate}" />
-									</Grid>
-								</StackPanel>
-								<!-- Download Button -->
-								<Button 
-									Grid.Column="2"
-									VerticalAlignment="Stretch"
-									VerticalContentAlignment="Center"
-									Padding="10"
-									BorderBrush="DarkGray"
-									BorderThickness="1"
-									CornerRadius="5"
-									Tag="{Binding Id}"
-									Click="OnClickDownload">
-									<PathIcon Data="{StaticResource copy_regular}" />
-								</Button>
-							</Grid>
-						</Border>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
-		</ScrollViewer>
 	</Grid>
 </UserControl>

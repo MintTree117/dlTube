@@ -39,7 +39,6 @@ public sealed class YtDownloaderViewModel : BaseViewModel
     string _resultMessage = string.Empty;
     bool _isLinkBoxEnabled;
     bool _isSettingsEnabled;
-    bool _hasResultMessage;
 
     // Commands
     public ReactiveCommand<Unit, Unit> DownloadCommand { get; }
@@ -135,11 +134,6 @@ public sealed class YtDownloaderViewModel : BaseViewModel
         get => _isSettingsEnabled;
         set => this.RaiseAndSetIfChanged( ref _isSettingsEnabled, value );
     }
-    public bool HasResultMessage
-    {
-        get => _hasResultMessage;
-        set => this.RaiseAndSetIfChanged( ref _hasResultMessage, value );
-    }
 
     // Command Delegates
     async Task HandleNewLink()
@@ -156,7 +150,7 @@ public sealed class YtDownloaderViewModel : BaseViewModel
             Logger?.LogError( $"Failed to obtain stream manifest! Reply message: {reply.PrintDetails()}" );
             VideoName = InvalidVideoName;
             ResultMessage = PrintError( reply.ErrorType.ToString() ); //reply.PrintDetails();
-            HasResultMessage = true;
+            HasMessage = true;
             _dlService = null;
             return;
         }
@@ -183,7 +177,7 @@ public sealed class YtDownloaderViewModel : BaseViewModel
             ? SuccessDownloadMessage
             : PrintError( reply.PrintDetails() );
 
-        HasResultMessage = true;
+        HasMessage = true;
         IsLinkBoxEnabled = true;
         IsSettingsEnabled = true;
     }
@@ -233,7 +227,7 @@ public sealed class YtDownloaderViewModel : BaseViewModel
 
         LoadDefaultImage();
         IsSettingsEnabled = false;
-        HasResultMessage = false;
+        HasMessage = false;
         SelectedStreamType = string.Empty;
         ResultMessage = string.Empty;
         VideoName = linkIsEmpty ? DefaultVideoName : LoadingVideoName;

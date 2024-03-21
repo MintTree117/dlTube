@@ -37,7 +37,6 @@ public sealed class ArchiveViewModel : BaseViewModel
     
     // Other Fields
     bool _isFree = true;
-    bool _hasMessage;
     string _apiKey = string.Empty;
     string _downloadLocation = string.Empty;
     
@@ -72,6 +71,7 @@ public sealed class ArchiveViewModel : BaseViewModel
         }
         catch ( Exception e )
         {
+            Console.WriteLine("fail");
             Logger?.LogError( e, e.Message );
         }
     }
@@ -98,9 +98,10 @@ public sealed class ArchiveViewModel : BaseViewModel
 
         if ( !reply.Success || reply.Data is null )
         {
-            HasMessage = true;
             Logger?.LogError( reply.PrintDetails() );
+            Console.WriteLine(reply.PrintDetails());
             Message = reply.PrintDetails();
+            HasMessage = true;
             return;
         }
 
@@ -140,11 +141,6 @@ public sealed class ArchiveViewModel : BaseViewModel
     }
     
     // Command Delegates
-    public void CloseError()
-    {
-        HasMessage = false;
-        Message = string.Empty;
-    }
     async Task SearchArchive()
     {
         Dictionary<string, object> searchParams = GetSearchParams();
@@ -247,11 +243,6 @@ public sealed class ArchiveViewModel : BaseViewModel
     {
         get => _isFree;
         set => this.RaiseAndSetIfChanged( ref _isFree, value );
-    }
-    public bool HasMessage
-    {
-        get => _hasMessage;
-        set => this.RaiseAndSetIfChanged( ref _hasMessage, value );
     }
     
     // Private Methods

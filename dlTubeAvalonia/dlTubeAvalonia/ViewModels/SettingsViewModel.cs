@@ -14,7 +14,6 @@ public sealed class SettingsViewModel : BaseViewModel
     string _apiKey = string.Empty;
     string _downloadLocation = string.Empty;
     string _selectedBackgroundImage = string.Empty;
-    bool _hasMessage;
     bool _settingsChanged;
     bool _isFree;
     
@@ -79,11 +78,6 @@ public sealed class SettingsViewModel : BaseViewModel
             this.RaiseAndSetIfChanged( ref _backgroundImages, value );
             SettingsChanged = true;
         }
-    }
-    public bool HasMessage
-    {
-        get => _hasMessage;
-        set => this.RaiseAndSetIfChanged( ref _hasMessage, value );
     }
     public bool SettingsChanged
     {

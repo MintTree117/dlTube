@@ -3,7 +3,8 @@
     x:DataType="viewModels:YtSearchViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels">
+    xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels"
+    xmlns:views="clr-namespace:dlTubeAvalonia.Views">
     
     <!-- Resources -->
     <UserControl.Resources>
@@ -65,94 +66,84 @@
             </Grid>
         </Border>
         
-        <!-- Error Message -->
-        <StackPanel
-            Grid.Row="1"
-            IsVisible="{Binding HasError}"
-            x:Name="ErrorMessage">
-            <TextBlock
-                HorizontalAlignment="Left"
-                Margin="10"
-                Text="{Binding Message}" />
-            <Button
-                HorizontalAlignment="Center"
-                HorizontalContentAlignment="Center"
-                Margin="10"
-                Padding="10"
-                Click="CloseErrorMessage"
-                Content="Close">
-            </Button>
+        <!-- Body -->
+        <StackPanel Grid.Row="1">
+            
+            <!-- Message Box -->
+            <views:ResultMessage
+                HideOnClose="True"
+                Text="{Binding Message}"
+                CloseCommand="{Binding CloseMessageCommand}"
+                IsVisible="{Binding HasMessage}"/>
+            
+            <!-- Search Results Wrapped In ScrollView -->
+            <ScrollViewer 
+                Margin="0,0,0,10"
+                Padding="10,0,10,0">
+                <ItemsControl ItemsSource="{Binding SearchResults}">
+                    <ItemsControl.ItemTemplate>
+                        <!-- Search Result Item -->
+                        <DataTemplate>
+                            <!-- Wrapper -->
+                           <Border Classes="SearchResultWrapper">
+                               <!-- Content -->
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <!-- Column 0: Video Image -->
+                                    <Border Grid.Column="0" Classes="SearchResultImageWrapper">
+                                        <Image Classes="SearchResultImage" Source="{Binding Image}" />
+                                    </Border>
+                                    <!-- Column 1: Video Info -->
+                                    <StackPanel Grid.Column="1">
+                                        <!-- Row 0: Video Info -->
+                                        <Grid ColumnDefinitions="Auto,*" Margin="0">
+                                            <!-- Title -->
+                                            <TextBlock 
+                                                Grid.Column="0"
+                                                HorizontalAlignment="Left"
+                                                Margin="0,0,0,0"
+                                                FontWeight="Bold"
+                                                Text="{Binding Title}" />
+                                            <!-- Duration -->
+                                            <TextBlock 
+                                                Grid.Column="1"
+                                                HorizontalAlignment="Right"
+                                                Margin="0,0,0,10"
+                                                FontWeight="Bold"
+                                                Text="{Binding Duration}" />
+                                        </Grid>
+                                        <!-- Row 1: Video Url -->
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <!-- Url -->
+                                            <TextBox
+                                                Grid.Column="0"
+                                                VerticalContentAlignment="Center"
+                                                IsReadOnly="True"
+                                                BorderBrush="#4a4a4a"
+                                                BorderThickness="0"
+                                                Background="Transparent"
+                                                Text="{Binding Url}" />
+                                            <!-- Copy Url Button -->
+                                            <Button
+                                                Grid.Column="1"
+                                                VerticalAlignment="Stretch"
+                                                VerticalContentAlignment="Center"
+                                                Margin="25,0,0,0"
+                                                Padding="10"
+                                                BorderBrush="DarkGray"
+                                                BorderThickness="1"
+                                                CornerRadius="5"
+                                                CommandParameter="{Binding Url}"
+                                                Click="OnClickCopy">
+                                                <PathIcon Data="{StaticResource copy_regular}" />
+                                            </Button>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                           </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </StackPanel>
-
-        
-        <!-- Search Results Wrapped In ScrollView -->
-        <ScrollViewer 
-            Grid.Row="1" 
-            Margin="0,0,0,10"
-            Padding="10,0,10,0">
-            <ItemsControl ItemsSource="{Binding SearchResults}">
-                <ItemsControl.ItemTemplate>
-                    <!-- Search Result Item -->
-                    <DataTemplate>
-                        <!-- Wrapper -->
-                       <Border Classes="SearchResultWrapper">
-                           <!-- Content -->
-                            <Grid ColumnDefinitions="Auto,*">
-                                <!-- Column 0: Video Image -->
-                                <Border Grid.Column="0" Classes="SearchResultImageWrapper">
-                                    <Image Classes="SearchResultImage" Source="{Binding Image}" />
-                                </Border>
-                                <!-- Column 1: Video Info -->
-                                <StackPanel Grid.Column="1">
-                                    <!-- Row 0: Video Info -->
-                                    <Grid ColumnDefinitions="Auto,*" Margin="0">
-                                        <!-- Title -->
-                                        <TextBlock 
-                                            Grid.Column="0"
-                                            HorizontalAlignment="Left"
-                                            Margin="0,0,0,0"
-                                            FontWeight="Bold"
-                                            Text="{Binding Title}" />
-                                        <!-- Duration -->
-                                        <TextBlock 
-                                            Grid.Column="1"
-                                            HorizontalAlignment="Right"
-                                            Margin="0,0,0,10"
-                                            FontWeight="Bold"
-                                            Text="{Binding Duration}" />
-                                    </Grid>
-                                    <!-- Row 1: Video Url -->
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <!-- Url -->
-                                        <TextBox
-                                            Grid.Column="0"
-                                            VerticalContentAlignment="Center"
-                                            IsReadOnly="True"
-                                            BorderBrush="#4a4a4a"
-                                            BorderThickness="0"
-                                            Background="Transparent"
-                                            Text="{Binding Url}" />
-                                        <!-- Copy Url Button -->
-                                        <Button
-                                            Grid.Column="1"
-                                            VerticalAlignment="Stretch"
-                                            VerticalContentAlignment="Center"
-                                            Margin="25,0,0,0"
-                                            Padding="10"
-                                            BorderBrush="DarkGray"
-                                            BorderThickness="1"
-                                            CornerRadius="5"
-                                            CommandParameter="{Binding Url}"
-                                            Click="OnClickCopy">
-                                            <PathIcon Data="{StaticResource copy_regular}" />
-                                        </Button>
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                       </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
     </Grid>
 </UserControl>

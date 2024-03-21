@@ -33,7 +33,6 @@ public sealed class YtSearchViewModel : BaseViewModel
     string _selectedResultCountName = string.Empty;
     string _searchText = string.Empty;
     bool _isFree = true;
-    bool _hasError;
     
     // Commands
     public ReactiveCommand<Unit, Unit> YoutubeCommand { get; }
@@ -61,7 +60,7 @@ public sealed class YtSearchViewModel : BaseViewModel
 
             if ( searchService is null )
             {
-                HasError = true;
+                HasMessage = true;
                 Message = $"Failed to get service: {nameof( YtSearchService )}";
                 return;
             }
@@ -71,7 +70,7 @@ public sealed class YtSearchViewModel : BaseViewModel
         catch ( Exception e )
         {
             Logger?.LogError( e, e.Message );
-            HasError = true;
+            HasMessage = true;
             Message = $"Failed to get service: {nameof( YtSearchService )}";
         }
     }
@@ -120,18 +119,8 @@ public sealed class YtSearchViewModel : BaseViewModel
         get => _isFree;
         set => this.RaiseAndSetIfChanged( ref _isFree, value );
     }
-    public bool HasError
-    {
-        get => _hasError;
-        set => this.RaiseAndSetIfChanged( ref _hasError, value );
-    }
     
     // Command Delegates
-    public void CloseError()
-    {
-        HasError = false;
-        Message = string.Empty;
-    }
     void GoToYoutube()
     {
         try
@@ -147,7 +136,7 @@ public sealed class YtSearchViewModel : BaseViewModel
         catch ( Exception e )
         {
             Logger?.LogError( e, e.Message );
-            HasError = true;
+            HasMessage = true;
             Message = ServiceErrorType.AppError.ToString();
         }
     }
@@ -170,13 +159,13 @@ public sealed class YtSearchViewModel : BaseViewModel
             {
                 SearchResults = new List<YoutubeSearchResult>();
                 Message = ServiceErrorType.NotFound.ToString();
-                HasError = true;
+                HasMessage = true;
             }
         }
         catch ( Exception e )
         {
             Logger?.LogError( e, e.Message );
-            HasError = true;
+            HasMessage = true;
             Console.WriteLine(e + e.Message);
             Message = e.Message; //ServiceErrorType.ServerError.ToString();
         }
@@ -187,7 +176,7 @@ public sealed class YtSearchViewModel : BaseViewModel
     {
         if ( string.IsNullOrWhiteSpace( url ) )
         {
-            HasError = true;
+            HasMessage = true;
             Message = "Tried to copy invalid url!";
             return;
         }
@@ -199,7 +188,7 @@ public sealed class YtSearchViewModel : BaseViewModel
         if ( mainWindow?.Clipboard is null )
         {
             Logger?.LogError( "Failed to obtain clipboard from main window!" );
-            HasError = true;
+            HasMessage = true;
             Message = "Failed to perform copy operation!";
             return;   
         }
@@ -230,7 +219,7 @@ public sealed class YtSearchViewModel : BaseViewModel
         if ( string.IsNullOrWhiteSpace( _searchText ) )
         {
             Logger?.LogError( "Search text is null!" );
-            HasError = true;
+            HasMessage = true;
             Message = "Search text is null!";
             return false;
         }
@@ -238,7 +227,7 @@ public sealed class YtSearchViewModel : BaseViewModel
         if ( _youtubeSearchService is null )
         {
             Logger?.LogError( "Search service is null!" );
-            HasError = true;
+            HasMessage = true;
             Message = ServiceErrorType.AppError.ToString();
             return false;
         }
@@ -246,7 +235,7 @@ public sealed class YtSearchViewModel : BaseViewModel
         if ( !_resultCountNames.Contains( _selectedResultCountName ) )
         {
             Logger?.LogError( "_resultCountNames out of bounds!" );
-            HasError = true;
+            HasMessage = true;
             Message = "Invalid _selectedResultsPerPage";
             return false;
         }
@@ -256,7 +245,7 @@ public sealed class YtSearchViewModel : BaseViewModel
         if ( resultCountIndex < 0 || resultCountIndex > _resultCounts.Count )
         {
             Logger?.LogError( "resultCountIndex out of bounds!" );
-            HasError = true;
+            HasMessage = true;
             Message = "Invalid _selectedResultsPerPage";
             return false;
         }
@@ -273,7 +262,7 @@ public sealed class YtSearchViewModel : BaseViewModel
 
             if ( index < 0 || index > _sortTypesDefinition.Count )
             {
-                HasError = true;
+                HasMessage = true;
                 Message = "Invalid _selectedSortType!";
                 IsFree = true;
                 return;
@@ -290,7 +279,7 @@ public sealed class YtSearchViewModel : BaseViewModel
         catch ( Exception e )
         {
             Logger?.LogError( e, e.Message );
-            HasError = true;
+            HasMessage = true;
             Message = ServiceErrorType.AppError.ToString();
         }
 

@@ -27,9 +27,4 @@ public sealed partial class ArchiveView : UserControl
             _viewModel.DownloadCommand.Execute( parameter );
         }
     }
-    void CloseErrorMessage( object? sender, RoutedEventArgs args )
-    {
-        ErrorMessage.IsVisible = false;
-        _viewModel.CloseError();
-    }
 }
