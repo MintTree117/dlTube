@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class YoutubeImageService
+public sealed class YtImageService
 {
     public static async Task<byte[]?> LoadImageBytesFromUrlAsync( string imageUrl, HttpClient client )
     {

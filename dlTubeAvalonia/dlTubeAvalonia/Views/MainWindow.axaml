@@ -1,18 +1,19 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:dlTubeAvalonia.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:dlTubeAvalonia="clr-namespace:dlTubeAvalonia"
-        x:Class="dlTubeAvalonia.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
-        mc:Ignorable="d" 
-        d:DesignWidth="800" 
-        d:DesignHeight="1200"
-        Height="800"
-        Width="1200"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="dlTubeAvalonia">
+<Window
+    x:Class="dlTubeAvalonia.Views.MainWindow"
+    x:DataType="vm:MainWindowViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:dlTubeAvalonia.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:dlTubeAvalonia="clr-namespace:dlTubeAvalonia"
+    mc:Ignorable="d" 
+    d:DesignWidth="800" 
+    d:DesignHeight="1200"
+    Height="800"
+    Width="1200"
+    Icon="avares://dlTubeAvalonia/Assets/dsotm.jpg"
+    Title="dlTubeAvalonia">
 
     <!-- Data Context -->
     <Design.DataContext>
@@ -22,7 +23,7 @@
     </Design.DataContext>
 
     <Window.Styles>
-        <StyleInclude Source="/AppStyles.axaml" />
+        <StyleInclude Source="/Styles/AppStyles.axaml" />
     </Window.Styles>
     
     <!-- Window Background -->
@@ -38,23 +39,12 @@
         <Grid RowDefinitions="Auto,*" Opacity="1">
             <!-- Top Nav -->
             <Grid Grid.Row="0"
-                ColumnDefinitions="Auto,*,*,*"
+                ColumnDefinitions="*,*,*,*"
                 HorizontalAlignment="Stretch"
                 Height="50">
-                <!-- Popout Button -->
-                <Button
-                    Grid.Column="0"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Center"
-                    VerticalAlignment="Stretch"
-                    VerticalContentAlignment="Center"
-                    Width="50"
-                    Click="OnClickTogglePopoutMenu">
-                    <PathIcon Data="{StaticResource apps_list_regular}" />
-                </Button>
                 <!-- Downloader Button -->
                 <Button 
-                    Grid.Column="1"
+                    Grid.Column="0"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Center"
                     VerticalAlignment="Stretch"
@@ -64,7 +54,7 @@
                 </Button>
                 <!-- Youtube Button -->
                 <Button
-                    Grid.Column="2"
+                    Grid.Column="1"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Center"
                     VerticalAlignment="Stretch"
@@ -74,13 +64,23 @@
                 </Button>
                 <!-- Archive Button -->
                 <Button
-                    Grid.Column="3"
+                    Grid.Column="2"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Center"
                     VerticalAlignment="Stretch"
                     VerticalContentAlignment="Center"
                     Content="Archive"
                     Click="OnClickViewArchive">
+                </Button>
+                <!-- Settings Button -->
+                <Button
+                    Grid.Column="3"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    VerticalAlignment="Stretch"
+                    VerticalContentAlignment="Center"
+                    Content="App Settings"
+                    Click="OnClickSettings">
                 </Button>
             </Grid>
 
@@ -94,72 +94,19 @@
                 IsVisible="{Binding IsPopoutMenuOpen}">
                 <!-- Content -->
                 <StackPanel>
-                    <!-- App Settings Button -->
-                    <Button
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
-                        VerticalAlignment="Top"
-                        VerticalContentAlignment="Center"
-                        Padding="10"
-                        Content="App Settings"
-                        Click="OnClickAppSettings">
-                    </Button>
-                    <!-- Login Button -->
-                    <Button
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
-                        VerticalAlignment="Top"
-                        VerticalContentAlignment="Center"
-                        Padding="10"
-                        Content="Login"
-                        IsVisible="{Binding ShowLogin}"
-                        Click="OnClickLogin">
-                    </Button>
-                    <!-- Account Settings Button -->
-                    <Button
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
-                        VerticalAlignment="Top"
-                        VerticalContentAlignment="Center"
-                        Padding="10"
-                        Content="Account Settings"
-                        IsVisible="{Binding IsAuthenticated}"
-                        Click="OnClickAccountSettings">
-                    </Button>
-                    <!-- Logout Button -->
-                    <Button
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
-                        VerticalAlignment="Top"
-                        VerticalContentAlignment="Center"
-                        Padding="10"
-                        Content="Logout"
-                        IsVisible="{Binding IsAuthenticated}"
-                        Click="OnClickLogout">
-                    </Button>
+  
                 </StackPanel>
             </Border>
 
             <!-- Main Content -->
             <Border 
-                Grid.Row="1"
-                Classes="wrapper">
+                Grid.Row="1">
                 <ContentControl
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Opacity="1"
                     x:Name="MainContent" />
             </Border>
-
-            <!-- Main Content Disabled Overlay -->
-            <Panel 
-                Grid.Row="1"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Background="#AA000000"
-                x:Name="MainContentOverlay"
-                IsVisible="False">
-            </Panel>
             
         </Grid>
     </Border>

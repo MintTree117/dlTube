@@ -3,6 +3,7 @@ using Avalonia.ReactiveUI;
 using System;
 using dlTubeAvalonia.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace dlTubeAvalonia;
 
@@ -26,10 +27,11 @@ sealed class Program
 
     static void ConfigureServices( IServiceCollection services )
     {
-        services.AddSingleton<YoutubeClientService>();
+        services.AddSingleton<SettingsService>();
+        services.AddSingleton<YtClientService>();
         services.AddScoped<HttpService>();
-        services.AddScoped<YoutubeDownloaderService>();
-        services.AddScoped<YoutubeSearchService>();
+        services.AddScoped<YtDownloaderService>();
+        services.AddScoped<YtSearchService>();
         services.AddSingleton<FFmpegService>();
         services.AddScoped<ArchiveService>();
         services.AddLogging( configure => { } );

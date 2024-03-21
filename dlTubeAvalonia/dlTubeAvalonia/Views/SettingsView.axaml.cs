@@ -1,14 +1,15 @@
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using dlTubeAvalonia.ViewModels;
 
 namespace dlTubeAvalonia.Views;
 
-public partial class LoginView : UserControl
+public sealed partial class SettingsView : UserControl
 {
-    public LoginView()
+    public SettingsView()
     {
         InitializeComponent();
+        this.DataContext = new SettingsViewModel();
     }
     void InitializeComponent()
     {

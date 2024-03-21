@@ -1,0 +1,69 @@
+<UserControl 
+	x:Class="dlTubeAvalonia.Views.SettingsView"
+	x:DataType="viewModels:SettingsViewModel"
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels">
+
+	<!-- Content -->
+	<StackPanel VerticalAlignment="Center" MaxWidth="800" IsEnabled="{Binding IsFree} ">
+		<!-- Title -->
+		<TextBlock
+			Classes="PageTitle"
+			Text="App Settings" />
+		<!-- Title Separator -->
+		<Border Classes="TitleSeparator"/>
+		<!-- Api Key Title -->
+		<TextBlock
+			HorizontalAlignment="Left"
+			Margin="0 0 0 5"
+			FontWeight="Bold"
+			Text="Archive Key" />
+		<!-- Api Key Field -->
+		<TextBox
+			HorizontalAlignment="Stretch"
+			Margin="0 0 0 15"
+			Padding="15"
+			Text="{Binding ApiKey}" />
+		<!-- Download Location Title -->
+		<TextBlock
+			HorizontalAlignment="Left"
+			Margin="0 0 0 5"
+			FontWeight="Bold"
+			Text="Download Location" />
+		<!-- Download Location Field -->
+		<TextBox
+			HorizontalAlignment="Stretch"
+			Margin="0 0 0 15"
+			Padding="15"
+			Text="{Binding DownloadLocation}" />
+		<!-- Background Image Title -->
+		<TextBlock
+			HorizontalAlignment="Left"
+			Margin="0 0 0 5"
+			FontWeight="Bold"
+			Text="Background" />
+		<!-- Background Image Dropdown -->
+		<ComboBox
+			HorizontalAlignment="Stretch"
+			Margin="0 0 0 15"
+			Padding="15"
+			PlaceholderText="None" />
+		<!-- Save Button -->
+		<Button
+			HorizontalAlignment="Stretch"
+			HorizontalContentAlignment="Center"
+			Margin="0,0,0,0"
+			Padding="0,0,0,15"
+			IsEnabled="{Binding SettingsChanged}"
+			Command="{Binding SaveChangesCommand}"
+			Content="Save Changes" />
+		<!-- Result Message -->
+		<TextBlock
+			HorizontalAlignment="Left"
+			Margin="0 0 0 15"
+			FontWeight="Bold"
+			IsVisible="{Binding HasMessage}"
+			Text="{Binding Message} "/>
+	</StackPanel>
+</UserControl>

@@ -12,10 +12,9 @@ using dlTubeAvalonia.Services;
 
 namespace dlTubeAvalonia.ViewModels;
 
-public sealed class ArchiveViewModel : ReactiveObject
+public sealed class ArchiveViewModel : BaseViewModel
 {
     // Services
-    readonly ILogger<ArchiveViewModel>? _logger;
     readonly ArchiveService _archiveService = null!;
     
     // Property Field List Values
@@ -24,7 +23,7 @@ public sealed class ArchiveViewModel : ReactiveObject
     readonly List<int> _resultCounts = [ 10, 20, 30, 50, 100, 200 ];
     
     // Property Fields
-    int _searchCount = 0;
+    int _searchCount;
     List<ArchiveItem> _searchResults = [ ];
     List<string> _categoryNames = [ "a, b, c" ];
     List<string> _streamTypes = [ ];
@@ -35,26 +34,27 @@ public sealed class ArchiveViewModel : ReactiveObject
     string _selectedSortType = string.Empty;
     string _selectedResultCountName = string.Empty;
     string _searchText = string.Empty;
-    string _errorMessage = string.Empty;
-    bool _ShowLoginPrompt = true;
-    bool _IsUserAuthenticated;
     bool _isFree = true;
     bool _hasError;
+
+    string _apiKey = string.Empty;
+    string _downloadLocation = string.Empty;
     
     // Command Definitions
     public ReactiveCommand<Unit, Unit> SearchCommand { get; }
     public ReactiveCommand<int, Unit> DownloadCommand { get; }
     
     // Constructor
-    public ArchiveViewModel()
+    public ArchiveViewModel() : base( TryGetLogger<ArchiveViewModel>() )
     {
         SearchCommand = ReactiveCommand.CreateFromTask( SearchArchive );
         DownloadCommand = ReactiveCommand.CreateFromTask<int>( async ( id ) => await DownloadArchiveItem( id ) );
+
+        if ( this.SettingsService is null )
+            return;
         
         if ( !TryGetArchiveService( ref _archiveService! ) )
             return;
-        
-        _logger = Program.ServiceProvider.GetService<ILogger<ArchiveViewModel>>();
         
         _streamTypes = GetStreamFilterTypeNames();
         _sortTypes = GetStreamSortTypeNames();
@@ -67,11 +67,11 @@ public sealed class ArchiveViewModel : ReactiveObject
 
         try
         {
-            //LoadCategories();
+            LoadCategories();
         }
         catch ( Exception e )
         {
-            _logger?.LogError( e, e.Message );
+            Logger?.LogError( e, e.Message );
         }
     }
     
@@ -88,18 +88,18 @@ public sealed class ArchiveViewModel : ReactiveObject
 
         IsFree = false;
         HasError = true;
-        ErrorMessage = "Failed to load archive service!";
+        Message = "Failed to load archive service!";
         return false;
     }
     async void LoadCategories()
     {
-        ApiReply<List<ArchiveCategory>?> reply = await _archiveService.GetCategoriesAsync();
+        ServiceReply<List<ArchiveCategory>?> reply = await _archiveService.GetCategoriesAsync( _apiKey );
 
         if ( !reply.Success || reply.Data is null )
         {
             HasError = true;
-            _logger?.LogError( reply.PrintDetails() );
-            ErrorMessage = reply.PrintDetails();
+            Logger?.LogError( reply.PrintDetails() );
+            Message = reply.PrintDetails();
             return;
         }
 
@@ -142,30 +142,17 @@ public sealed class ArchiveViewModel : ReactiveObject
     public void CloseError()
     {
         HasError = false;
-        ErrorMessage = string.Empty;
+        Message = string.Empty;
     }
     async Task SearchArchive()
     {
-        Dictionary<string, object> searchParams = [ ];
-
-        if ( !string.IsNullOrWhiteSpace( _selectedCategoryName ) )
-            searchParams.Add( "category", _selectedCategoryName );
-
-        if ( !string.IsNullOrWhiteSpace( _selectedStreamType ) )
-            searchParams.Add( "streamType", _streamTypeDefinitions[ _streamTypes.IndexOf( _selectedStreamType ) ] );
-
-        if ( !string.IsNullOrWhiteSpace( _selectedSortType ) )
-            searchParams.Add( "sortType", _sortTypesDefinition[ _sortTypes.IndexOf( _selectedSortType ) ] );
-
-        if ( !string.IsNullOrWhiteSpace( _selectedResultCountName ) )
-            searchParams.Add( "resultCount", _resultCounts[ _resultCountNames.IndexOf( _selectedResultCountName ) ] );
-        
-        ApiReply<ArchiveSearch?> reply = await _archiveService.SearchVideosAsync( searchParams );
+        Dictionary<string, object> searchParams = GetSearchParams();
+        ServiceReply<ArchiveSearch?> reply = await _archiveService.SearchVideosAsync( _apiKey, searchParams );
 
         if ( !reply.Success || reply.Data is null )
         {
             HasError = true;
-            ErrorMessage = reply.PrintDetails();
+            Message = reply.PrintDetails();
             return;
         }
 
@@ -174,7 +161,7 @@ public sealed class ArchiveViewModel : ReactiveObject
     }
     async Task DownloadArchiveItem( int itemId )
     {
-        
+        await Task.Delay( 5000 );
     }
 
     // Reactive Properties
@@ -249,21 +236,6 @@ public sealed class ArchiveViewModel : ReactiveObject
         get => _searchText;
         set => this.RaiseAndSetIfChanged( ref _searchText, value );
     }
-    public string ErrorMessage
-    {
-        get => _errorMessage;
-        set => this.RaiseAndSetIfChanged( ref _errorMessage, value );
-    }
-    public bool ShowLoginPrompt
-    {
-        get => _ShowLoginPrompt;
-        set => this.RaiseAndSetIfChanged( ref _ShowLoginPrompt, value );
-    }
-    public bool IsUserAuthenticated
-    {
-        get => _IsUserAuthenticated;
-        set => this.RaiseAndSetIfChanged( ref _IsUserAuthenticated, value );
-    }
     public bool IsFree
     {
         get => _isFree;
@@ -276,6 +248,29 @@ public sealed class ArchiveViewModel : ReactiveObject
     }
     
     // Private Methods
+    protected override void OnAppSettingsChanged( AppSettingsModel newSettings )
+    {
+        _apiKey = newSettings.ApiKey;
+        _downloadLocation = newSettings.DownloadLocation;
+    }
+    Dictionary<string, object> GetSearchParams()
+    {
+        Dictionary<string, object> searchParams = [ ];
+
+        if ( !string.IsNullOrWhiteSpace( _selectedCategoryName ) )
+            searchParams.Add( "category", _selectedCategoryName );
+
+        if ( !string.IsNullOrWhiteSpace( _selectedStreamType ) )
+            searchParams.Add( "streamType", _streamTypeDefinitions[ _streamTypes.IndexOf( _selectedStreamType ) ] );
+
+        if ( !string.IsNullOrWhiteSpace( _selectedSortType ) )
+            searchParams.Add( "sortType", _sortTypesDefinition[ _sortTypes.IndexOf( _selectedSortType ) ] );
+
+        if ( !string.IsNullOrWhiteSpace( _selectedResultCountName ) )
+            searchParams.Add( "resultCount", _resultCounts[ _resultCountNames.IndexOf( _selectedResultCountName ) ] );
+
+        return searchParams;
+    }
     void OnChangeDropdownValue()
     {
         if ( string.IsNullOrWhiteSpace( _searchText ) )

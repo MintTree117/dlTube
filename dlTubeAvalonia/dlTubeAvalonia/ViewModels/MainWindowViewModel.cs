@@ -2,7 +2,7 @@
 
 namespace dlTubeAvalonia.ViewModels;
 
-public sealed class MainWindowViewModel : ReactiveObject
+public sealed class MainWindowViewModel : BaseViewModel
 {
     const string DefaultMenuAccountText = "Login";
     
@@ -11,7 +11,7 @@ public sealed class MainWindowViewModel : ReactiveObject
     bool _isPopoutMenuOpen;
     string _menuAccountName;
     
-    public MainWindowViewModel()
+    public MainWindowViewModel() : base( TryGetLogger<MainWindowViewModel>() )
     {
         ShowLogin = true;
         _menuAccountName = DefaultMenuAccountText;

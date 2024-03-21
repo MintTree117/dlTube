@@ -7,23 +7,11 @@
 	
 	<!-- Content -->
 	<Grid RowDefinitions="Auto,*" IsEnabled="{Binding IsFree}">
-		
-		<!-- Login Prompt -->
-		<TextBlock 
-			Grid.Row="1"
-			HorizontalAlignment="Center"
-			VerticalAlignment="Center"
-			FontSize="36"
-			FontWeight="Bold"
-			Text="Please login to view this archive."
-			IsVisible="{Binding ShowLoginPrompt}" />
-		
 		<!-- Header Wrapper -->
 		<Border 
 			Grid.Row="0" 
 			Classes="SearchHeaderWrapper"
-			Height="140"
-			IsVisible="{Binding IsUserAuthenticated}">
+			Height="140">
 			<!-- Search Bar, Button, Dropdowns -->
 	        <Grid
 	            RowDefinitions="*,*"
@@ -95,7 +83,7 @@
 			<TextBlock
 				HorizontalAlignment="Left"
 				Margin="10"
-				Text="{Binding ErrorMessage}" />
+				Text="{Binding Message}" />
 			<Button
 				HorizontalAlignment="Center"
 				HorizontalContentAlignment="Center"
@@ -110,8 +98,7 @@
 		<ScrollViewer
 			Grid.Row="1"
 			Margin="0,0,0,10"
-			Padding="10,0,10,0"
-			IsVisible="{Binding IsUserAuthenticated}">
+			Padding="10,0,10,0">
 			<ItemsControl ItemsSource="{Binding SearchResults}">
 				<ItemsControl.ItemTemplate>
 					<!-- Search Result Item -->

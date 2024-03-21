@@ -12,6 +12,7 @@
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
         <EmbeddedResource Include="Assets\defaultplayer.png"/>
+        <EmbeddedResource Include="Assets\dsotm.jpg"/>
     </ItemGroup>
 
     <ItemGroup>

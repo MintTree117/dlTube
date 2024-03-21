@@ -16,17 +16,15 @@ public sealed class ArchiveService : HttpService
     // Services
     readonly ILogger<ArchiveService>? _logger = Program.ServiceProvider.GetService<ILogger<ArchiveService>>();
     
-    // Constructor
-
     // Public Methods
-    public async Task<ApiReply<List<ArchiveCategory>?>> GetCategoriesAsync()
+    public async Task<ServiceReply<List<ArchiveCategory>?>> GetCategoriesAsync( string? apiKey )
     {
-        ApiReply<List<ArchiveCategory>?> res = await TryGetRequest<List<ArchiveCategory>>( ApiPathGetCategories, null, null );
+        ServiceReply<List<ArchiveCategory>?> res = await TryGetRequest<List<ArchiveCategory>>( ApiPathGetCategories, null, apiKey );
         return res;
     }
-    public async Task<ApiReply<ArchiveSearch?>> SearchVideosAsync( Dictionary<string,object>? parameters )
+    public async Task<ServiceReply<ArchiveSearch?>> SearchVideosAsync( string? apiKey, Dictionary<string,object>? parameters )
     {
-        ApiReply<ArchiveSearch?> res = await TryGetRequest<ArchiveSearch>( ApiPathSearch, parameters, null );
+        ServiceReply<ArchiveSearch?> res = await TryGetRequest<ArchiveSearch>( ApiPathSearch, parameters, apiKey );
         return res;
     }
 }

@@ -1,7 +1,7 @@
 using System;
 using System.Net;
 
-namespace dlTubeAvalonia.Services;
+namespace dlTubeAvalonia.Models;
 
 public enum ServiceErrorType
 {
@@ -17,24 +17,30 @@ public enum ServiceErrorType
     AppError
 }
 
-public sealed record ApiReply<T>
+public sealed record ServiceReply<T>
 {
     const string MESSAGE_RESPONSE_ERROR = "Failed to produce a proper response message!";
 
-    public ApiReply()
+    public ServiceReply()
     {
 
     }
 
-    public ApiReply( ServiceErrorType errorType, string? message = null )
+    public ServiceReply( ServiceErrorType errorType, string? message = null )
     {
         Data = default;
         Success = false;
         ErrorType = errorType;
         Message = message ?? GetDefaultMessage( errorType );
     }
-
-    public ApiReply( T data )
+    public ServiceReply( T data, ServiceErrorType errorType, string? message = null )
+    {
+        Data = default;
+        Success = false;
+        ErrorType = errorType;
+        Message = message ?? GetDefaultMessage( errorType );
+    }
+    public ServiceReply( T data )
     {
         Data = data;
         Success = true;

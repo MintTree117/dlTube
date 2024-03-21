@@ -5,13 +5,13 @@ using YoutubeExplode;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class YoutubeClientService
+public sealed class YtClientService
 {
     public YoutubeClient? YoutubeClient { get; init; }
 
-    public YoutubeClientService()
+    public YtClientService()
     {
-        var logger = Program.ServiceProvider.GetService<ILogger<YoutubeClientService>>();
+        var logger = Program.ServiceProvider.GetService<ILogger<YtClientService>>();
 
         try
         {

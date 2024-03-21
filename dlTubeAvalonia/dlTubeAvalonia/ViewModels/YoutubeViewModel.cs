@@ -16,11 +16,10 @@ using dlTubeAvalonia.Services;
 
 namespace dlTubeAvalonia.ViewModels;
 
-public sealed class YoutubeViewModel : ReactiveObject
+public sealed class YoutubeViewModel : BaseViewModel
 {
     // Services Definitions
-    readonly ILogger<YoutubeViewModel>? _logger;
-    readonly YoutubeSearchService? _youtubeSearchService;
+    readonly YtSearchService? _youtubeSearchService;
     
     // Property Field List Values
     readonly List<YoutubeSortType> _sortTypesDefinition = Enum.GetValues<YoutubeSortType>().ToList();
@@ -43,11 +42,10 @@ public sealed class YoutubeViewModel : ReactiveObject
     public ReactiveCommand<string, Unit> CopyUrlCommand { get; }
     
     // Constructor
-    public YoutubeViewModel()
+    public YoutubeViewModel() : base( TryGetLogger<YoutubeViewModel>() )
     {
-        _logger = Program.ServiceProvider.GetService<ILogger<YoutubeViewModel>>();
         TryGetYoutubeService( ref _youtubeSearchService! );
-        
+
         SortTypes = GetSortTypeNames();
         ResultCountNames = GetResultsPerPageNames( _resultCounts );
         SelectedSortType = _sortTypes[ 0 ];
@@ -56,16 +54,16 @@ public sealed class YoutubeViewModel : ReactiveObject
         SearchCommand = ReactiveCommand.CreateFromTask( Search );
         CopyUrlCommand = ReactiveCommand.CreateFromTask<string>( async ( url ) => { await CopyUrlToClipboard( url ); } );
     }
-    void TryGetYoutubeService( ref YoutubeSearchService service )
+    void TryGetYoutubeService( ref YtSearchService service )
     {
         try
         {
-            var searchService = Program.ServiceProvider.GetService<YoutubeSearchService>();
+            var searchService = Program.ServiceProvider.GetService<YtSearchService>();
 
             if ( searchService is null )
             {
                 HasError = true;
-                ErrorMessage = $"Failed to get service: {nameof( YoutubeSearchService )}";
+                ErrorMessage = $"Failed to get service: {nameof( YtSearchService )}";
                 return;
             }
 
@@ -73,9 +71,9 @@ public sealed class YoutubeViewModel : ReactiveObject
         }
         catch ( Exception e )
         {
-            _logger?.LogError( e, e.Message );
+            Logger?.LogError( e, e.Message );
             HasError = true;
-            ErrorMessage = $"Failed to get service: {nameof( YoutubeSearchService )}";
+            ErrorMessage = $"Failed to get service: {nameof( YtSearchService )}";
         }
     }
     
@@ -154,7 +152,7 @@ public sealed class YoutubeViewModel : ReactiveObject
         }
         catch ( Exception e )
         {
-            _logger?.LogError( e, e.Message );
+            Logger?.LogError( e, e.Message );
             HasError = true;
             ErrorMessage = ServiceErrorType.AppError.ToString();
         }
@@ -172,7 +170,7 @@ public sealed class YoutubeViewModel : ReactiveObject
         }
         catch ( Exception e )
         {
-            _logger?.LogError( e, e.Message );
+            Logger?.LogError( e, e.Message );
             HasError = true;
             ErrorMessage = ServiceErrorType.ServerError.ToString();
         }
@@ -194,7 +192,7 @@ public sealed class YoutubeViewModel : ReactiveObject
 
         if ( mainWindow?.Clipboard is null )
         {
-            _logger?.LogError( "Failed to obtain clipboard from main window!" );
+            Logger?.LogError( "Failed to obtain clipboard from main window!" );
             HasError = true;
             ErrorMessage = "Failed to perform copy operation!";
             return;   
@@ -225,7 +223,7 @@ public sealed class YoutubeViewModel : ReactiveObject
 
         if ( string.IsNullOrWhiteSpace( _searchText ) )
         {
-            _logger?.LogError( "Search text is null!" );
+            Logger?.LogError( "Search text is null!" );
             HasError = true;
             ErrorMessage = "Search text is null!";
             return false;
@@ -233,7 +231,7 @@ public sealed class YoutubeViewModel : ReactiveObject
         
         if ( _youtubeSearchService is null )
         {
-            _logger?.LogError( "Search service is null!" );
+            Logger?.LogError( "Search service is null!" );
             HasError = true;
             ErrorMessage = ServiceErrorType.AppError.ToString();
             return false;
@@ -241,7 +239,7 @@ public sealed class YoutubeViewModel : ReactiveObject
 
         if ( !_resultCountNames.Contains( _selectedResultCountName ) )
         {
-            _logger?.LogError( "_resultCountNames out of bounds!" );
+            Logger?.LogError( "_resultCountNames out of bounds!" );
             HasError = true;
             ErrorMessage = "Invalid _selectedResultsPerPage";
             return false;
@@ -251,7 +249,7 @@ public sealed class YoutubeViewModel : ReactiveObject
 
         if ( resultCountIndex < 0 || resultCountIndex > _resultCounts.Count )
         {
-            _logger?.LogError( "resultCountIndex out of bounds!" );
+            Logger?.LogError( "resultCountIndex out of bounds!" );
             HasError = true;
             ErrorMessage = "Invalid _selectedResultsPerPage";
             return false;
@@ -285,7 +283,7 @@ public sealed class YoutubeViewModel : ReactiveObject
         }
         catch ( Exception e )
         {
-            _logger?.LogError( e, e.Message );
+            Logger?.LogError( e, e.Message );
             HasError = true;
             ErrorMessage = ServiceErrorType.AppError.ToString();
         }

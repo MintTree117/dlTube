@@ -20,13 +20,7 @@ public sealed partial class MainWindow : Window
         _downloadView = new DownloadView();
         MainContent.Content = _downloadView;
     }
-
-    void OnClickTogglePopoutMenu( object? sender, RoutedEventArgs args )
-    {
-        popout.IsVisible = !popout.IsVisible;
-        MainContent.IsEnabled = !popout.IsVisible; // disable main content while accessing menu
-        MainContentOverlay.IsVisible = popout.IsVisible;
-    }
+    
     void OnClickViewYoutubeDownloader( object? sender, RoutedEventArgs args )
     {
         MainContent.Content = _downloadView;
@@ -44,23 +38,9 @@ public sealed partial class MainWindow : Window
         MainContent.Content = _archiveView;
         OnNewPage();
     }
-    void OnClickAppSettings( object? sender, RoutedEventArgs args )
+    void OnClickSettings( object? sender, RoutedEventArgs args )
     {
-        MainContent.Content = new AppSettingsView();
-        OnNewPage();
-    }
-    void OnClickLogin( object? sender, RoutedEventArgs args )
-    {
-        MainContent.Content = new LoginView();
-        OnNewPage();
-    }
-    void OnClickAccountSettings( object? sender, RoutedEventArgs args )
-    {
-        OnNewPage();
-    }
-    void OnClickLogout( object? sender, RoutedEventArgs args )
-    {
-        MainContent.Content = _downloadView;
+        MainContent.Content = new SettingsView();
         OnNewPage();
     }
 
@@ -68,6 +48,5 @@ public sealed partial class MainWindow : Window
     {
         popout.IsVisible = false;
         MainContent.IsEnabled = true;
-        MainContentOverlay.IsVisible = false;
     }
 }

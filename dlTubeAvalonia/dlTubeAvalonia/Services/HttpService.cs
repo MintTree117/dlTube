@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using dlTubeAvalonia.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -20,7 +21,7 @@ public class HttpService
         _logger = Program.ServiceProvider.GetService<ILogger<HttpService>>();
     }
     
-    public async Task<ApiReply<T?>> TryGetRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
+    public async Task<ServiceReply<T?>> TryGetRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
     {
         try
         {
@@ -34,7 +35,7 @@ public class HttpService
             return HandleHttpException<T?>( e, "Get" );
         }
     }
-    public async Task<ApiReply<T?>> TryPostRequest<T>( string apiPath, object? body = null, string? authToken = null )
+    public async Task<ServiceReply<T?>> TryPostRequest<T>( string apiPath, object? body = null, string? authToken = null )
     {
         try
         {
@@ -47,7 +48,7 @@ public class HttpService
             return HandleHttpException<T?>( e, "Post" );
         }
     }
-    public async Task<ApiReply<T?>> TryPutRequest<T>( string apiPath, object? body = null, string? authToken = null )
+    public async Task<ServiceReply<T?>> TryPutRequest<T>( string apiPath, object? body = null, string? authToken = null )
     {
         try
         {
@@ -60,7 +61,7 @@ public class HttpService
             return HandleHttpException<T?>( e, "Put" );
         }
     }
-    public async Task<ApiReply<T?>> TryDeleteRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
+    public async Task<ServiceReply<T?>> TryDeleteRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
     {
         try
         {
@@ -89,13 +90,13 @@ public class HttpService
 
         return $"{apiPath}?{query}";
     }
-    async Task<ApiReply<T?>> HandleHttpResponse<T>( HttpResponseMessage httpResponse )
+    async Task<ServiceReply<T?>> HandleHttpResponse<T>( HttpResponseMessage httpResponse )
     {
         // Handle string edge-case: json has trouble with strings
         if ( typeof( T ) == typeof( string ) )
         {
             string responseString = await httpResponse.Content.ReadAsStringAsync();
-            return new ApiReply<T?>( ( T ) ( object ) responseString );
+            return new ServiceReply<T?>( ( T ) ( object ) responseString );
         }
         
         // Early out if operation was successful
@@ -104,21 +105,21 @@ public class HttpService
             var getReply = await httpResponse.Content.ReadFromJsonAsync<T>();
 
             return getReply is not null
-                ? new ApiReply<T?>( getReply )
-                : new ApiReply<T?>( ServiceErrorType.NotFound, "No data returned from request" );
+                ? new ServiceReply<T?>( getReply )
+                : new ServiceReply<T?>( ServiceErrorType.NotFound, "No data returned from request" );
         }
         
         // Handle http error code
         string errorContent = await httpResponse.Content.ReadAsStringAsync();
-        ServiceErrorType errorType = ApiReply<object>.GetHttpServiceErrorType( httpResponse.StatusCode );
+        ServiceErrorType errorType = ServiceReply<object>.GetHttpServiceErrorType( httpResponse.StatusCode );
         _logger?.LogError( $"{errorContent}" );
-        return new ApiReply<T?>( errorType, errorContent );
+        return new ServiceReply<T?>( errorType, errorContent );
     }
     
-    ApiReply<T?> HandleHttpException<T>( Exception e, string requestType )
+    ServiceReply<T?> HandleHttpException<T>( Exception e, string requestType )
     {
         _logger?.LogError( e, $"{requestType}: Exception occurred while sending API request." );
-        return new ApiReply<T?>( ServiceErrorType.ServerError, e.Message );
+        return new ServiceReply<T?>( ServiceErrorType.ServerError, e.Message );
     }
     void SetAuthHttpHeader( string? token )
     {

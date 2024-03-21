@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using dlTubeAvalonia.Enums;
+using dlTubeAvalonia.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using YoutubeExplode.Videos;
@@ -13,15 +14,15 @@ using YoutubeExplode.Videos.Streams;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class YoutubeDownloaderService
+public sealed class YtDownloaderService
 {
     // Constants
     const string TempThumbnailFileName = "thumbnail.jpg";
     const string TempThumbnailConvertedFileName = "thumbnail_converted.jpg";
     
     // Services
-    readonly ILogger<YoutubeDownloaderService>? _logger;
-    readonly YoutubeClientService? _youtubeService;
+    readonly ILogger<YtDownloaderService>? _logger;
+    readonly YtClientService? _youtubeService;
     readonly FFmpegService? _ffmpegService;
     readonly HttpClient? _http;
     
@@ -49,21 +50,21 @@ public sealed class YoutubeDownloaderService
     List<string>? _videoSteamQualities;
 
     // Constructor
-    public YoutubeDownloaderService( string videoUrl )
+    public YtDownloaderService( string videoUrl )
     {
         _videoUrl = videoUrl;
-        _logger = Program.ServiceProvider.GetService<ILogger<YoutubeDownloaderService>>();
+        _logger = Program.ServiceProvider.GetService<ILogger<YtDownloaderService>>();
         TryGetYoutubeClientService( ref _youtubeService );
         TryGetFFmpegService( ref _ffmpegService );
 
         if ( _ffmpegService is not null )
             _http = new HttpClient();
     }
-    void TryGetYoutubeClientService( ref YoutubeClientService? _clientService )
+    void TryGetYoutubeClientService( ref YtClientService? _clientService )
     {
         try
         {
-            _clientService = Program.ServiceProvider.GetService<YoutubeClientService>();
+            _clientService = Program.ServiceProvider.GetService<YtClientService>();
         }
         catch ( Exception e )
         {
@@ -84,14 +85,14 @@ public sealed class YoutubeDownloaderService
     }
 
     // Public Methods
-    public async Task<ApiReply<bool>> TryInitialize()
+    public async Task<ServiceReply<bool>> TryInitialize()
     {
         // Youtube Client Service
         if ( _youtubeService?.YoutubeClient is null )
         {
             const string YoutubeClientFailMessage = "Failed to initialize YoutubeClientService!";
             _logger?.LogError( YoutubeClientFailMessage );
-            return new ApiReply<bool>( ServiceErrorType.AppError, YoutubeClientFailMessage );
+            return new ServiceReply<bool>( ServiceErrorType.AppError, YoutubeClientFailMessage );
         }
         
         try
@@ -105,13 +106,13 @@ public sealed class YoutubeDownloaderService
                 _thumbnailBytes = await GetThumbnailBytes();
             
             return _streamManifest is not null && _video is not null
-                ? new ApiReply<bool>( true )
-                : new ApiReply<bool>( ServiceErrorType.NotFound );
+                ? new ServiceReply<bool>( true )
+                : new ServiceReply<bool>( ServiceErrorType.NotFound );
         }
         catch ( Exception e )
         {
             _logger?.LogError( e, e.Message );
-            return new ApiReply<bool>( ServiceErrorType.ServerError );
+            return new ServiceReply<bool>( ServiceErrorType.ServerError );
         }
     }
     public async Task<List<string>> GetStreamInfo( StreamType steamType )
@@ -124,7 +125,7 @@ public sealed class YoutubeDownloaderService
             _ => throw new Exception( "Invalid Stream Type!" )
         };
     }
-    public async Task<ApiReply<bool>> Download( string filepath, StreamType type, int qualityIndex )
+    public async Task<ServiceReply<bool>> Download( string filepath, StreamType type, int qualityIndex )
     {
         try
         {
@@ -146,12 +147,12 @@ public sealed class YoutubeDownloaderService
             if ( _hasFFmeg )
                 await AddImage( path );
             
-            return new ApiReply<bool>( true );
+            return new ServiceReply<bool>( true );
         }
         catch ( Exception e )
         {
             Console.WriteLine( e + e.Message );
-            return new ApiReply<bool>( ServiceErrorType.ServerError );
+            return new ServiceReply<bool>( ServiceErrorType.ServerError );
         }
     }
 
@@ -234,7 +235,7 @@ public sealed class YoutubeDownloaderService
             return _thumbnailBytes;
 
         return _http is not null
-            ? _thumbnailBytes = await YoutubeImageService.LoadImageBytesFromUrlAsync( _video.Thumbnails[ 0 ].Url, _http )
+            ? _thumbnailBytes = await YtImageService.LoadImageBytesFromUrlAsync( _video.Thumbnails[ 0 ].Url, _http )
             : Array.Empty<byte>();
     }
     async Task AddImage( string videoPath )

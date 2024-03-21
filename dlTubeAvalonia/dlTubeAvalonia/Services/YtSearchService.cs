@@ -11,28 +11,28 @@ using YoutubeExplode.Search;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class YoutubeSearchService
+public sealed class YtSearchService
 {
     // Constants
     const int MaxSearchResults = 200;
     
     // Services
-    readonly ILogger<YoutubeSearchService>? _logger;
-    readonly YoutubeClientService? _youtubeService;
+    readonly ILogger<YtSearchService>? _logger;
+    readonly YtClientService? _youtubeService;
     readonly HttpClient? _http;
     
     // Constructor
-    public YoutubeSearchService()
+    public YtSearchService()
     {
         _http = new HttpClient();
-        _logger = Program.ServiceProvider.GetService<ILogger<YoutubeSearchService>>();
+        _logger = Program.ServiceProvider.GetService<ILogger<YtSearchService>>();
         TryGetYoutubeClientService( ref _youtubeService );
     }
-    void TryGetYoutubeClientService( ref YoutubeClientService? _clientService )
+    void TryGetYoutubeClientService( ref YtClientService? _clientService )
     {
         try
         {
-            _clientService = Program.ServiceProvider.GetService<YoutubeClientService>();
+            _clientService = Program.ServiceProvider.GetService<YtClientService>();
         }
         catch ( Exception e )
         {
@@ -93,7 +93,7 @@ public sealed class YoutubeSearchService
     // Private Methods
     async Task<Bitmap?> GetImageBitmap( string imageUrl )
     {
-        byte[]? bytes = await YoutubeImageService.LoadImageBytesFromUrlAsync( imageUrl, _http );
+        byte[]? bytes = await YtImageService.LoadImageBytesFromUrlAsync( imageUrl, _http );
 
         if ( bytes is null )
             return null;

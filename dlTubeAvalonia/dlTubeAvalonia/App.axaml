@@ -1,17 +1,17 @@
-<Application xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="dlTubeAvalonia.App"
-             xmlns:local="using:dlTubeAvalonia"
-             RequestedThemeVariant="Dark">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+<Application
+    x:Class="dlTubeAvalonia.App"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:dlTubeAvalonia"
+    RequestedThemeVariant="Dark">
              
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
-  
+    
     <Application.Styles>
         <FluentTheme />
-        <StyleInclude Source="avares://dlTubeAvalonia/Icons.axaml" />
-        <StyleInclude Source="avares://dlTubeAvalonia/AppStyles.axaml" />
+        <StyleInclude Source="avares://dlTubeAvalonia/Styles/Icons.axaml" />
+        <StyleInclude Source="avares://dlTubeAvalonia/Styles/AppStyles.axaml" />
     </Application.Styles>
 </Application>
