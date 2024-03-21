@@ -48,13 +48,15 @@
 			HorizontalAlignment="Stretch"
 			Margin="0 0 0 15"
 			Padding="15"
-			PlaceholderText="None" />
+			PlaceholderText="None"
+			ItemsSource="{Binding BackgroundImages}" 
+			SelectedItem="{Binding SelectedBackgroundImage}" />
 		<!-- Save Button -->
 		<Button
 			HorizontalAlignment="Stretch"
 			HorizontalContentAlignment="Center"
-			Margin="0,0,0,0"
-			Padding="0,0,0,15"
+			Margin="0,0,0,15"
+			Padding="15,20"
 			IsEnabled="{Binding SettingsChanged}"
 			Command="{Binding SaveChangesCommand}"
 			Content="Save Changes" />
@@ -63,6 +65,7 @@
 			HorizontalAlignment="Left"
 			Margin="0 0 0 15"
 			FontWeight="Bold"
+			TextWrapping="Wrap"
 			IsVisible="{Binding HasMessage}"
 			Text="{Binding Message} "/>
 	</StackPanel>

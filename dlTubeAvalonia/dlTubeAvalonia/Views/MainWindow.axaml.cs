@@ -1,24 +1,73 @@
+using System;
+using System.IO;
+using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using dlTubeAvalonia.Models;
+using dlTubeAvalonia.Services;
 using dlTubeAvalonia.ViewModels;
 
 namespace dlTubeAvalonia.Views;
 
-public sealed partial class MainWindow : Window
+public sealed partial class MainWindow : Window, IDisposable
 {
-    readonly MainWindowViewModel _viewModel;
+    readonly SettingsService? SettingsService;
     readonly DownloadView _downloadView;
     YoutubeView? _youtubeView;
     ArchiveView? _archiveView;
     
     public MainWindow()
     {
-        this.DataContext = new MainWindowViewModel();
+        //this.DataContext = new MainWindowViewModel();
         InitializeComponent();
-        _viewModel = (this.DataContext as MainWindowViewModel)!;
-
+        this.DataContext = new MainWindowViewModel();
         _downloadView = new DownloadView();
         MainContent.Content = _downloadView;
+
+        this.SettingsService = Program.ServiceProvider.GetService<SettingsService>();
+
+        Console.WriteLine( this.SettingsService );
+        
+        if ( SettingsService is not null )
+            SettingsService.SettingsChanged += OnChangeSettings;
+        
+        OnChangeSettings( this.SettingsService?.Settings );
+    }
+    public void Dispose()
+    {
+        if ( SettingsService is not null )
+            SettingsService.SettingsChanged -= OnChangeSettings;
+    }
+
+    void OnChangeSettings( AppSettingsModel? newSettings )
+    {
+        if ( newSettings is null || string.IsNullOrWhiteSpace( newSettings.SelectedBackgroundImage ) )
+            return;
+
+        if ( newSettings.SelectedBackgroundImage == AppSettingsModel.TransparentBackgroundKeyword )
+        {
+            this.Background = null;
+            return;
+        }
+        
+        var _assembly = Assembly.GetExecutingAssembly();
+        Stream? stream = _assembly.GetManifestResourceStream( newSettings.SelectedBackgroundImage );
+
+        if ( stream is null )
+        {
+            stream?.Dispose();
+            return;
+        }
+
+        Background = new ImageBrush( new Bitmap( stream ) )
+        {
+            Stretch = Stretch.UniformToFill
+        };
+
+        stream.Dispose();
     }
     
     void OnClickViewYoutubeDownloader( object? sender, RoutedEventArgs args )
@@ -46,7 +95,6 @@ public sealed partial class MainWindow : Window
 
     void OnNewPage()
     {
-        popout.IsVisible = false;
         MainContent.IsEnabled = true;
     }
 }

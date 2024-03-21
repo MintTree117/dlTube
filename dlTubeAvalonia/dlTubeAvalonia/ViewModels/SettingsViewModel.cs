@@ -1,17 +1,19 @@
-using System;
+using System.Collections.Generic;
 using System.Reactive;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using dlTubeAvalonia.Models;
 using dlTubeAvalonia.Services;
+
 namespace dlTubeAvalonia.ViewModels;
 
 public sealed class SettingsViewModel : BaseViewModel
 {
     // Property Fields
+    IReadOnlyList<string> _backgroundImages = [ ];
     string _apiKey = string.Empty;
     string _downloadLocation = string.Empty;
+    string _selectedBackgroundImage = string.Empty;
     bool _hasMessage;
     bool _settingsChanged;
     bool _isFree;
@@ -25,6 +27,8 @@ public sealed class SettingsViewModel : BaseViewModel
     // Constructor
     public SettingsViewModel() : base( TryGetLogger<SettingsViewModel>() )
     {
+        BackgroundImages = AppSettingsModel.BackgroundImages;
+        
         if ( this.SettingsService is null )
             return;
 
@@ -34,19 +38,9 @@ public sealed class SettingsViewModel : BaseViewModel
 
         ApiKey = _service.Settings.ApiKey;
         DownloadLocation = _service.Settings.DownloadLocation;
+        SelectedBackgroundImage = _service.Settings.SelectedBackgroundImage;
 
-        LoadInitialSettings();
-    }
-    void LoadInitialSettings()
-    {
-        try
-        {
-            LoadSettings();
-        }
-        catch ( Exception e )
-        {
-            Logger?.LogError( e, e.Message );
-        }
+        IsFree = true;
     }
     
     // Reactive Properties
@@ -68,7 +62,24 @@ public sealed class SettingsViewModel : BaseViewModel
             SettingsChanged = true;
         }
     }
-
+    public string SelectedBackgroundImage
+    {
+        get => _selectedBackgroundImage;
+        set
+        {
+            this.RaiseAndSetIfChanged( ref _selectedBackgroundImage, value );
+            SettingsChanged = true;
+        }
+    }
+    public IReadOnlyList<string> BackgroundImages
+    {
+        get => _backgroundImages;
+        set
+        {
+            this.RaiseAndSetIfChanged( ref _backgroundImages, value );
+            SettingsChanged = true;
+        }
+    }
     public bool HasMessage
     {
         get => _hasMessage;
@@ -86,21 +97,6 @@ public sealed class SettingsViewModel : BaseViewModel
     }
     
     // Private Methods
-    async void LoadSettings()
-    {
-        IsFree = false;
-        
-        ServiceReply<AppSettingsModel> reply = await _service.LoadSettingsAsync();
-
-        if ( !reply.Success )
-        {
-            Message = reply.PrintDetails();
-            HasMessage = true;
-        }
-        
-        SettingsChanged = false;
-        IsFree = true;
-    }
     async Task SaveSettings()
     {
         IsFree = false;
@@ -111,7 +107,8 @@ public sealed class SettingsViewModel : BaseViewModel
         AppSettingsModel settings = new()
         {
             ApiKey = _apiKey,
-            DownloadLocation = _downloadLocation
+            DownloadLocation = _downloadLocation,
+            SelectedBackgroundImage = _selectedBackgroundImage
         };
 
         ServiceReply<bool> reply = await _service.SaveSettings( settings );

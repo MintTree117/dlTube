@@ -6,13 +6,12 @@
     xmlns:vm="using:dlTubeAvalonia.ViewModels"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:dlTubeAvalonia="clr-namespace:dlTubeAvalonia"
     mc:Ignorable="d" 
     d:DesignWidth="800" 
     d:DesignHeight="1200"
     Height="800"
     Width="1200"
-    Icon="avares://dlTubeAvalonia/Assets/dsotm.jpg"
+    Icon="avares://dlTubeAvalonia/Assets/avalonia-logo.ico"
     Title="dlTubeAvalonia">
 
     <!-- Data Context -->
@@ -29,7 +28,6 @@
     <!-- Window Background -->
     <Window.Background>
         <ImageBrush
-            Source="avares://dlTubeAvalonia/Assets/space.jpg"
             Stretch="UniformToFill" />
     </Window.Background>
 
@@ -83,20 +81,6 @@
                     Click="OnClickSettings">
                 </Button>
             </Grid>
-
-            <!-- Pop-out Menu (Overlay) -->
-            <Border
-                x:Name="popout"
-                Grid.Row="1"
-                HorizontalAlignment="Left"
-                Width="300"
-                ZIndex="1000"
-                IsVisible="{Binding IsPopoutMenuOpen}">
-                <!-- Content -->
-                <StackPanel>
-  
-                </StackPanel>
-            </Border>
 
             <!-- Main Content -->
             <Border 

@@ -11,10 +11,8 @@ namespace dlTubeAvalonia.Services;
 // Singleton Service
 public sealed class SettingsService
 {
-    // OnChange Event
+    // Change Event
     public event Action<AppSettingsModel>? SettingsChanged;
-
-    public Guid CurrentGeneration { get; private set; }
     
     // Constants
     public const string DefaultDownloadDirectory = "./";
@@ -35,7 +33,6 @@ public sealed class SettingsService
         _logger = Program.ServiceProvider.GetService<ILogger<SettingsService>>();
         Settings = LoadSettings();
     }
-
     AppSettingsModel LoadSettings()
     {
         try
@@ -110,6 +107,7 @@ public sealed class SettingsService
         }
     }
     
+    // TODO: Deal with this
     public static string GetUserSettingsPath()
     {
         string appDataFolder = Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData );
