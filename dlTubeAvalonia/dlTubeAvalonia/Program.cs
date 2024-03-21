@@ -29,11 +29,11 @@ sealed class Program
     {
         services.AddSingleton<SettingsService>();
         services.AddSingleton<YtClientService>();
-        services.AddScoped<HttpService>();
-        services.AddScoped<YtDownloaderService>();
-        services.AddScoped<YtSearchService>();
+        services.AddSingleton<HttpService>();
+        services.AddSingleton<YtDownloaderService>();
+        services.AddSingleton<YtSearchService>();
         services.AddSingleton<FFmpegService>();
-        services.AddScoped<ArchiveService>();
+        services.AddSingleton<ArchiveService>();
         services.AddLogging( configure => { } );
     }
 

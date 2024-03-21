@@ -5,35 +5,32 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using dlTubeAvalonia.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using dlTubeAvalonia.Models;
 
 namespace dlTubeAvalonia.Services;
 
+// Singleton Service
 public class HttpService
 {
-    protected readonly HttpClient Http;
-    readonly ILogger<HttpService>? _logger;
+    readonly HttpClient _http = new();
+    readonly ILogger<HttpService>? _logger = Program.ServiceProvider.GetService<ILogger<HttpService>>();
     
-    public HttpService()
-    {
-        Http = new HttpClient();
-        _logger = Program.ServiceProvider.GetService<ILogger<HttpService>>();
-    }
-
-    public async Task<ServiceReply<T?>> TryGetStreamRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
+    public async Task<ServiceReply<MemoryStream?>> TryGetImageStream( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
     {
         try
         {
             SetAuthHttpHeader( authToken );
             string path = BuildQueryString( apiPath, parameters );
-            HttpResponseMessage httpResponse = await Http.GetAsync( path );
-            return await HandleHttpResponse<T?>( httpResponse );
+            HttpResponseMessage httpResponse = await _http.GetAsync( path );
+            
+            return await HandleImageStreamHttpResponse( httpResponse );
         }
         catch ( Exception e )
         {
-            return HandleHttpException<T?>( e, "Get" );
+            _logger?.LogError( e, e.Message );
+            return HandleHttpException<MemoryStream?>( e, "Get" );
         }
     }
     public async Task<ServiceReply<T?>> TryGetRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
@@ -42,8 +39,8 @@ public class HttpService
         {
             SetAuthHttpHeader( authToken );
             string path = BuildQueryString( apiPath, parameters );
-            HttpResponseMessage httpResponse = await Http.GetAsync( path );
-            return await HandleHttpResponse<T?>( httpResponse );
+            HttpResponseMessage httpResponse = await _http.GetAsync( path );
+            return await HandleJsonHttpResponse<T?>( httpResponse );
         }
         catch ( Exception e )
         {
@@ -55,8 +52,8 @@ public class HttpService
         try
         {
             SetAuthHttpHeader( authToken );
-            HttpResponseMessage httpResponse = await Http.PostAsJsonAsync( apiPath, body );
-            return await HandleHttpResponse<T?>( httpResponse );
+            HttpResponseMessage httpResponse = await _http.PostAsJsonAsync( apiPath, body );
+            return await HandleJsonHttpResponse<T?>( httpResponse );
         }
         catch ( Exception e )
         {
@@ -68,8 +65,8 @@ public class HttpService
         try
         {
             SetAuthHttpHeader( authToken );
-            HttpResponseMessage httpResponse = await Http.PutAsJsonAsync( apiPath, body );
-            return await HandleHttpResponse<T?>( httpResponse );
+            HttpResponseMessage httpResponse = await _http.PutAsJsonAsync( apiPath, body );
+            return await HandleJsonHttpResponse<T?>( httpResponse );
         }
         catch ( Exception e )
         {
@@ -82,15 +79,15 @@ public class HttpService
         {
             SetAuthHttpHeader( authToken );
             string path = BuildQueryString( apiPath, parameters );
-            HttpResponseMessage httpResponse = await Http.DeleteAsync( path );
-            return await HandleHttpResponse<T?>( httpResponse );
+            HttpResponseMessage httpResponse = await _http.DeleteAsync( path );
+            return await HandleJsonHttpResponse<T?>( httpResponse );
         }
         catch ( Exception e )
         {
             return HandleHttpException<T?>( e, "Delete" );
         }
     }
-
+    
     static string BuildQueryString( string apiPath, Dictionary<string, object>? parameters )
     {
         if ( parameters is null )
@@ -105,15 +102,9 @@ public class HttpService
 
         return $"{apiPath}?{query}";
     }
-    async Task<ServiceReply<T?>> HandleHttpResponse<T>( HttpResponseMessage httpResponse )
+    
+    async Task<ServiceReply<T?>> HandleJsonHttpResponse<T>( HttpResponseMessage httpResponse )
     {
-        // Handle string edge-case: json has trouble with strings
-        if ( typeof( T ) == typeof( Stream ) )
-        {
-            Stream responseStream = await httpResponse.Content.ReadAsStreamAsync();
-            return new ServiceReply<T?>( ( T )( object )responseStream );
-        }
-        
         // Handle string edge-case: json has trouble with strings
         if ( typeof( T ) == typeof( string ) )
         {
@@ -121,17 +112,30 @@ public class HttpService
             return new ServiceReply<T?>( ( T ) ( object ) responseString );
         }
         
-        // Early out if operation was successful
-        if ( httpResponse.IsSuccessStatusCode )
-        {
-            var getReply = await httpResponse.Content.ReadFromJsonAsync<T>();
-
-            return getReply is not null
-                ? new ServiceReply<T?>( getReply )
-                : new ServiceReply<T?>( ServiceErrorType.NotFound, "No data returned from request" );
-        }
+        // Early out if operation was not successful
+        if ( !httpResponse.IsSuccessStatusCode )
+            return await HandleHttpError<T>( httpResponse );
         
-        // Handle http error code
+        var getReply = await httpResponse.Content.ReadFromJsonAsync<T>();
+
+        return getReply is not null
+            ? new ServiceReply<T?>( getReply )
+            : new ServiceReply<T?>( ServiceErrorType.NotFound, "No data returned from request" );
+    }
+    async Task<ServiceReply<MemoryStream?>> HandleImageStreamHttpResponse( HttpResponseMessage httpResponse )
+    {
+        if ( !httpResponse.IsSuccessStatusCode ) 
+            return await HandleHttpError<MemoryStream?>( httpResponse );
+        
+        await using Stream stream = await httpResponse.Content.ReadAsStreamAsync();
+        MemoryStream memoryStream = new();
+        await stream.CopyToAsync( memoryStream ); // Copy the stream to a MemoryStream
+        await stream.DisposeAsync();
+        
+        return new ServiceReply<MemoryStream?>( memoryStream );
+    }
+    async Task<ServiceReply<T?>> HandleHttpError<T>( HttpResponseMessage httpResponse )
+    {
         string errorContent = await httpResponse.Content.ReadAsStringAsync();
         ServiceErrorType errorType = ServiceReply<object>.GetHttpServiceErrorType( httpResponse.StatusCode );
         _logger?.LogError( $"{errorContent}" );
@@ -140,12 +144,12 @@ public class HttpService
     
     ServiceReply<T?> HandleHttpException<T>( Exception e, string requestType )
     {
-        _logger?.LogError( e, $"{requestType}: Exception occurred while sending API request." );
-        return new ServiceReply<T?>( ServiceErrorType.ServerError, e.Message );
+        _logger?.LogError( e, e.Message );
+        return new ServiceReply<T?>( ServiceErrorType.ServerError, $"{requestType}: Exception occurred while sending API request." );
     }
     void SetAuthHttpHeader( string? token )
     {
-        Http.DefaultRequestHeaders.Authorization = !string.IsNullOrWhiteSpace( token )
+        _http.DefaultRequestHeaders.Authorization = !string.IsNullOrWhiteSpace( token )
             ? new System.Net.Http.Headers.AuthenticationHeaderValue( "Bearer", token )
             : null;
     }

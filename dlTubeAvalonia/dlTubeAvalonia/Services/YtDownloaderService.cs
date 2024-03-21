@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using dlTubeAvalonia.Enums;
 using dlTubeAvalonia.Models;
@@ -14,20 +13,21 @@ using YoutubeExplode.Videos.Streams;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class YtDownloaderService
+public sealed class YtDownloaderService( string videoUrl )
 {
     // Constants
+    const string YoutubeClientFailMessage = "Failed to initialize YoutubeClientService!";
     const string TempThumbnailFileName = "thumbnail.jpg";
     const string TempThumbnailConvertedFileName = "thumbnail_converted.jpg";
     
     // Services
-    readonly ILogger<YtDownloaderService>? _logger;
-    readonly YtClientService? _youtubeService;
-    readonly FFmpegService? _ffmpegService;
-    readonly HttpClient? _http;
+    readonly ILogger<YtDownloaderService>? _logger = Program.ServiceProvider.GetService<ILogger<YtDownloaderService>>();
+    readonly YtClientService? _youtubeService = Program.ServiceProvider.GetService<YtClientService>();
+    readonly FFmpegService? _ffmpegService = Program.ServiceProvider.GetService<FFmpegService>();
+    readonly HttpService? _httpService = Program.ServiceProvider.GetService<HttpService>();
     
     // Video Url From Constructor
-    readonly string _videoUrl;
+    readonly string _videoUrl = videoUrl;
     
     // Stream Data
     public string? VideoName => _video?.Title;
@@ -48,49 +48,13 @@ public sealed class YtDownloaderService
     List<string>? _mixedSteamQualities;
     List<string>? _audioSteamQualities;
     List<string>? _videoSteamQualities;
-
-    // Constructor
-    public YtDownloaderService( string videoUrl )
-    {
-        _videoUrl = videoUrl;
-        _logger = Program.ServiceProvider.GetService<ILogger<YtDownloaderService>>();
-        TryGetYoutubeClientService( ref _youtubeService );
-        TryGetFFmpegService( ref _ffmpegService );
-
-        if ( _ffmpegService is not null )
-            _http = new HttpClient();
-    }
-    void TryGetYoutubeClientService( ref YtClientService? _clientService )
-    {
-        try
-        {
-            _clientService = Program.ServiceProvider.GetService<YtClientService>();
-        }
-        catch ( Exception e )
-        {
-            _logger?.LogError( e, e.Message );
-        }
-    }
-    void TryGetFFmpegService( ref FFmpegService? _fFmpegService )
-    {
-        try
-        {
-            _fFmpegService = Program.ServiceProvider.GetService<FFmpegService>();
-        }
-        catch ( Exception e )
-        {
-            _logger?.LogError( e, e.Message );
-        }
-        
-    }
-
+    
     // Public Methods
     public async Task<ServiceReply<bool>> TryInitialize()
     {
         // Youtube Client Service
         if ( _youtubeService?.YoutubeClient is null )
         {
-            const string YoutubeClientFailMessage = "Failed to initialize YoutubeClientService!";
             _logger?.LogError( YoutubeClientFailMessage );
             return new ServiceReply<bool>( ServiceErrorType.AppError, YoutubeClientFailMessage );
         }
@@ -234,9 +198,16 @@ public sealed class YtDownloaderService
         if ( _thumbnailBytes is not null || _video?.Thumbnails[ 0 ].Url is null )
             return _thumbnailBytes;
 
-        return _http is not null
-            ? _thumbnailBytes = await YtImageService.LoadImageBytesFromUrlAsync( _video.Thumbnails[ 0 ].Url, _http )
-            : Array.Empty<byte>();
+        if ( _httpService is null )
+            return Array.Empty<byte>();
+
+        ServiceReply<MemoryStream?> reply = await _httpService.TryGetImageStream( _video.Thumbnails[ 0 ].Url );
+
+        if ( !reply.Success || reply.Data is null )
+            return null;
+
+        _thumbnailBytes = await Utils.GetImageBytes( reply.Data );
+        return _thumbnailBytes;
     }
     async Task AddImage( string videoPath )
     {

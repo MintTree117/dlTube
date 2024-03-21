@@ -16,8 +16,8 @@ public sealed partial class MainWindow : Window
 {
     // Services & Views
     readonly SettingsService? SettingsService;
-    readonly DownloadView _downloadView;
-    YoutubeView? _youtubeView;
+    readonly YtDownloaderView _downloadView;
+    YtSearchView? _youtubeView;
     ArchiveView? _archiveView;
     
     // Initialization
@@ -26,12 +26,10 @@ public sealed partial class MainWindow : Window
         //this.DataContext = new MainWindowViewModel();
         InitializeComponent();
         this.DataContext = new MainWindowViewModel();
-        _downloadView = new DownloadView();
+        _downloadView = new YtDownloaderView();
         MainContent.Content = _downloadView;
 
         this.SettingsService = Program.ServiceProvider.GetService<SettingsService>();
-
-        Console.WriteLine( this.SettingsService );
         
         if ( SettingsService is not null )
             SettingsService.SettingsChanged += OnChangeSettings;
@@ -97,7 +95,7 @@ public sealed partial class MainWindow : Window
     }
     void OnClickViewYoutubeSearch( object? sender, RoutedEventArgs args )
     {
-        _youtubeView ??= new YoutubeView();
+        _youtubeView ??= new YtSearchView();
         MainContent.Content = _youtubeView;
         OnNewPage();
     }

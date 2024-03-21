@@ -16,7 +16,7 @@ using dlTubeAvalonia.Services;
 
 namespace dlTubeAvalonia.ViewModels;
 
-public sealed class YoutubeViewModel : BaseViewModel
+public sealed class YtSearchViewModel : BaseViewModel
 {
     // Services Definitions
     readonly YtSearchService? _youtubeSearchService;
@@ -32,7 +32,6 @@ public sealed class YoutubeViewModel : BaseViewModel
     string _selectedSortType = string.Empty;
     string _selectedResultCountName = string.Empty;
     string _searchText = string.Empty;
-    string _errorMessage = string.Empty;
     bool _isFree = true;
     bool _hasError;
     
@@ -42,7 +41,7 @@ public sealed class YoutubeViewModel : BaseViewModel
     public ReactiveCommand<string, Unit> CopyUrlCommand { get; }
     
     // Constructor
-    public YoutubeViewModel() : base( TryGetLogger<YoutubeViewModel>() )
+    public YtSearchViewModel() : base( TryGetLogger<YtSearchViewModel>() )
     {
         TryGetYoutubeService( ref _youtubeSearchService! );
 
@@ -63,7 +62,7 @@ public sealed class YoutubeViewModel : BaseViewModel
             if ( searchService is null )
             {
                 HasError = true;
-                ErrorMessage = $"Failed to get service: {nameof( YtSearchService )}";
+                Message = $"Failed to get service: {nameof( YtSearchService )}";
                 return;
             }
 
@@ -73,7 +72,7 @@ public sealed class YoutubeViewModel : BaseViewModel
         {
             Logger?.LogError( e, e.Message );
             HasError = true;
-            ErrorMessage = $"Failed to get service: {nameof( YtSearchService )}";
+            Message = $"Failed to get service: {nameof( YtSearchService )}";
         }
     }
     
@@ -116,11 +115,6 @@ public sealed class YoutubeViewModel : BaseViewModel
         get => _searchText;
         set => this.RaiseAndSetIfChanged( ref _searchText, value );
     }
-    public string ErrorMessage
-    {
-        get => _errorMessage;
-        set => this.RaiseAndSetIfChanged( ref _errorMessage, value );
-    }
     public bool IsFree
     {
         get => _isFree;
@@ -136,7 +130,7 @@ public sealed class YoutubeViewModel : BaseViewModel
     public void CloseError()
     {
         HasError = false;
-        ErrorMessage = string.Empty;
+        Message = string.Empty;
     }
     void GoToYoutube()
     {
@@ -154,7 +148,7 @@ public sealed class YoutubeViewModel : BaseViewModel
         {
             Logger?.LogError( e, e.Message );
             HasError = true;
-            ErrorMessage = ServiceErrorType.AppError.ToString();
+            Message = ServiceErrorType.AppError.ToString();
         }
     }
     async Task Search()
@@ -166,13 +160,25 @@ public sealed class YoutubeViewModel : BaseViewModel
 
         try
         {
-            SearchResults = await _youtubeSearchService!.GetStreams( _searchText, _resultCounts[ resultCountIndex ] );
+            ServiceReply<IReadOnlyList<YoutubeSearchResult>> reply = await _youtubeSearchService!.GetStreams( _searchText, _resultCounts[ resultCountIndex ] );
+
+            if ( reply is { Success: true, Data: not null } )
+            {
+                SearchResults = reply.Data;
+            }
+            else
+            {
+                SearchResults = new List<YoutubeSearchResult>();
+                Message = ServiceErrorType.NotFound.ToString();
+                HasError = true;
+            }
         }
         catch ( Exception e )
         {
             Logger?.LogError( e, e.Message );
             HasError = true;
-            ErrorMessage = ServiceErrorType.ServerError.ToString();
+            Console.WriteLine(e + e.Message);
+            Message = e.Message; //ServiceErrorType.ServerError.ToString();
         }
         
         IsFree = true;
@@ -182,7 +188,7 @@ public sealed class YoutubeViewModel : BaseViewModel
         if ( string.IsNullOrWhiteSpace( url ) )
         {
             HasError = true;
-            ErrorMessage = "Tried to copy invalid url!";
+            Message = "Tried to copy invalid url!";
             return;
         }
         
@@ -194,7 +200,7 @@ public sealed class YoutubeViewModel : BaseViewModel
         {
             Logger?.LogError( "Failed to obtain clipboard from main window!" );
             HasError = true;
-            ErrorMessage = "Failed to perform copy operation!";
+            Message = "Failed to perform copy operation!";
             return;   
         }
 
@@ -225,7 +231,7 @@ public sealed class YoutubeViewModel : BaseViewModel
         {
             Logger?.LogError( "Search text is null!" );
             HasError = true;
-            ErrorMessage = "Search text is null!";
+            Message = "Search text is null!";
             return false;
         }
         
@@ -233,7 +239,7 @@ public sealed class YoutubeViewModel : BaseViewModel
         {
             Logger?.LogError( "Search service is null!" );
             HasError = true;
-            ErrorMessage = ServiceErrorType.AppError.ToString();
+            Message = ServiceErrorType.AppError.ToString();
             return false;
         }
 
@@ -241,7 +247,7 @@ public sealed class YoutubeViewModel : BaseViewModel
         {
             Logger?.LogError( "_resultCountNames out of bounds!" );
             HasError = true;
-            ErrorMessage = "Invalid _selectedResultsPerPage";
+            Message = "Invalid _selectedResultsPerPage";
             return false;
         }
 
@@ -251,7 +257,7 @@ public sealed class YoutubeViewModel : BaseViewModel
         {
             Logger?.LogError( "resultCountIndex out of bounds!" );
             HasError = true;
-            ErrorMessage = "Invalid _selectedResultsPerPage";
+            Message = "Invalid _selectedResultsPerPage";
             return false;
         }
 
@@ -268,7 +274,7 @@ public sealed class YoutubeViewModel : BaseViewModel
             if ( index < 0 || index > _sortTypesDefinition.Count )
             {
                 HasError = true;
-                ErrorMessage = "Invalid _selectedSortType!";
+                Message = "Invalid _selectedSortType!";
                 IsFree = true;
                 return;
             }
@@ -285,7 +291,7 @@ public sealed class YoutubeViewModel : BaseViewModel
         {
             Logger?.LogError( e, e.Message );
             HasError = true;
-            ErrorMessage = ServiceErrorType.AppError.ToString();
+            Message = ServiceErrorType.AppError.ToString();
         }
 
         IsFree = true;

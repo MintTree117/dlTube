@@ -1,6 +1,6 @@
 <UserControl 
-    x:Class="dlTubeAvalonia.Views.YoutubeView"
-    x:DataType="viewModels:YoutubeViewModel"
+    x:Class="dlTubeAvalonia.Views.YtSearchView"
+    x:DataType="viewModels:YtSearchViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:viewModels="clr-namespace:dlTubeAvalonia.ViewModels">
@@ -73,7 +73,7 @@
             <TextBlock
                 HorizontalAlignment="Left"
                 Margin="10"
-                Text="{Binding ErrorMessage}" />
+                Text="{Binding Message}" />
             <Button
                 HorizontalAlignment="Center"
                 HorizontalContentAlignment="Center"

@@ -15,7 +15,7 @@ using dlTubeAvalonia.Services;
 
 namespace dlTubeAvalonia.ViewModels;
 
-public sealed class DownloaderViewModel : BaseViewModel
+public sealed class YtDownloaderViewModel : BaseViewModel
 {
     // Services
     YtDownloaderService? _dlService;
@@ -41,8 +41,6 @@ public sealed class DownloaderViewModel : BaseViewModel
     bool _isSettingsEnabled;
     bool _hasResultMessage;
 
-    string _downloadDirectory = string.Empty;
-
     // Commands
     public ReactiveCommand<Unit, Unit> DownloadCommand { get; }
     
@@ -50,7 +48,7 @@ public sealed class DownloaderViewModel : BaseViewModel
     ReactiveCommand<Unit, Unit> NewStreamCommand { get; }
 
     // Constructor
-    public DownloaderViewModel() : base( TryGetLogger<DownloaderViewModel>() )
+    public YtDownloaderViewModel() : base( TryGetLogger<YtDownloaderViewModel>() )
     {
         TryGetDownloadService( ref _dlService );
         
@@ -166,7 +164,7 @@ public sealed class DownloaderViewModel : BaseViewModel
         IsSettingsEnabled = true;
         VideoName = $"{_dlService.VideoName ?? DefaultVideoName} : Length = {_dlService.VideoDuration}";
 
-        GetImageBytes();
+        SetImageBitmap();
         await HandleNewStreamType();
     }
     async Task DownloadStream()
@@ -191,10 +189,6 @@ public sealed class DownloaderViewModel : BaseViewModel
     }
 
     // Private Methods
-    protected override void OnAppSettingsChanged( AppSettingsModel newSettings )
-    {
-        _downloadDirectory = newSettings.DownloadLocation;
-    }
     static string PrintError( string message )
     {
         return $"{FailDownloadMessage} : {message}";
@@ -222,7 +216,7 @@ public sealed class DownloaderViewModel : BaseViewModel
             ? SettingsService.Settings.DownloadLocation
             : SettingsService.DefaultDownloadDirectory;
     }
-    void GetImageBytes()
+    void SetImageBitmap()
     {
         byte[]? bytes = _dlService!.ThumbnailBytes;
 

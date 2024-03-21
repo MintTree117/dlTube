@@ -5,13 +5,13 @@ using dlTubeAvalonia.ViewModels;
 
 namespace dlTubeAvalonia.Views;
 
-public partial class YoutubeView : UserControl
+public partial class YtSearchView : UserControl
 {
-    readonly YoutubeViewModel _viewModel;
+    readonly YtSearchViewModel _viewModel;
     
-    public YoutubeView()
+    public YtSearchView()
     {
-        _viewModel = new YoutubeViewModel();
+        _viewModel = new YtSearchViewModel();
         this.DataContext = _viewModel;
         InitializeComponent();
     }

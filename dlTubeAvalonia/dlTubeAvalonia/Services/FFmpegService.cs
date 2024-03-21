@@ -1,12 +1,15 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class FFmpegService( ILogger<FFmpegService>? _logger )
+public sealed class FFmpegService
 {
+    readonly ILogger<FFmpegService>? _logger = Program.ServiceProvider.GetService<ILogger<FFmpegService>>();
+    
     bool? _isFFmpegInstalled;
 
     public async Task<bool> CheckFFmpegInstallationAsync()
@@ -16,10 +19,12 @@ public sealed class FFmpegService( ILogger<FFmpegService>? _logger )
     }
     static async Task<bool> IsFFmpegInstalledAsync( ILogger<FFmpegService>? logger )
     {
+        Process? process = null;
+        
         try
         {
             // FFmpeg process
-            using Process process = new();
+            process = new Process();
             process.StartInfo.FileName = "ffmpeg";
             process.StartInfo.Arguments = "-version";
             process.StartInfo.RedirectStandardOutput = true;
@@ -34,7 +39,7 @@ public sealed class FFmpegService( ILogger<FFmpegService>? _logger )
             string error = await process.StandardError.ReadToEndAsync();
 
             await process.WaitForExitAsync();
-            
+
             bool success = process.ExitCode == 0 && !string.IsNullOrWhiteSpace( output );
 
             if ( !success )
@@ -42,10 +47,20 @@ public sealed class FFmpegService( ILogger<FFmpegService>? _logger )
 
             return success;
         }
-        catch( Exception e )
+        catch ( Exception e )
         {
             logger?.LogError( e, e.Message );
             return false;
+        }
+        finally
+        {
+            if ( process is not null )
+            {
+                if ( !process.HasExited )
+                      process.Kill();
+                
+                process.Dispose();
+            }
         }
     }
 }

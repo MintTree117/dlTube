@@ -21,11 +21,6 @@ public sealed record ServiceReply<T>
 {
     const string MESSAGE_RESPONSE_ERROR = "Failed to produce a proper response message!";
 
-    public ServiceReply()
-    {
-
-    }
-
     public ServiceReply( ServiceErrorType errorType, string? message = null )
     {
         Data = default;

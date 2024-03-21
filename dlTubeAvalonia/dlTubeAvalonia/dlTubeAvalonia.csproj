@@ -34,7 +34,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="Views\YoutubeView.axaml.cs">
+      <Compile Update="Views\YtSearchView.axaml.cs">
         <DependentUpon>YoutubeSearchView.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>

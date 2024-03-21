@@ -4,12 +4,12 @@ using dlTubeAvalonia.ViewModels;
 
 namespace dlTubeAvalonia.Views;
 
-public sealed partial class DownloadView : UserControl
+public sealed partial class YtDownloaderView : UserControl
 {
-    public DownloadView()
+    public YtDownloaderView()
     {
         InitializeComponent();
-        this.DataContext = new DownloaderViewModel();
+        this.DataContext = new YtDownloaderViewModel();
     }
     
     void InitializeComponent()

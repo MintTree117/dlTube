@@ -8,33 +8,40 @@ using dlTubeAvalonia.Models;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class ArchiveService : HttpService
+public sealed class ArchiveService
 {
     // Constants
+    const string NoHttpMessage = "Failed to obatain HttpService!";
     const string ApiPath = "api/archive";
     const string ApiPathGetCategories = $"{ApiPath}/categories";
     const string ApiPathSearch = $"{ApiPath}/search";
     
     // Services
     readonly ILogger<ArchiveService>? _logger = Program.ServiceProvider.GetService<ILogger<ArchiveService>>();
+    readonly HttpService? _http = Program.ServiceProvider.GetService<HttpService>();
     
     // Public Methods
     public async Task<ServiceReply<List<ArchiveCategory>?>> GetCategoriesAsync( string? apiKey )
     {
-        return await TryGetRequest<List<ArchiveCategory>>( ApiPathGetCategories, null, apiKey );
+        return _http is not null
+            ? await _http.TryGetRequest<List<ArchiveCategory>>( ApiPathGetCategories, null, apiKey )
+            : new ServiceReply<List<ArchiveCategory>?>( ServiceErrorType.AppError, NoHttpMessage );
     }
     public async Task<ServiceReply<ArchiveSearch?>> SearchVideosAsync( string? apiKey, Dictionary<string,object>? parameters )
     {
-        return await TryGetRequest<ArchiveSearch>( ApiPathSearch, parameters, apiKey );
+        return _http is not null
+            ? await _http.TryGetRequest<ArchiveSearch>( ApiPathSearch, parameters, apiKey )
+            : new ServiceReply<ArchiveSearch?>( ServiceErrorType.AppError, NoHttpMessage );
     }
     public async Task<ServiceReply<bool>> DownloadStreamAsync( string? apiKey, Dictionary<string, object>? httpParameters, string downloadPath )
     {
-        ServiceReply<Stream?> streamReply = await TryGetRequest<Stream>( ApiPathSearch, httpParameters, apiKey );
+        if ( _http is null )
+            return new ServiceReply<bool>( ServiceErrorType.AppError, NoHttpMessage );
+        
+        ServiceReply<Stream?> streamReply = await _http.TryGetRequest<Stream>( ApiPathSearch, httpParameters, apiKey );
 
         if ( !streamReply.Success || streamReply.Data is null )
-        {
             return new ServiceReply<bool>( streamReply.ErrorType, streamReply.Message );
-        }
 
         try
         {

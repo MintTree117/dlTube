@@ -22,15 +22,15 @@ public sealed class SettingsService
     const string FailedSaveMessage = "Failed to save settings to disk! Changes will still persist until you close the app.";
     
     // Services
-    readonly ILogger<SettingsService>? _logger;
+    readonly ILogger<SettingsService>? _logger = Program.ServiceProvider.GetService<ILogger<SettingsService>>();
     
     // Settings Model
     public AppSettingsModel Settings { get; private set; }
+    readonly JsonSerializerOptions _serializerOptions = new() { WriteIndented = true };
 
     // Constructor
     public SettingsService()
     {
-        _logger = Program.ServiceProvider.GetService<ILogger<SettingsService>>();
         Settings = LoadSettings();
     }
     AppSettingsModel LoadSettings()
@@ -68,6 +68,7 @@ public sealed class SettingsService
                 return new ServiceReply<AppSettingsModel>( Settings, ServiceErrorType.NotFound, FailLoadMessage );
             
             string json = await File.ReadAllTextAsync( CachePath );
+            JsonSerializer.Deserialize<object>( json );
             var loadedSettings = JsonSerializer.Deserialize<AppSettingsModel>( json );
             bool loaded = loadedSettings is not null;
 
@@ -91,8 +92,12 @@ public sealed class SettingsService
             if ( !Directory.Exists( CacheDirectory ) )
                 Directory.CreateDirectory( CacheDirectory );
 
-            string json = JsonSerializer.Serialize( newSettings, new JsonSerializerOptions { WriteIndented = true } );
-            await File.WriteAllTextAsync( CachePath, json );
+            //string json = JsonSerializer.Serialize( newSettings, _serializerOptions );
+            byte[] jsonBytes = JsonSerializer.SerializeToUtf8Bytes( newSettings, _serializerOptions );
+
+            await using FileStream fs = new FileStream( CachePath, FileMode.Create );
+            await fs.WriteAsync( jsonBytes );
+            //await File.WriteAllTextAsync( CachePath, json );
             return new ServiceReply<bool>( true );
         }
         catch ( Exception e )
@@ -105,18 +110,5 @@ public sealed class SettingsService
             Settings = newSettings;
             SettingsChanged?.Invoke( Settings );
         }
-    }
-    
-    // TODO: Deal with this
-    public static string GetUserSettingsPath()
-    {
-        string appDataFolder = Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData );
-        string myAppFolder = Path.Combine( appDataFolder, "dlTubeAvalonia" );
-        string appSettingsFile = Path.Combine( myAppFolder, "appsettings.json" );
-
-        if ( !Directory.Exists( myAppFolder ) )
-            Directory.CreateDirectory( myAppFolder );
-
-        return appSettingsFile;
     }
 }
