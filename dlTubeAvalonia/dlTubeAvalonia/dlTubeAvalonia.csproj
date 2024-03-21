@@ -26,6 +26,7 @@
         <EmbeddedResource Include="Assets\defaultplayer1.png" />
         <EmbeddedResource Include="Assets\defaultplayer2.png"/>
         <EmbeddedResource Include="Assets\defaultplayer3.jpg"/>
+        <EmbeddedResource Include="Assets\youtube.jpg"/>
     </ItemGroup>
 
     <ItemGroup>

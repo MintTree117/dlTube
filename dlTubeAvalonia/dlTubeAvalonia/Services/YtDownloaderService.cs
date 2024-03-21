@@ -96,8 +96,8 @@ public sealed class YtDownloaderService( string videoUrl )
             IStreamInfo streamInfo = type switch
             {
                 StreamType.Mixed => _mixedStreams[ qualityIndex ],
-                StreamType.Audio => _mixedStreams[ qualityIndex ],
-                StreamType.Video => _mixedStreams[ qualityIndex ],
+                StreamType.Audio => _audioStreams[ qualityIndex ],
+                StreamType.Video => _videoStreams[ qualityIndex ],
                 _ => throw new ArgumentOutOfRangeException( nameof( type ), type, null )
             };
 

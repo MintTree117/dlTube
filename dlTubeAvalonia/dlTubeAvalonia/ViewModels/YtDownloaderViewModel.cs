@@ -36,14 +36,12 @@ public sealed class YtDownloaderViewModel : BaseViewModel
     string _videoName = DefaultVideoName;
     string _selectedStreamTypeName = string.Empty; // saves state between downloads for user convenience
     string _selectedStreamQualityName = string.Empty;
-    string _resultMessage = string.Empty;
     bool _isLinkBoxEnabled;
     bool _isSettingsEnabled;
 
     // Commands
     public ReactiveCommand<Unit, Unit> DownloadCommand { get; }
-    
-    ReactiveCommand<Unit, Unit> LoadDataCommand { get; } // Private command for easy async execution of method
+    ReactiveCommand<Unit, Unit> LoadDataCommand { get; }
     ReactiveCommand<Unit, Unit> NewStreamCommand { get; }
 
     // Constructor
@@ -119,11 +117,6 @@ public sealed class YtDownloaderViewModel : BaseViewModel
         get => _selectedStreamQualityName;
         set => this.RaiseAndSetIfChanged( ref _selectedStreamQualityName, value );
     }
-    public string ResultMessage
-    {
-        get => _resultMessage;
-        set => this.RaiseAndSetIfChanged( ref _resultMessage, value );
-    }
     public bool IsLinkBoxEnabled
     {
         get => _isLinkBoxEnabled;
@@ -149,7 +142,7 @@ public sealed class YtDownloaderViewModel : BaseViewModel
         {
             Logger?.LogError( $"Failed to obtain stream manifest! Reply message: {reply.PrintDetails()}" );
             VideoName = InvalidVideoName;
-            ResultMessage = PrintError( reply.ErrorType.ToString() ); //reply.PrintDetails();
+            Message = PrintError( reply.ErrorType.ToString() ); //reply.PrintDetails();
             HasMessage = true;
             _dlService = null;
             return;
@@ -173,7 +166,7 @@ public sealed class YtDownloaderViewModel : BaseViewModel
         ServiceReply<bool> reply = await _dlService!.Download(
             GetDownloadPath(), streamType, _streamQualities.IndexOf( _selectedStreamQualityName ) );
 
-        ResultMessage = reply.Success
+        Message = reply.Success
             ? SuccessDownloadMessage
             : PrintError( reply.PrintDetails() );
 
@@ -192,7 +185,7 @@ public sealed class YtDownloaderViewModel : BaseViewModel
         if ( _dlService is null || !Enum.TryParse( _selectedStreamTypeName, out StreamType streamType ) )
         {
             Logger?.LogError( $"Failed to handle new stream type!" );
-            ResultMessage = PrintError( ServiceErrorType.AppError.ToString() );
+            Message = PrintError( ServiceErrorType.AppError.ToString() );
             return;
         }
 
@@ -229,7 +222,7 @@ public sealed class YtDownloaderViewModel : BaseViewModel
         IsSettingsEnabled = false;
         HasMessage = false;
         SelectedStreamType = string.Empty;
-        ResultMessage = string.Empty;
+        Message = string.Empty;
         VideoName = linkIsEmpty ? DefaultVideoName : LoadingVideoName;
         StreamQualities = [ ];
         _dlService = null;
@@ -248,21 +241,21 @@ public sealed class YtDownloaderViewModel : BaseViewModel
         if ( _dlService is null )
         {
             Logger?.LogError( "Youtube download service is null!" );
-            ResultMessage = PrintError( ServiceErrorType.AppError.ToString() );
+            Message = PrintError( ServiceErrorType.AppError.ToString() );
             return false;
         }
         // Invalid Selected Stream Type
         if ( !Enum.TryParse( _selectedStreamTypeName, out streamType ) )
         {
             Logger?.LogError( "Invalid Stream Type!" );
-            ResultMessage = PrintError( ServiceErrorType.AppError.ToString() );
+            Message = PrintError( ServiceErrorType.AppError.ToString() );
             return false;
         }
         // Invalid Selected Stream Quality
         if ( !_streamQualities.Contains( _selectedStreamQualityName ) )
         {
             Logger?.LogError( "Invalid _selectedStreamQualityName!" );
-            ResultMessage = PrintError( ServiceErrorType.AppError.ToString() );
+            Message = PrintError( ServiceErrorType.AppError.ToString() );
             return false;
         }
 

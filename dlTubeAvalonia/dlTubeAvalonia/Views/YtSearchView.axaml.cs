@@ -30,9 +30,4 @@ public partial class YtSearchView : UserControl
         
         _viewModel.CopyUrlCommand.Execute( url );
     }
-    void CloseErrorMessage( object? sender, RoutedEventArgs args )
-    {
-        ErrorMessage.IsVisible = false;
-        _viewModel.CloseError();
-    }
 }

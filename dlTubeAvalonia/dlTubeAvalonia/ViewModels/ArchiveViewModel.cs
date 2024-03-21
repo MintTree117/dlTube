@@ -36,7 +36,6 @@ public sealed class ArchiveViewModel : BaseViewModel
     string _searchText = string.Empty;
     
     // Other Fields
-    bool _isFree = true;
     string _apiKey = string.Empty;
     string _downloadLocation = string.Empty;
     
@@ -74,6 +73,8 @@ public sealed class ArchiveViewModel : BaseViewModel
             Console.WriteLine("fail");
             Logger?.LogError( e, e.Message );
         }
+
+        IsFree = true;
     }
     
     // Init Methods
@@ -238,11 +239,6 @@ public sealed class ArchiveViewModel : BaseViewModel
     {
         get => _searchText;
         set => this.RaiseAndSetIfChanged( ref _searchText, value );
-    }
-    public bool IsFree
-    {
-        get => _isFree;
-        set => this.RaiseAndSetIfChanged( ref _isFree, value );
     }
     
     // Private Methods

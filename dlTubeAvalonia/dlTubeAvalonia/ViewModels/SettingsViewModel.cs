@@ -15,7 +15,6 @@ public sealed class SettingsViewModel : BaseViewModel
     string _downloadLocation = string.Empty;
     string _selectedBackgroundImage = string.Empty;
     bool _settingsChanged;
-    bool _isFree;
     
     // Service
     readonly SettingsService _service = null!;
@@ -83,11 +82,6 @@ public sealed class SettingsViewModel : BaseViewModel
     {
         get => _settingsChanged;
         set => this.RaiseAndSetIfChanged( ref _settingsChanged, value );
-    }
-    public bool IsFree
-    {
-        get => _isFree;
-        set => this.RaiseAndSetIfChanged( ref _isFree, value );
     }
     
     // Private Methods

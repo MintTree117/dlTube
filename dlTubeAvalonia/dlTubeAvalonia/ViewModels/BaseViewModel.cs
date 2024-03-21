@@ -15,6 +15,7 @@ public abstract class BaseViewModel : ReactiveObject, IDisposable
     protected readonly SettingsService? SettingsService;
     
     // Reactive Property Fields
+    bool _isFree = false;
     bool _hasMessage;
     string _message = string.Empty;
     
@@ -37,6 +38,11 @@ public abstract class BaseViewModel : ReactiveObject, IDisposable
     }
     
     // Reactive Properties
+    public bool IsFree
+    {
+        get => _isFree;
+        set => this.RaiseAndSetIfChanged( ref _isFree, value );
+    }
     public string Message
     {
         get => _message;

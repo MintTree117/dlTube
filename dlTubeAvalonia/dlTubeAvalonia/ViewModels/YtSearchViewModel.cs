@@ -32,7 +32,6 @@ public sealed class YtSearchViewModel : BaseViewModel
     string _selectedSortType = string.Empty;
     string _selectedResultCountName = string.Empty;
     string _searchText = string.Empty;
-    bool _isFree = true;
     
     // Commands
     public ReactiveCommand<Unit, Unit> YoutubeCommand { get; }
@@ -51,6 +50,8 @@ public sealed class YtSearchViewModel : BaseViewModel
         YoutubeCommand = ReactiveCommand.Create( GoToYoutube );
         SearchCommand = ReactiveCommand.CreateFromTask( Search );
         CopyUrlCommand = ReactiveCommand.CreateFromTask<string>( async ( url ) => { await CopyUrlToClipboard( url ); } );
+
+        IsFree = true;
     }
     void TryGetYoutubeService( ref YtSearchService service )
     {
@@ -70,8 +71,8 @@ public sealed class YtSearchViewModel : BaseViewModel
         catch ( Exception e )
         {
             Logger?.LogError( e, e.Message );
-            HasMessage = true;
             Message = $"Failed to get service: {nameof( YtSearchService )}";
+            HasMessage = true;
         }
     }
     
@@ -113,11 +114,6 @@ public sealed class YtSearchViewModel : BaseViewModel
     {
         get => _searchText;
         set => this.RaiseAndSetIfChanged( ref _searchText, value );
-    }
-    public bool IsFree
-    {
-        get => _isFree;
-        set => this.RaiseAndSetIfChanged( ref _isFree, value );
     }
     
     // Command Delegates
