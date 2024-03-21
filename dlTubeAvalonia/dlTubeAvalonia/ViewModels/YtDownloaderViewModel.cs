@@ -26,7 +26,7 @@ public sealed class YtDownloaderViewModel : BaseViewModel
     const string InvalidVideoName = "Invalid Video Link";
     const string SuccessDownloadMessage = "Download success!";
     const string FailDownloadMessage = "Failed to download!";
-    const string DefaultVideoImage = "avares://dlTubeAvalonia/Assets/defaultplayer.png";
+    const string DefaultVideoImage = "avares://dlTubeAvalonia/Assets/defaultplayer3.jpg";
     
     // Property Field List Values
     Bitmap? _videoImageBitmap;

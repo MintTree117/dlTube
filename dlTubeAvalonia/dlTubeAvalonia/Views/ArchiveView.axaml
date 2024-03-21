@@ -44,7 +44,7 @@
             			Grid.Column="0"
             			Classes="SearchDropdown"
 			            HorizontalAlignment="Stretch"
-            			Margin="0,0,5,0"
+			            Margin="0,0,10,0"
             			PlaceholderText="All"
             			ItemsSource="{Binding CategoryNames}"
             			SelectedItem="{Binding SelectedCategoryName}" />
@@ -53,7 +53,7 @@
             			Grid.Column="1"
             			Classes="SearchDropdown"
 			            HorizontalAlignment="Stretch"
-            			Margin="0,0,5,0"
+			            Margin="0,0,10,0"
             			ItemsSource="{Binding StreamTypes}"
             			SelectedItem="{Binding SelectedStreamType}" />
             		<!-- Sort Dropdown -->
@@ -61,7 +61,7 @@
             			Grid.Column="2"
             			Classes="SearchDropdown"
 			            HorizontalAlignment="Stretch"
-            			Margin="0,0,5,0"
+			            Margin="0,0,10,0"
             			ItemsSource="{Binding SortTypes}"
             			SelectedItem="{Binding SelectedSortType}" />
             		<!-- Results Dropdown -->

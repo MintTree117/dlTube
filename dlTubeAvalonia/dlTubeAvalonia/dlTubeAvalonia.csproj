@@ -11,13 +11,21 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
-        <EmbeddedResource Include="Assets\defaultplayer.png"/>
-        <EmbeddedResource Include="Assets\dsotm.jpg">
-            <LogicalName>dlTubeAvalonia.Assets.dsotm.jpg</LogicalName>
+        <EmbeddedResource Include="Assets\Backgrounds\concert.jpg">
+          <LogicalName>dlTubeAvalonia.Assets.Backgrounds.concert.jpg</LogicalName>
         </EmbeddedResource>
-        <EmbeddedResource Include="Assets\space.jpg">
-            <LogicalName>dlTubeAvalonia.Assets.space.jpg</LogicalName>
+        <EmbeddedResource Include="Assets\Backgrounds\dsotm.jpg">
+          <LogicalName>dlTubeAvalonia.Assets.Backgrounds.dsotm.jpg</LogicalName>
         </EmbeddedResource>
+        <EmbeddedResource Include="Assets\Backgrounds\forest.jpg">
+          <LogicalName>dlTubeAvalonia.Assets.Backgrounds.forest.jpg</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Assets\Backgrounds\space.jpg">
+          <LogicalName>dlTubeAvalonia.Assets.Backgrounds.space.jpg</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Assets\defaultplayer1.png" />
+        <EmbeddedResource Include="Assets\defaultplayer2.png"/>
+        <EmbeddedResource Include="Assets\defaultplayer3.jpg"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -38,5 +46,10 @@
         <DependentUpon>YoutubeSearchView.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Assets\Backgrounds\dsotm.jpg" />
+      <UpToDateCheckInput Remove="Assets\Backgrounds\space.jpg" />
     </ItemGroup>
 </Project>

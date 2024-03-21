@@ -21,15 +21,19 @@
         <!-- Video Image -->
         <Border
             HorizontalAlignment="Center"
+            Width="150"
             Height="150"
             Margin="0,5,0,15"
             BorderBrush="DarkGray"
-            BorderThickness="2"
+            BorderThickness="1"
             CornerRadius="5">
-            <Image
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Source="{Binding VideoImageBitmap}" />
+            <!-- Window Background -->
+            <Border.Background>
+                <ImageBrush
+                    Stretch="UniformToFill"
+                    Source="{Binding VideoImageBitmap}" />
+            </Border.Background>
+
         </Border>
         <!-- Video Title -->
         <TextBlock

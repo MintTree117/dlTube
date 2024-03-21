@@ -43,7 +43,7 @@
                 <Button 
                     Grid.Column="2"
                     Classes="SearchButton"
-                    Margin="0,0,5,0"
+                    Margin="0,0,10,0"
                     Command="{Binding SearchCommand}">
                     <PathIcon Data="{StaticResource search_regular}" />
                 </Button>
@@ -52,7 +52,7 @@
                     Grid.Column="3"
                     Classes="SearchDropdown"
                     HorizontalAlignment="Right"
-                    Margin="0,0,5,0"
+                    Margin="0,0,10,0"
                     ItemsSource="{Binding SortTypes}"
                     SelectedItem="{Binding SelectedSortType}" />
                 <!-- Results Dropdown -->
