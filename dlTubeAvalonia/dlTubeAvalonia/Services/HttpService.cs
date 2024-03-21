@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace dlTubeAvalonia.Services;
 
 public class HttpService
 {
-    readonly HttpClient Http;
+    protected readonly HttpClient Http;
     readonly ILogger<HttpService>? _logger;
     
     public HttpService()
@@ -20,7 +21,21 @@ public class HttpService
         Http = new HttpClient();
         _logger = Program.ServiceProvider.GetService<ILogger<HttpService>>();
     }
-    
+
+    public async Task<ServiceReply<T?>> TryGetStreamRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
+    {
+        try
+        {
+            SetAuthHttpHeader( authToken );
+            string path = BuildQueryString( apiPath, parameters );
+            HttpResponseMessage httpResponse = await Http.GetAsync( path );
+            return await HandleHttpResponse<T?>( httpResponse );
+        }
+        catch ( Exception e )
+        {
+            return HandleHttpException<T?>( e, "Get" );
+        }
+    }
     public async Task<ServiceReply<T?>> TryGetRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
     {
         try
@@ -92,6 +107,13 @@ public class HttpService
     }
     async Task<ServiceReply<T?>> HandleHttpResponse<T>( HttpResponseMessage httpResponse )
     {
+        // Handle string edge-case: json has trouble with strings
+        if ( typeof( T ) == typeof( Stream ) )
+        {
+            Stream responseStream = await httpResponse.Content.ReadAsStreamAsync();
+            return new ServiceReply<T?>( ( T )( object )responseStream );
+        }
+        
         // Handle string edge-case: json has trouble with strings
         if ( typeof( T ) == typeof( string ) )
         {

@@ -20,6 +20,13 @@ public sealed partial class ArchiveView : UserControl
     {
         AvaloniaXamlLoader.Load( this );
     }
+    void OnClickDownload( object? sender, RoutedEventArgs args )
+    {
+        if ( sender is Button { Tag: string parameter } )
+        {
+            _viewModel.DownloadCommand.Execute( parameter );
+        }
+    }
     void CloseErrorMessage( object? sender, RoutedEventArgs args )
     {
         ErrorMessage.IsVisible = false;

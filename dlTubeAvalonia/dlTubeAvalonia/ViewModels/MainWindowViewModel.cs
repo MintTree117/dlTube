@@ -1,10 +1,6 @@
 ﻿namespace dlTubeAvalonia.ViewModels;
 
-public sealed class MainWindowViewModel : BaseViewModel
+public sealed class MainWindowViewModel() : BaseViewModel( TryGetLogger<MainWindowViewModel>() )
 {
-    //  Methods
-    public MainWindowViewModel() : base( TryGetLogger<MainWindowViewModel>() )
-    {
-        
-    }
+    
 }

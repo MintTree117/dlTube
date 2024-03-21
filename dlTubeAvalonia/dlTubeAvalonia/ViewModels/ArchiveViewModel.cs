@@ -22,7 +22,7 @@ public sealed class ArchiveViewModel : BaseViewModel
     readonly List<StreamSortType> _sortTypesDefinition = Enum.GetValues<StreamSortType>().ToList();
     readonly List<int> _resultCounts = [ 10, 20, 30, 50, 100, 200 ];
     
-    // Property Fields
+    // Reactive Property Fields
     int _searchCount;
     List<ArchiveItem> _searchResults = [ ];
     List<string> _categoryNames = [ "a, b, c" ];
@@ -34,21 +34,22 @@ public sealed class ArchiveViewModel : BaseViewModel
     string _selectedSortType = string.Empty;
     string _selectedResultCountName = string.Empty;
     string _searchText = string.Empty;
+    
+    // Other Fields
     bool _isFree = true;
-    bool _hasError;
-
+    bool _hasMessage;
     string _apiKey = string.Empty;
     string _downloadLocation = string.Empty;
     
     // Command Definitions
     public ReactiveCommand<Unit, Unit> SearchCommand { get; }
-    public ReactiveCommand<int, Unit> DownloadCommand { get; }
+    public ReactiveCommand<string, Unit> DownloadCommand { get; }
     
     // Constructor
     public ArchiveViewModel() : base( TryGetLogger<ArchiveViewModel>() )
     {
         SearchCommand = ReactiveCommand.CreateFromTask( SearchArchive );
-        DownloadCommand = ReactiveCommand.CreateFromTask<int>( async ( id ) => await DownloadArchiveItem( id ) );
+        DownloadCommand = ReactiveCommand.CreateFromTask<string>( async ( id ) => await DownloadArchiveItem( id ) );
 
         if ( this.SettingsService is null )
             return;
@@ -87,7 +88,7 @@ public sealed class ArchiveViewModel : BaseViewModel
         }
 
         IsFree = false;
-        HasError = true;
+        HasMessage = true;
         Message = "Failed to load archive service!";
         return false;
     }
@@ -97,7 +98,7 @@ public sealed class ArchiveViewModel : BaseViewModel
 
         if ( !reply.Success || reply.Data is null )
         {
-            HasError = true;
+            HasMessage = true;
             Logger?.LogError( reply.PrintDetails() );
             Message = reply.PrintDetails();
             return;
@@ -141,7 +142,7 @@ public sealed class ArchiveViewModel : BaseViewModel
     // Command Delegates
     public void CloseError()
     {
-        HasError = false;
+        HasMessage = false;
         Message = string.Empty;
     }
     async Task SearchArchive()
@@ -151,7 +152,7 @@ public sealed class ArchiveViewModel : BaseViewModel
 
         if ( !reply.Success || reply.Data is null )
         {
-            HasError = true;
+            HasMessage = true;
             Message = reply.PrintDetails();
             return;
         }
@@ -159,9 +160,15 @@ public sealed class ArchiveViewModel : BaseViewModel
         SearchCount = reply.Data.TotalMatches;
         SearchResults = reply.Data.Items;
     }
-    async Task DownloadArchiveItem( int itemId )
+    async Task DownloadArchiveItem( string itemId )
     {
-        await Task.Delay( 5000 );
+        ServiceReply<bool> reply = await _archiveService.DownloadStreamAsync(
+            _apiKey, new Dictionary<string, object>() { { "itemId", itemId } }, _downloadLocation );
+
+        HasMessage = true;
+        Message = reply.Success
+            ? "Successfully downloaded stream."
+            : reply.PrintDetails();
     }
 
     // Reactive Properties
@@ -241,10 +248,10 @@ public sealed class ArchiveViewModel : BaseViewModel
         get => _isFree;
         set => this.RaiseAndSetIfChanged( ref _isFree, value );
     }
-    public bool HasError
+    public bool HasMessage
     {
-        get => _hasError;
-        set => this.RaiseAndSetIfChanged( ref _hasError, value );
+        get => _hasMessage;
+        set => this.RaiseAndSetIfChanged( ref _hasMessage, value );
     }
     
     // Private Methods

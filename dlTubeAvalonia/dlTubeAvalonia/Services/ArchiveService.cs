@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,12 +21,36 @@ public sealed class ArchiveService : HttpService
     // Public Methods
     public async Task<ServiceReply<List<ArchiveCategory>?>> GetCategoriesAsync( string? apiKey )
     {
-        ServiceReply<List<ArchiveCategory>?> res = await TryGetRequest<List<ArchiveCategory>>( ApiPathGetCategories, null, apiKey );
-        return res;
+        return await TryGetRequest<List<ArchiveCategory>>( ApiPathGetCategories, null, apiKey );
     }
     public async Task<ServiceReply<ArchiveSearch?>> SearchVideosAsync( string? apiKey, Dictionary<string,object>? parameters )
     {
-        ServiceReply<ArchiveSearch?> res = await TryGetRequest<ArchiveSearch>( ApiPathSearch, parameters, apiKey );
-        return res;
+        return await TryGetRequest<ArchiveSearch>( ApiPathSearch, parameters, apiKey );
+    }
+    public async Task<ServiceReply<bool>> DownloadStreamAsync( string? apiKey, Dictionary<string, object>? httpParameters, string downloadPath )
+    {
+        ServiceReply<Stream?> streamReply = await TryGetRequest<Stream>( ApiPathSearch, httpParameters, apiKey );
+
+        if ( !streamReply.Success || streamReply.Data is null )
+        {
+            return new ServiceReply<bool>( streamReply.ErrorType, streamReply.Message );
+        }
+
+        try
+        {
+            Stream inputStream = streamReply.Data;
+            Stream outputStream = File.Open( downloadPath, FileMode.Create );
+
+            await inputStream.CopyToAsync( outputStream );
+            await outputStream.DisposeAsync();
+            await inputStream.DisposeAsync();
+
+            return new ServiceReply<bool>( true );
+        }
+        catch ( Exception e )
+        {
+            _logger?.LogError( e, e.Message );
+            return new ServiceReply<bool>( ServiceErrorType.IoError );
+        }
     }
 }

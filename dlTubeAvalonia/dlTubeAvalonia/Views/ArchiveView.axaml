@@ -78,7 +78,7 @@
 		<!-- Error Message -->
 		<StackPanel
 			Grid.Row="1"
-			IsVisible="{Binding HasError}"
+			IsVisible="{Binding HasMessage}"
 			x:Name="ErrorMessage">
 			<TextBlock
 				HorizontalAlignment="Left"
@@ -153,7 +153,8 @@
 									BorderBrush="DarkGray"
 									BorderThickness="1"
 									CornerRadius="5"
-									CommandParameter="{Binding Id}">
+									Tag="{Binding Id}"
+									Click="OnClickDownload">
 									<PathIcon Data="{StaticResource copy_regular}" />
 								</Button>
 							</Grid>

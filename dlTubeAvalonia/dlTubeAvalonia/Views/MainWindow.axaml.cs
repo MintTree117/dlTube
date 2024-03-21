@@ -12,13 +12,15 @@ using dlTubeAvalonia.ViewModels;
 
 namespace dlTubeAvalonia.Views;
 
-public sealed partial class MainWindow : Window, IDisposable
+public sealed partial class MainWindow : Window
 {
+    // Services & Views
     readonly SettingsService? SettingsService;
     readonly DownloadView _downloadView;
     YoutubeView? _youtubeView;
     ArchiveView? _archiveView;
     
+    // Initialization
     public MainWindow()
     {
         //this.DataContext = new MainWindowViewModel();
@@ -36,26 +38,41 @@ public sealed partial class MainWindow : Window, IDisposable
         
         OnChangeSettings( this.SettingsService?.Settings );
     }
-    public void Dispose()
+    protected override void OnClosed( EventArgs e )
     {
         if ( SettingsService is not null )
             SettingsService.SettingsChanged -= OnChangeSettings;
+        
+        base.OnClosed( e );
     }
-
+    
+    // Private Methods
     void OnChangeSettings( AppSettingsModel? newSettings )
     {
-        if ( newSettings is null || string.IsNullOrWhiteSpace( newSettings.SelectedBackgroundImage ) )
+        string? img = newSettings?.SelectedBackgroundImage;
+        
+        if ( string.IsNullOrWhiteSpace( img ) )
             return;
 
-        if ( newSettings.SelectedBackgroundImage == AppSettingsModel.TransparentBackgroundKeyword )
+        if ( img == AppSettingsModel.TransparentBackgroundKeyword )
         {
-            this.Background = null;
+            Background = null;
             return;
         }
-        
-        var _assembly = Assembly.GetExecutingAssembly();
-        Stream? stream = _assembly.GetManifestResourceStream( newSettings.SelectedBackgroundImage );
 
+        Stream? stream;
+        
+        try
+        {
+            var _assembly = Assembly.GetExecutingAssembly();
+            stream = _assembly.GetManifestResourceStream( img );
+        }
+        catch ( Exception e )
+        {
+            Console.WriteLine( e + e.Message );
+            throw;
+        }
+        
         if ( stream is null )
         {
             stream?.Dispose();
@@ -69,7 +86,10 @@ public sealed partial class MainWindow : Window, IDisposable
 
         stream.Dispose();
     }
-    
+    void OnNewPage()
+    {
+        MainContent.IsEnabled = true;
+    }
     void OnClickViewYoutubeDownloader( object? sender, RoutedEventArgs args )
     {
         MainContent.Content = _downloadView;
@@ -91,10 +111,5 @@ public sealed partial class MainWindow : Window, IDisposable
     {
         MainContent.Content = new SettingsView();
         OnNewPage();
-    }
-
-    void OnNewPage()
-    {
-        MainContent.IsEnabled = true;
     }
 }
