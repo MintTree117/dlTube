@@ -6,9 +6,9 @@ using Microsoft.Extensions.Logging;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class FFmpegService
+public sealed class FFmpegChecker
 {
-    readonly ILogger<FFmpegService>? _logger = Program.ServiceProvider.GetService<ILogger<FFmpegService>>();
+    readonly ILogger<FFmpegChecker>? _logger = Program.ServiceProvider.GetService<ILogger<FFmpegChecker>>();
     
     bool? _isFFmpegInstalled;
 
@@ -17,7 +17,7 @@ public sealed class FFmpegService
         _isFFmpegInstalled ??= await IsFFmpegInstalledAsync( _logger );
         return _isFFmpegInstalled.Value;
     }
-    static async Task<bool> IsFFmpegInstalledAsync( ILogger<FFmpegService>? logger )
+    static async Task<bool> IsFFmpegInstalledAsync( ILogger<FFmpegChecker>? logger )
     {
         Process? process = null;
         
@@ -29,7 +29,7 @@ public sealed class FFmpegService
             process.StartInfo.Arguments = "-version";
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
-            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.UseShellExecute = false; // TODO: Test if need true
             process.StartInfo.CreateNoWindow = true;
 
             process.Start();
@@ -37,7 +37,7 @@ public sealed class FFmpegService
             // Read the output to ensure the command was executed
             string output = await process.StandardOutput.ReadToEndAsync();
             string error = await process.StandardError.ReadToEndAsync();
-
+            
             await process.WaitForExitAsync();
 
             bool success = process.ExitCode == 0 && !string.IsNullOrWhiteSpace( output );

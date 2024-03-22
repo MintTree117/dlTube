@@ -9,13 +9,15 @@ using Avalonia.Media.Imaging;
 using dlTubeAvalonia.Models;
 using dlTubeAvalonia.Services;
 using dlTubeAvalonia.ViewModels;
+using Microsoft.Extensions.Logging;
 
 namespace dlTubeAvalonia.Views;
 
 public sealed partial class MainWindow : Window
 {
     // Services & Views
-    readonly SettingsService? SettingsService;
+    readonly ILogger<MainWindow>? _logger = Program.ServiceProvider.GetService<ILogger<MainWindow>>();
+    readonly SettingsManager SettingsService = Program.ServiceProvider.GetService<SettingsManager>()!;
     readonly YtDownloaderView _downloadView;
     YtSearchView? _youtubeView;
     ArchiveView? _archiveView;
@@ -23,24 +25,18 @@ public sealed partial class MainWindow : Window
     // Initialization
     public MainWindow()
     {
-        //this.DataContext = new MainWindowViewModel();
         InitializeComponent();
         this.DataContext = new MainWindowViewModel();
+        
         _downloadView = new YtDownloaderView();
         MainContent.Content = _downloadView;
 
-        this.SettingsService = Program.ServiceProvider.GetService<SettingsService>();
-        
-        if ( SettingsService is not null )
-            SettingsService.SettingsChanged += OnChangeSettings;
-        
-        OnChangeSettings( this.SettingsService?.Settings );
+        SettingsService.SettingsChanged += OnChangeSettings;
+        OnChangeSettings( SettingsService.Settings );
     }
     protected override void OnClosed( EventArgs e )
     {
-        if ( SettingsService is not null )
-            SettingsService.SettingsChanged -= OnChangeSettings;
-        
+        SettingsService.SettingsChanged -= OnChangeSettings;
         base.OnClosed( e );
     }
     
@@ -62,13 +58,13 @@ public sealed partial class MainWindow : Window
         
         try
         {
-            var _assembly = Assembly.GetExecutingAssembly();
-            stream = _assembly.GetManifestResourceStream( img );
+            var assembly = Assembly.GetExecutingAssembly();
+            stream = assembly.GetManifestResourceStream( img );
         }
         catch ( Exception e )
         {
-            Console.WriteLine( e + e.Message );
-            throw;
+            _logger?.LogError( e, e.Message );
+            return;
         }
         
         if ( stream is null )

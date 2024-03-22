@@ -12,10 +12,10 @@ public abstract class BaseViewModel : ReactiveObject, IDisposable
 {
     // Services
     protected readonly ILogger<BaseViewModel>? Logger;
-    protected readonly SettingsService? SettingsService;
+    protected readonly SettingsManager SettingsService = Program.ServiceProvider.GetService<SettingsManager>()!;
     
     // Reactive Property Fields
-    bool _isFree = false;
+    bool _isFree;
     bool _hasMessage;
     string _message = string.Empty;
     
@@ -25,7 +25,7 @@ public abstract class BaseViewModel : ReactiveObject, IDisposable
     // Constructor
     public void Dispose()
     {
-        GC.SuppressFinalize( this ); // Rider Optimization
+        GC.SuppressFinalize( this ); // Rider Suggested Optimization
         
         if ( SettingsService is not null )
             SettingsService.SettingsChanged -= OnAppSettingsChanged;
@@ -34,7 +34,6 @@ public abstract class BaseViewModel : ReactiveObject, IDisposable
     {
         Logger = logger;
         CloseMessageCommand = ReactiveCommand.Create( CloseMessage );
-        TryGetSettingsService( ref SettingsService );
     }
     
     // Reactive Properties
@@ -63,19 +62,10 @@ public abstract class BaseViewModel : ReactiveObject, IDisposable
     {
         return Program.ServiceProvider.GetService<ILogger<T>>();
     }
-    void TryGetSettingsService( ref SettingsService? settingsService )
+    public void ShowMessage( string message )
     {
-        try
-        {
-            settingsService = Program.ServiceProvider.GetService<SettingsService>();
-            
-            if ( settingsService is not null )
-                settingsService.SettingsChanged += OnAppSettingsChanged;
-        }
-        catch ( Exception e )
-        {
-            Logger?.LogError( e, e.Message );
-        }
+        Message = message;
+        HasMessage = true;
     }
     void CloseMessage()
     {

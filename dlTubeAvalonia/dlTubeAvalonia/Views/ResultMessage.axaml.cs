@@ -1,4 +1,3 @@
-using System;
 using AngleSharp.Browser;
 using Avalonia;
 using Avalonia.Controls;
@@ -15,23 +14,17 @@ public partial class ResultMessage : UserControl
         get => GetValue( TextProperty );
         set => SetValue( TextProperty, value );
     }
-
-    public static readonly StyledProperty<ICommand> CloseCommandProperty =
-        AvaloniaProperty.Register<ResultMessage, ICommand>( nameof( CloseCommand ) );
-
+    
+    // Define the Text property using Avalonia's property system
+    public static readonly StyledProperty<string> TextProperty = AvaloniaProperty.Register<ResultMessage, string>( nameof( Text ), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay );
+    public static readonly StyledProperty<ICommand> CloseCommandProperty = AvaloniaProperty.Register<ResultMessage, ICommand>( nameof( CloseCommand ) );
     public ICommand CloseCommand
     {
         get => GetValue( CloseCommandProperty );
         set => SetValue( CloseCommandProperty, value );
     }
-
     
-    // Define the Text property using Avalonia's property system
-    public static readonly StyledProperty<string> TextProperty =
-        AvaloniaProperty.Register<ResultMessage, string>(
-            nameof( Text ),
-            defaultBindingMode: Avalonia.Data.BindingMode.TwoWay );
-    
+    // Constructor
     public ResultMessage()
     {
         InitializeComponent();

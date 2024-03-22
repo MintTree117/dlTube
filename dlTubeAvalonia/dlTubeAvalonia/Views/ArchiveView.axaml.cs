@@ -12,7 +12,7 @@ public sealed partial class ArchiveView : UserControl
     public ArchiveView()
     {
         _viewModel = new ArchiveViewModel();
-        this.DataContext = _viewModel;
+        DataContext = _viewModel;
         InitializeComponent();
     }
     

@@ -11,6 +11,7 @@ public sealed record AppSettingsModel
     public const string TransparentBackgroundKeyword = "Transparent";
     public const string DefaultBackgroundImage = "dlTubeAvalonia.Assets.Backgrounds.space.jpg";
     public static IReadOnlyList<string> BackgroundImages { get; } = [
+        TransparentBackgroundKeyword,
         "dlTubeAvalonia.Assets.Backgrounds.space.jpg",
         "dlTubeAvalonia.Assets.Backgrounds.dsotm.jpg",
         "dlTubeAvalonia.Assets.Backgrounds.forest.jpg",

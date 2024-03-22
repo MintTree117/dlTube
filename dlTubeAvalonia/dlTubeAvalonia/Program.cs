@@ -27,13 +27,14 @@ sealed class Program
 
     static void ConfigureServices( IServiceCollection services )
     {
-        services.AddSingleton<SettingsService>();
-        services.AddSingleton<YtClientService>();
-        services.AddSingleton<HttpService>();
-        services.AddSingleton<YtDownloaderService>();
-        services.AddSingleton<YtSearchService>();
-        services.AddSingleton<FFmpegService>();
+        services.AddSingleton<SettingsManager>();
+        services.AddSingleton<YoutubeClientHolder>();
+        services.AddSingleton<HttpController>();
+        services.AddSingleton<YoutubeDownloader>();
+        services.AddSingleton<YoutubeBrowser>();
+        services.AddSingleton<FFmpegChecker>();
         services.AddSingleton<ArchiveService>();
+        services.AddScoped<ImageLoader>();
         services.AddLogging( configure => { } );
     }
 

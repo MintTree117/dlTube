@@ -3,7 +3,6 @@ using System.Reactive;
 using System.Threading.Tasks;
 using ReactiveUI;
 using dlTubeAvalonia.Models;
-using dlTubeAvalonia.Services;
 
 namespace dlTubeAvalonia.ViewModels;
 
@@ -16,27 +15,18 @@ public sealed class SettingsViewModel : BaseViewModel
     string _selectedBackgroundImage = string.Empty;
     bool _settingsChanged;
     
-    // Service
-    readonly SettingsService _service = null!;
-    
     // Commands
-    public ReactiveCommand<Unit, Unit> SaveChangesCommand { get; } = default!;
+    public ReactiveCommand<Unit, Unit> SaveChangesCommand { get; }
     
     // Constructor
     public SettingsViewModel() : base( TryGetLogger<SettingsViewModel>() )
     {
-        BackgroundImages = AppSettingsModel.BackgroundImages;
-        
-        if ( this.SettingsService is null )
-            return;
-
-        _service = this.SettingsService;
-        
         SaveChangesCommand = ReactiveCommand.CreateFromTask( SaveSettings );
-
-        ApiKey = _service.Settings.ApiKey;
-        DownloadLocation = _service.Settings.DownloadLocation;
-        SelectedBackgroundImage = _service.Settings.SelectedBackgroundImage;
+        
+        BackgroundImages = AppSettingsModel.BackgroundImages;
+        ApiKey = SettingsService.Settings.ApiKey;
+        DownloadLocation = SettingsService.Settings.DownloadLocation;
+        SelectedBackgroundImage = SettingsService.Settings.SelectedBackgroundImage;
 
         IsFree = true;
     }
@@ -99,7 +89,7 @@ public sealed class SettingsViewModel : BaseViewModel
             SelectedBackgroundImage = _selectedBackgroundImage
         };
 
-        ServiceReply<bool> reply = await _service.SaveSettings( settings );
+        ServiceReply<bool> reply = await SettingsService.SaveSettings( settings );
         
         Message = reply.Success
             ? "Saved Settings To Disk."

@@ -15,7 +15,7 @@ namespace dlTubeAvalonia.ViewModels;
 public sealed class ArchiveViewModel : BaseViewModel
 {
     // Services
-    readonly ArchiveService _archiveService = null!;
+    readonly ArchiveService _archiveService = Program.ServiceProvider.GetService<ArchiveService>()!;
     
     // Property Field List Values
     readonly List<StreamFilterType> _streamTypeDefinitions = Enum.GetValues<StreamFilterType>().ToList();
@@ -52,9 +52,6 @@ public sealed class ArchiveViewModel : BaseViewModel
         if ( this.SettingsService is null )
             return;
         
-        if ( !TryGetArchiveService( ref _archiveService! ) )
-            return;
-        
         _streamTypes = GetStreamFilterTypeNames();
         _sortTypes = GetStreamSortTypeNames();
         _resultCountNames = GetResultsPerPageNames( _resultCounts );
@@ -70,7 +67,6 @@ public sealed class ArchiveViewModel : BaseViewModel
         }
         catch ( Exception e )
         {
-            Console.WriteLine("fail");
             Logger?.LogError( e, e.Message );
         }
 
@@ -78,21 +74,6 @@ public sealed class ArchiveViewModel : BaseViewModel
     }
     
     // Init Methods
-    bool TryGetArchiveService( ref ArchiveService? archiveService )
-    {
-        ArchiveService? service = Program.ServiceProvider.GetService<ArchiveService>();
-
-        if ( service is not null )
-        {
-            archiveService = service;
-            return true;
-        }
-
-        IsFree = false;
-        HasMessage = true;
-        Message = "Failed to load archive service!";
-        return false;
-    }
     async void LoadCategories()
     {
         ServiceReply<List<ArchiveCategory>?> reply = await _archiveService.GetCategoriesAsync( _apiKey );
@@ -100,9 +81,7 @@ public sealed class ArchiveViewModel : BaseViewModel
         if ( !reply.Success || reply.Data is null )
         {
             Logger?.LogError( reply.PrintDetails() );
-            Console.WriteLine(reply.PrintDetails());
-            Message = reply.PrintDetails();
-            HasMessage = true;
+            ShowMessage( reply.PrintDetails() );
             return;
         }
 
@@ -149,8 +128,7 @@ public sealed class ArchiveViewModel : BaseViewModel
 
         if ( !reply.Success || reply.Data is null )
         {
-            HasMessage = true;
-            Message = reply.PrintDetails();
+            ShowMessage( reply.PrintDetails() );
             return;
         }
 

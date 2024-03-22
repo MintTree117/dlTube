@@ -12,12 +12,12 @@ using dlTubeAvalonia.Models;
 namespace dlTubeAvalonia.Services;
 
 // Singleton Service
-public class HttpService
+public class HttpController
 {
     readonly HttpClient _http = new();
-    readonly ILogger<HttpService>? _logger = Program.ServiceProvider.GetService<ILogger<HttpService>>();
+    readonly ILogger<HttpController>? _logger = Program.ServiceProvider.GetService<ILogger<HttpController>>();
     
-    public async Task<ServiceReply<MemoryStream?>> TryGetImageStream( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
+    public async Task<ServiceReply<Stream?>> TryGetStream( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
     {
         try
         {
@@ -30,7 +30,7 @@ public class HttpService
         catch ( Exception e )
         {
             _logger?.LogError( e, e.Message );
-            return HandleHttpException<MemoryStream?>( e, "Get" );
+            return HandleHttpException<Stream?>( e, "Get" );
         }
     }
     public async Task<ServiceReply<T?>> TryGetRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
@@ -122,17 +122,17 @@ public class HttpService
             ? new ServiceReply<T?>( getReply )
             : new ServiceReply<T?>( ServiceErrorType.NotFound, "No data returned from request" );
     }
-    async Task<ServiceReply<MemoryStream?>> HandleImageStreamHttpResponse( HttpResponseMessage httpResponse )
+    async Task<ServiceReply<Stream?>> HandleImageStreamHttpResponse( HttpResponseMessage httpResponse )
     {
         if ( !httpResponse.IsSuccessStatusCode ) 
-            return await HandleHttpError<MemoryStream?>( httpResponse );
+            return await HandleHttpError<Stream?>( httpResponse );
         
         await using Stream stream = await httpResponse.Content.ReadAsStreamAsync();
         MemoryStream memoryStream = new();
         await stream.CopyToAsync( memoryStream ); // Copy the stream to a MemoryStream
         await stream.DisposeAsync();
         
-        return new ServiceReply<MemoryStream?>( memoryStream );
+        return new ServiceReply<Stream?>( memoryStream );
     }
     async Task<ServiceReply<T?>> HandleHttpError<T>( HttpResponseMessage httpResponse )
     {

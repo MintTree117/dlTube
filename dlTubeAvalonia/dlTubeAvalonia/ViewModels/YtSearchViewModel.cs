@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
@@ -19,7 +18,7 @@ namespace dlTubeAvalonia.ViewModels;
 public sealed class YtSearchViewModel : BaseViewModel
 {
     // Services Definitions
-    readonly YtSearchService? _youtubeSearchService;
+    readonly YoutubeBrowser _youtubeSearchService = Program.ServiceProvider.GetService<YoutubeBrowser>()!;
     
     // Property Field List Values
     readonly List<YoutubeSortType> _sortTypesDefinition = Enum.GetValues<YoutubeSortType>().ToList();
@@ -40,8 +39,6 @@ public sealed class YtSearchViewModel : BaseViewModel
     // Constructor
     public YtSearchViewModel() : base( TryGetLogger<YtSearchViewModel>() )
     {
-        TryGetYoutubeService( ref _youtubeSearchService! );
-
         SortTypes = GetSortTypeNames();
         ResultCountNames = GetResultsPerPageNames( _resultCounts );
         SelectedSortType = _sortTypes[ 0 ];
@@ -50,28 +47,6 @@ public sealed class YtSearchViewModel : BaseViewModel
         CopyUrlCommand = ReactiveCommand.CreateFromTask<string>( async ( url ) => { await CopyUrlToClipboard( url ); } );
 
         IsFree = true;
-    }
-    void TryGetYoutubeService( ref YtSearchService service )
-    {
-        try
-        {
-            var searchService = Program.ServiceProvider.GetService<YtSearchService>();
-
-            if ( searchService is null )
-            {
-                HasMessage = true;
-                Message = $"Failed to get service: {nameof( YtSearchService )}";
-                return;
-            }
-
-            service = searchService;
-        }
-        catch ( Exception e )
-        {
-            Logger?.LogError( e, e.Message );
-            Message = $"Failed to get service: {nameof( YtSearchService )}";
-            HasMessage = true;
-        }
     }
     
     // Reactive Properties
@@ -118,32 +93,19 @@ public sealed class YtSearchViewModel : BaseViewModel
     async Task Search()
     {
         if ( !ValidateSearchParams( out int resultCountIndex ) )
-            return;   
+        {
+            ShowMessage( "Invalid search results count selected!" );
+            return;
+        }
         
         IsFree = false;
 
-        try
-        {
-            ServiceReply<IReadOnlyList<YoutubeSearchResult>> reply = await _youtubeSearchService!.GetStreams( _searchText, _resultCounts[ resultCountIndex ] );
+        ServiceReply<IReadOnlyList<YoutubeSearchResult>> searchReply = await _youtubeSearchService.GetStreams( _searchText, _resultCounts[ resultCountIndex ] );
 
-            if ( reply is { Success: true, Data: not null } )
-            {
-                SearchResults = reply.Data;
-            }
-            else
-            {
-                SearchResults = new List<YoutubeSearchResult>();
-                Message = ServiceErrorType.NotFound.ToString();
-                HasMessage = true;
-            }
-        }
-        catch ( Exception e )
-        {
-            Logger?.LogError( e, e.Message );
-            HasMessage = true;
-            Console.WriteLine(e + e.Message);
-            Message = e.Message; //ServiceErrorType.ServerError.ToString();
-        }
+        bool success = searchReply is { Success: true, Data: not null };
+        SearchResults = ( success ? searchReply.Data : new List<YoutubeSearchResult>() )!;
+        Message = ServiceErrorType.NotFound.ToString();
+        HasMessage = true;
         
         IsFree = true;
     }
@@ -151,24 +113,31 @@ public sealed class YtSearchViewModel : BaseViewModel
     {
         if ( string.IsNullOrWhiteSpace( url ) )
         {
-            HasMessage = true;
-            Message = "Tried to copy invalid url!";
+            ShowMessage( "Tried to copy invalid url!" );
             return;
         }
-        
-        // TODO: Make this mobile accessible
-        Window? mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop 
-            ? desktop.MainWindow : null;
 
-        if ( mainWindow?.Clipboard is null )
+        try
         {
-            Logger?.LogError( "Failed to obtain clipboard from main window!" );
-            HasMessage = true;
-            Message = "Failed to perform copy operation!";
-            return;   
-        }
+            // TODO: Make this mobile accessible
+            Window? mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
+                ? desktop.MainWindow
+                : null;
 
-        await mainWindow.Clipboard.SetTextAsync( url );
+            if ( mainWindow?.Clipboard is null )
+            {
+                Logger?.LogError( "Failed to obtain clipboard from main window!" );
+                ShowMessage( "Failed to copy youtube link to clipboard!" );
+                return;
+            }
+
+            await mainWindow.Clipboard.SetTextAsync( url );
+        }
+        catch ( Exception e )
+        {
+            Logger?.LogError( e, e.Message );
+            ShowMessage( $"{ServiceErrorType.AppError.ToString()} : Failed to copy youtube link to clipboard!" );
+        }
     }
     
     // Private Methods
@@ -194,24 +163,14 @@ public sealed class YtSearchViewModel : BaseViewModel
         if ( string.IsNullOrWhiteSpace( _searchText ) )
         {
             Logger?.LogError( "Search text is null!" );
-            HasMessage = true;
-            Message = "Search text is null!";
+            ShowMessage( "Search text is null!" );
             return false;
         }
         
-        if ( _youtubeSearchService is null )
-        {
-            Logger?.LogError( "Search service is null!" );
-            HasMessage = true;
-            Message = ServiceErrorType.AppError.ToString();
-            return false;
-        }
-
         if ( !_resultCountNames.Contains( _selectedResultCountName ) )
         {
             Logger?.LogError( "_resultCountNames out of bounds!" );
-            HasMessage = true;
-            Message = "Invalid _selectedResultsPerPage";
+            ShowMessage( "Invalid _selectedResultsPerPage" );
             return false;
         }
 
@@ -220,8 +179,7 @@ public sealed class YtSearchViewModel : BaseViewModel
         if ( resultCountIndex < 0 || resultCountIndex > _resultCounts.Count )
         {
             Logger?.LogError( "resultCountIndex out of bounds!" );
-            HasMessage = true;
-            Message = "Invalid _selectedResultsPerPage";
+            ShowMessage( "Invalid _selectedResultsPerPage" );
             return false;
         }
 
@@ -238,8 +196,7 @@ public sealed class YtSearchViewModel : BaseViewModel
             if ( index < 0 || index > _sortTypesDefinition.Count )
             {
                 HasMessage = true;
-                Message = "Invalid _selectedSortType!";
-                IsFree = true;
+                ShowMessage( "Invalid _selectedSortType!" );
                 return;
             }
 
@@ -248,14 +205,13 @@ public sealed class YtSearchViewModel : BaseViewModel
                 YoutubeSortType.Default => SearchResults,
                 YoutubeSortType.Alphabetical => _searchResults.OrderBy( r => r.Title ).ToList(),
                 YoutubeSortType.Duration => _searchResults.OrderBy( r => r.Duration ).ToList(),
-                _ => throw new Exception( "Invalid _sortTypesDefinition!" )
+                _ => SearchResults
             };
         }
         catch ( Exception e )
         {
             Logger?.LogError( e, e.Message );
-            HasMessage = true;
-            Message = ServiceErrorType.AppError.ToString();
+            ShowMessage( $"{ServiceErrorType.AppError} : An error occured while updating sort dropdown." );
         }
 
         IsFree = true;

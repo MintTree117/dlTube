@@ -9,7 +9,7 @@ using dlTubeAvalonia.Models;
 namespace dlTubeAvalonia.Services;
 
 // Singleton Service
-public sealed class SettingsService
+public sealed class SettingsManager
 {
     // Change Event
     public event Action<AppSettingsModel>? SettingsChanged;
@@ -22,14 +22,14 @@ public sealed class SettingsService
     const string FailedSaveMessage = "Failed to save settings to disk! Changes will still persist until you close the app.";
     
     // Services
-    readonly ILogger<SettingsService>? _logger = Program.ServiceProvider.GetService<ILogger<SettingsService>>();
+    readonly ILogger<SettingsManager>? _logger = Program.ServiceProvider.GetService<ILogger<SettingsManager>>();
     
     // Settings Model
     public AppSettingsModel Settings { get; private set; }
     readonly JsonSerializerOptions _serializerOptions = new() { WriteIndented = true };
 
     // Constructor
-    public SettingsService()
+    public SettingsManager()
     {
         Settings = LoadSettings();
     }

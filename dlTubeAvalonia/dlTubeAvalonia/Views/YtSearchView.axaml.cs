@@ -1,5 +1,7 @@
 using System;
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
@@ -10,6 +12,7 @@ namespace dlTubeAvalonia.Views;
 
 public partial class YtSearchView : UserControl
 {
+    readonly ILogger<YtSearchView>? _logger = Program.ServiceProvider.GetService<ILogger<YtSearchView>>();
     readonly YtSearchViewModel _viewModel;
     
     public YtSearchView()
@@ -32,7 +35,6 @@ public partial class YtSearchView : UserControl
             : string.Empty;
         
         GoToYoutube( url );
-        //_viewModel.OpenYoutubeCommand.Execute( "https://www.youtube.com/watch?v=e6-HossxeWc&t=110s" );
     }
     void OnClickCopy( object sender, RoutedEventArgs e )
     {
@@ -48,21 +50,21 @@ public partial class YtSearchView : UserControl
     // Here instead of view model because of weird binding issue: as of this comment Avalonia still has quirks
     void GoToYoutube( string url )
     {
+        Process p = new();
+        
         try
         {
-            ProcessStartInfo psi = new()
-            {
-                FileName = url,
-                UseShellExecute = true // Important for .NET Core
-            };
+            p.StartInfo.FileName = url;
+            p.StartInfo.UseShellExecute = true; // Important for .NET Core
 
-            Process.Start( psi );
+            p.Start();
+            p.WaitForExit();
         }
         catch ( Exception e )
         {
-            Console.WriteLine( "Error" );
-            _viewModel.Message = ServiceErrorType.AppError.ToString();
-            _viewModel.HasMessage = true;
+            p.Kill();
+            _logger?.LogError( e, e.Message );
+            _viewModel.ShowMessage( $"{ServiceErrorType.AppError} : Failed to open link!" );
         }
     }
 }

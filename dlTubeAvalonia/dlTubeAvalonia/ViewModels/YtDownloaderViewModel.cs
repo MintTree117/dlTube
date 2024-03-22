@@ -18,7 +18,7 @@ namespace dlTubeAvalonia.ViewModels;
 public sealed class YtDownloaderViewModel : BaseViewModel
 {
     // Services
-    YtDownloaderService? _dlService;
+    YoutubeDownloader? _dlService;
     
     // Constants
     const string DefaultVideoName = "No Video Selected";
@@ -58,14 +58,14 @@ public sealed class YtDownloaderViewModel : BaseViewModel
         LoadDefaultImage();
         
         // Load Initial Settings
-        OnAppSettingsChanged( SettingsService?.Settings ?? new AppSettingsModel() );
+        OnAppSettingsChanged( SettingsService.Settings );
     }
 
-    void TryGetDownloadService( ref YtDownloaderService? dlService )
+    void TryGetDownloadService( ref YoutubeDownloader? dlService )
     {
         try
         {
-            dlService = Program.ServiceProvider.GetService<YtDownloaderService>();
+            dlService = Program.ServiceProvider.GetService<YoutubeDownloader>();
         }
         catch ( Exception e )
         {
@@ -134,7 +134,7 @@ public sealed class YtDownloaderViewModel : BaseViewModel
         if ( LinkIsEmptyAfterChangesApplied() )
             return;
         
-        _dlService = new YtDownloaderService( _youtubeLink );
+        _dlService = new YoutubeDownloader( _youtubeLink );
 
         ServiceReply<bool> reply = await _dlService.TryInitialize();
         
@@ -201,18 +201,11 @@ public sealed class YtDownloaderViewModel : BaseViewModel
     {
         return SettingsService is not null
             ? SettingsService.Settings.DownloadLocation
-            : SettingsService.DefaultDownloadDirectory;
+            : SettingsManager.DefaultDownloadDirectory;
     }
     void SetImageBitmap()
     {
-        byte[]? bytes = _dlService!.ThumbnailBytes;
-
-        if ( bytes is null )
-            return;
-
-        using MemoryStream memoryStream = new( bytes );
-        Bitmap newThumbnailBitmap = new( memoryStream );
-        VideoImageBitmap = newThumbnailBitmap;
+        VideoImageBitmap = _dlService?.ThumbnailBitmap;
     }
     bool LinkIsEmptyAfterChangesApplied()
     {
