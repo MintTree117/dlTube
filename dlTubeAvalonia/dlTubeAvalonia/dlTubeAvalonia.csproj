@@ -14,17 +14,13 @@
         <EmbeddedResource Include="Assets\Backgrounds\concert.jpg">
           <LogicalName>dlTubeAvalonia.Assets.Backgrounds.concert.jpg</LogicalName>
         </EmbeddedResource>
-        <EmbeddedResource Include="Assets\Backgrounds\dsotm.jpg">
-          <LogicalName>dlTubeAvalonia.Assets.Backgrounds.dsotm.jpg</LogicalName>
-        </EmbeddedResource>
         <EmbeddedResource Include="Assets\Backgrounds\forest.jpg">
           <LogicalName>dlTubeAvalonia.Assets.Backgrounds.forest.jpg</LogicalName>
         </EmbeddedResource>
         <EmbeddedResource Include="Assets\Backgrounds\space.jpg">
           <LogicalName>dlTubeAvalonia.Assets.Backgrounds.space.jpg</LogicalName>
         </EmbeddedResource>
-        <EmbeddedResource Include="Assets\defaultplayer1.png" />
-        <EmbeddedResource Include="Assets\defaultplayer3.jpg"/>
+        <EmbeddedResource Include="Assets\default_stream_image.png" />
         <EmbeddedResource Include="Assets\youtube.jpg"/>
     </ItemGroup>
 

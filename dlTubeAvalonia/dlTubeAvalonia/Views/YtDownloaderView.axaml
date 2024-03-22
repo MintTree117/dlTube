@@ -24,14 +24,14 @@
             HorizontalAlignment="Center"
             Width="150"
             Height="150"
-            Margin="0,5,0,15"
+            Margin="0,0,0,30"
             BorderBrush="DarkGray"
             BorderThickness="1"
             CornerRadius="5">
             <!-- Border Background -->
             <Border.Background>
                 <ImageBrush
-                    Opacity="0.8"
+                    Opacity="0.6"
                     Stretch="UniformToFill"
                     Source="{Binding VideoImageBitmap}" />
             </Border.Background>
@@ -40,7 +40,7 @@
         <!-- Video Title -->
         <TextBlock
             HorizontalAlignment="Center"
-            Margin="0,0,0,20"
+            Margin="0,0,0,30"
             FontWeight="Bold"
             TextWrapping="Wrap"
             Text="{Binding VideoName}" />

@@ -29,7 +29,7 @@
 	<!-- Separator -->
 	<Style Selector="Border.TitleSeparator">
 		<Setter Property="HorizontalAlignment" Value="Stretch" />
-		<Setter Property="Margin" Value="0 20 0 20" />
+		<Setter Property="Margin" Value="0 30 0 30" />
 		<Setter Property="BorderThickness" Value="0,0,0,2" />
 		<Setter Property="BorderBrush" Value="#707070" />
 	</Style>
@@ -44,11 +44,11 @@
 		<Setter Property="HorizontalAlignment" Value="Left" />
 		<Setter Property="VerticalAlignment" Value="Stretch" />
 		<Setter Property="VerticalContentAlignment" Value="Center" />
-		<Setter Property="Margin" Value="0,10,10,10" />
-		<Setter Property="Padding" Value="35,10" />
+		<Setter Property="Margin" Value="0,5,10,5" />
+		<Setter Property="Padding" Value="35,0" />
 		<Setter Property="BorderThickness" Value="1" />
 		<Setter Property="BorderBrush" Value="DarkGray" />
-		<Setter Property="CornerRadius" Value="5" />
+		<Setter Property="CornerRadius" Value="7" />
 	</Style>
 	<!-- Search Bar -->
 	<Style Selector="TextBox.SearchBar">

@@ -9,10 +9,10 @@
     xmlns:dlTubeAvalonia="clr-namespace:dlTubeAvalonia"
     mc:Ignorable="d" 
     d:DesignWidth="800" 
-    d:DesignHeight="1200"
+    d:DesignHeight="1000"
     Height="800"
-    Width="1200"
-    Icon="avares://dlTubeAvalonia/Assets/avalonia-logo.ico"
+    Width="1000"
+    Icon="avares://dlTubeAvalonia/Assets/avalonia_logo.ico"
     Title="dlTubeAvalonia">
 
     <!-- Data Context -->

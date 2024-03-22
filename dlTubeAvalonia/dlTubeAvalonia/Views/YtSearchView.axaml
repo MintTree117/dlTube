@@ -21,14 +21,13 @@
                 <Button
                     Grid.Column="0"
                     Classes="LogoButton"
-                    CornerRadius="15"
                     CommandParameter="https://www.youtube.com/"
                     Click="OnClickLink">
                     <Button.Background>
                         <ImageBrush
                             Stretch="UniformToFill"
-                            Opacity="0.9"
-                            Source="avares://dlTubeAvalonia/Assets/youtube.jpg">
+                            Opacity="0.8"
+                            Source="avares://dlTubeAvalonia/Assets/youtube_logo.jpg">
                         </ImageBrush>
                     </Button.Background>
                 </Button>

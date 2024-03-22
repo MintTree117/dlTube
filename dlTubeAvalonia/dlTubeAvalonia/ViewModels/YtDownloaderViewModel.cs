@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using ReactiveUI;
@@ -24,7 +23,7 @@ public sealed class YtDownloaderViewModel : BaseViewModel
     const string InvalidVideoName = "Invalid Video Link";
     const string SuccessDownloadMessage = "Download success!";
     const string FailDownloadMessage = "Failed to download!";
-    const string DefaultVideoImage = "avares://dlTubeAvalonia/Assets/defaultplayer3.jpg";
+    const string DefaultVideoImage = "avares://dlTubeAvalonia/Assets/default_stream_image.png";
     
     // Property Field List Values
     Bitmap? _videoImageBitmap;

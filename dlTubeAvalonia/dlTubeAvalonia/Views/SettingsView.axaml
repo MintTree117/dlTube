@@ -7,10 +7,15 @@
 	xmlns:views="clr-namespace:dlTubeAvalonia.Views">
 
 	<!-- Content -->
-	<StackPanel VerticalAlignment="Center" MaxWidth="800" IsEnabled="{Binding IsFree} ">
+	<StackPanel 
+		VerticalAlignment="Top"
+		MaxWidth="600"
+		Margin="0,100,0,0"
+		IsEnabled="{Binding IsFree} ">
 		<!-- Title -->
 		<TextBlock
 			Classes="PageTitle"
+			HorizontalAlignment="Center"
 			Text="App Settings" />
 		<!-- Title Separator -->
 		<Border Classes="TitleSeparator"/>
