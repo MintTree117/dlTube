@@ -37,8 +37,4 @@ public partial class ResultMessage : UserControl
     {
         AvaloniaXamlLoader.Load( this );
     }
-    void Close( object? sender, RoutedEventArgs args )
-    {
-        //IsVisible = false;
-    }
 }
