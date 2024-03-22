@@ -19,7 +19,7 @@ public sealed class SettingsViewModel : BaseViewModel
     public ReactiveCommand<Unit, Unit> SaveChangesCommand { get; }
     
     // Constructor
-    public SettingsViewModel() : base( TryGetLogger<SettingsViewModel>() )
+    public SettingsViewModel()
     {
         SaveChangesCommand = ReactiveCommand.CreateFromTask( SaveSettings );
         

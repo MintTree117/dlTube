@@ -27,6 +27,8 @@ sealed class Program
 
     static void ConfigureServices( IServiceCollection services )
     {
+        services.AddLogging(co => co.SetMinimumLevel( LogLevel.Information ));
+        services.AddSingleton<FileLogger>();
         services.AddSingleton<SettingsManager>();
         services.AddSingleton<YoutubeClientHolder>();
         services.AddSingleton<HttpController>();
@@ -34,8 +36,6 @@ sealed class Program
         services.AddSingleton<YoutubeBrowser>();
         services.AddSingleton<FFmpegChecker>();
         services.AddSingleton<ArchiveService>();
-        services.AddScoped<ImageLoader>();
-        services.AddLogging( configure => { } );
     }
 
     static AppBuilder BuildAvaloniaApp()

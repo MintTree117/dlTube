@@ -21,6 +21,7 @@
                 <Button
                     Grid.Column="0"
                     Classes="LogoButton"
+                    CornerRadius="15"
                     CommandParameter="https://www.youtube.com/"
                     Click="OnClickLink">
                     <Button.Background>
@@ -51,6 +52,7 @@
                     Classes="SearchDropdown"
                     HorizontalAlignment="Right"
                     Margin="0,0,10,0"
+                    Width="175"
                     ItemsSource="{Binding SortTypes}"
                     SelectedItem="{Binding SelectedSortType}" />
                 <!-- Results Dropdown -->
@@ -58,6 +60,7 @@
                     Grid.Column="4"
                     Classes="SearchDropdown"
                     HorizontalAlignment="Right"
+                    Width="175"
                     ItemsSource="{Binding ResultCountNames}"
                     SelectedItem="{Binding SelectedResultCountName}" />
             </Grid>
@@ -67,7 +70,6 @@
         <views:ResultMessage 
             Grid.Row="1"
             Text="{Binding Message}"
-            HideOnClose="True"
             CloseCommand="{Binding CloseMessageCommand}"
             IsVisible="{Binding HasMessage}" />
         

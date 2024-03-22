@@ -8,8 +8,8 @@ public sealed partial class SettingsView : UserControl
 {
     public SettingsView()
     {
+        DataContext = new SettingsViewModel();
         InitializeComponent();
-        this.DataContext = new SettingsViewModel();
     }
     void InitializeComponent()
     {

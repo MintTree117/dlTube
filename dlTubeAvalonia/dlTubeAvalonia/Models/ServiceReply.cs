@@ -51,7 +51,7 @@ public sealed record ServiceReply<T>
     {
         return $"{ErrorType} : {Message}";
     }
-    public static ServiceErrorType GetHttpServiceErrorType(HttpStatusCode statusCode)
+    public static ServiceErrorType GetHttpError(HttpStatusCode statusCode)
     {
         return statusCode switch
         {

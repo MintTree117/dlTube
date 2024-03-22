@@ -5,17 +5,14 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using dlTubeAvalonia.Models;
 
 namespace dlTubeAvalonia.Services;
 
 // Singleton Service
-public class HttpController
+public class HttpController : BaseService
 {
     readonly HttpClient _http = new();
-    readonly ILogger<HttpController>? _logger = Program.ServiceProvider.GetService<ILogger<HttpController>>();
     
     public async Task<ServiceReply<Stream?>> TryGetStream( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
     {
@@ -29,8 +26,7 @@ public class HttpController
         }
         catch ( Exception e )
         {
-            _logger?.LogError( e, e.Message );
-            return HandleHttpException<Stream?>( e, "Get" );
+            return HandleHttpException<Stream?>( e, "Get-Stream" );
         }
     }
     public async Task<ServiceReply<T?>> TryGetRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
@@ -137,14 +133,14 @@ public class HttpController
     async Task<ServiceReply<T?>> HandleHttpError<T>( HttpResponseMessage httpResponse )
     {
         string errorContent = await httpResponse.Content.ReadAsStringAsync();
-        ServiceErrorType errorType = ServiceReply<object>.GetHttpServiceErrorType( httpResponse.StatusCode );
-        _logger?.LogError( $"{errorContent}" );
+        ServiceErrorType errorType = ServiceReply<object>.GetHttpError( httpResponse.StatusCode );
+        Logger.LogWithConsole( $"{errorContent}" );
         return new ServiceReply<T?>( errorType, errorContent );
     }
     
     ServiceReply<T?> HandleHttpException<T>( Exception e, string requestType )
     {
-        _logger?.LogError( e, e.Message );
+        Logger.LogWithConsole( ExString( e ) );
         return new ServiceReply<T?>( ServiceErrorType.ServerError, $"{requestType}: Exception occurred while sending API request." );
     }
     void SetAuthHttpHeader( string? token )

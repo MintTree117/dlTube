@@ -9,24 +9,29 @@ using Avalonia.Media.Imaging;
 using dlTubeAvalonia.Models;
 using dlTubeAvalonia.Services;
 using dlTubeAvalonia.ViewModels;
-using Microsoft.Extensions.Logging;
 
 namespace dlTubeAvalonia.Views;
 
-public sealed partial class MainWindow : Window
+public sealed partial class MainWindow : Window, IDisposable
 {
-    // Services & Views
-    readonly ILogger<MainWindow>? _logger = Program.ServiceProvider.GetService<ILogger<MainWindow>>();
+    // Services
+    readonly FileLogger _logger = Program.ServiceProvider.GetService<FileLogger>()!;
     readonly SettingsManager SettingsService = Program.ServiceProvider.GetService<SettingsManager>()!;
+    
+    // Cached Views
     readonly YtDownloaderView _downloadView;
     YtSearchView? _youtubeView;
     ArchiveView? _archiveView;
     
     // Initialization
+    public void Dispose()
+    {
+        SettingsService.SettingsChanged -= OnChangeSettings;
+    }
     public MainWindow()
     {
+        DataContext = new MainWindowViewModel();
         InitializeComponent();
-        this.DataContext = new MainWindowViewModel();
         
         _downloadView = new YtDownloaderView();
         MainContent.Content = _downloadView;
@@ -40,7 +45,7 @@ public sealed partial class MainWindow : Window
         base.OnClosed( e );
     }
     
-    // Private Methods
+    // UI Event Methods
     void OnChangeSettings( AppSettingsModel? newSettings )
     {
         string? img = newSettings?.SelectedBackgroundImage;
@@ -63,7 +68,7 @@ public sealed partial class MainWindow : Window
         }
         catch ( Exception e )
         {
-            _logger?.LogError( e, e.Message );
+            _logger.LogWithConsole( $"{e} : {e.Message}" );
             return;
         }
         

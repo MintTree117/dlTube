@@ -2,14 +2,12 @@ using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using dlTubeAvalonia.Models;
 
 namespace dlTubeAvalonia.Services;
 
 // Singleton Service
-public sealed class SettingsManager
+public sealed class SettingsManager : BaseService
 {
     // Change Event
     public event Action<AppSettingsModel>? SettingsChanged;
@@ -20,9 +18,6 @@ public sealed class SettingsManager
     const string CachePath = CacheDirectory + "/Cache.txt";
     const string FailLoadMessage = "Failed to load settings file! You can still make changes, but they might not be saved once you close the app.";
     const string FailedSaveMessage = "Failed to save settings to disk! Changes will still persist until you close the app.";
-    
-    // Services
-    readonly ILogger<SettingsManager>? _logger = Program.ServiceProvider.GetService<ILogger<SettingsManager>>();
     
     // Settings Model
     public AppSettingsModel Settings { get; private set; }
@@ -39,7 +34,7 @@ public sealed class SettingsManager
         {
             if ( !File.Exists( CachePath ) )
             {
-                _logger?.LogError( "Settings file doesn't exist" );
+                Logger.LogWithConsole( $"{ServiceErrorType.IoError} : Settings file doesn't exist" );
                 return Settings;
             }
             
@@ -54,7 +49,7 @@ public sealed class SettingsManager
         }
         catch ( Exception e )
         {
-            _logger?.LogError( e, e.Message );
+            Logger.LogWithConsole( ExString( e ) );
             return Settings;
         }
     }
@@ -68,8 +63,8 @@ public sealed class SettingsManager
                 return new ServiceReply<AppSettingsModel>( Settings, ServiceErrorType.NotFound, FailLoadMessage );
             
             string json = await File.ReadAllTextAsync( CachePath );
-            JsonSerializer.Deserialize<object>( json );
             var loadedSettings = JsonSerializer.Deserialize<AppSettingsModel>( json );
+            
             bool loaded = loadedSettings is not null;
 
             if ( loaded )
@@ -81,8 +76,8 @@ public sealed class SettingsManager
         }
         catch ( Exception e )
         {
-            _logger?.LogError( e, e.Message );
-            return new ServiceReply<AppSettingsModel>(ServiceErrorType.IoError, FailLoadMessage );
+            Logger.LogWithConsole( ExString( e ) );
+            return new ServiceReply<AppSettingsModel>( ServiceErrorType.IoError, FailLoadMessage );
         }
     }
     public async Task<ServiceReply<bool>> SaveSettings( AppSettingsModel newSettings )
@@ -102,7 +97,7 @@ public sealed class SettingsManager
         }
         catch ( Exception e )
         {
-            _logger?.LogError( e, e.Message );
+            Logger.LogWithConsole( ExString( e ) );
             return new ServiceReply<bool>( ServiceErrorType.IoError, FailedSaveMessage );
         }
         finally

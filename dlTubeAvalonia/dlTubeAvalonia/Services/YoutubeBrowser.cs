@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Avalonia.Media.Imaging;
@@ -8,14 +9,14 @@ using dlTubeAvalonia.Models;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class YoutubeBrowser
+public sealed class YoutubeBrowser : BaseService
 {
     // Constants
     const int MaxSearchResults = 200;
     
     // Services
     readonly YoutubeClientHolder _youtubeService = Program.ServiceProvider.GetService<YoutubeClientHolder>()!;
-    readonly ImageLoader _imageLoader = Program.ServiceProvider.GetService<ImageLoader>()!;
+    readonly HttpController _http = Program.ServiceProvider.GetService<HttpController>()!;
 
     // Public Methods
     public async Task<ServiceReply<IReadOnlyList<YoutubeSearchResult>>> GetStreams( string query, int resultsPerPage )
@@ -48,7 +49,7 @@ public sealed class YoutubeBrowser
                 ? v.Thumbnails[ 0 ].Url
                 : "";
             
-            ServiceReply<Bitmap?> reply = await _imageLoader.GetImageBitmap( url );
+            ServiceReply<Bitmap?> reply = await GetImageBitmap( url );
             
             customResults.Add( new YoutubeSearchResult
             {
@@ -60,5 +61,29 @@ public sealed class YoutubeBrowser
         }
         
         return new ServiceReply<IReadOnlyList<YoutubeSearchResult>>( customResults );
+    }
+
+    async Task<ServiceReply<Bitmap?>> GetImageBitmap( string imageUrl )
+    {
+        ServiceReply<Stream?> reply = await _http.TryGetStream( imageUrl );
+
+        if ( !reply.Success || reply.Data is null )
+            return new ServiceReply<Bitmap?>( reply.ErrorType, reply.Message );
+
+        Stream stream = reply.Data;
+        stream.Position = 0; // Never forget again! Stream pointer/index lol
+
+        try
+        {
+            Bitmap map = new( stream );
+            await stream.DisposeAsync();
+            return new ServiceReply<Bitmap?>( map );
+        }
+        catch ( Exception e )
+        {
+            Logger.LogWithConsole( ExString( e ) );
+            await stream.DisposeAsync();
+            return new ServiceReply<Bitmap?>( ServiceErrorType.AppError, "Fail get image stream" );
+        }
     }
 }

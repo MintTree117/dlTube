@@ -1,7 +1,6 @@
 using System;
 using System.Reactive;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using dlTubeAvalonia.Models;
 using dlTubeAvalonia.Services;
@@ -11,7 +10,7 @@ namespace dlTubeAvalonia.ViewModels;
 public abstract class BaseViewModel : ReactiveObject, IDisposable
 {
     // Services
-    protected readonly ILogger<BaseViewModel>? Logger;
+    protected readonly FileLogger Logger = Program.ServiceProvider.GetService<FileLogger>()!;
     protected readonly SettingsManager SettingsService = Program.ServiceProvider.GetService<SettingsManager>()!;
     
     // Reactive Property Fields
@@ -26,13 +25,10 @@ public abstract class BaseViewModel : ReactiveObject, IDisposable
     public void Dispose()
     {
         GC.SuppressFinalize( this ); // Rider Suggested Optimization
-        
-        if ( SettingsService is not null )
-            SettingsService.SettingsChanged -= OnAppSettingsChanged;
+        SettingsService.SettingsChanged -= OnAppSettingsChanged;
     }
-    protected BaseViewModel( ILogger<BaseViewModel>? logger )
+    protected BaseViewModel()
     {
-        Logger = logger;
         CloseMessageCommand = ReactiveCommand.Create( CloseMessage );
     }
     
@@ -58,9 +54,11 @@ public abstract class BaseViewModel : ReactiveObject, IDisposable
     {
         
     }
-    protected static ILogger<T>? TryGetLogger<T>()
+    protected static string ExString( Exception e, string? message = null )
     {
-        return Program.ServiceProvider.GetService<ILogger<T>>();
+        return string.IsNullOrWhiteSpace( message )
+            ? $"{e} : {e.Message}"
+            : $"{message} : {e} : {e.Message}";
     }
     public void ShowMessage( string message )
     {

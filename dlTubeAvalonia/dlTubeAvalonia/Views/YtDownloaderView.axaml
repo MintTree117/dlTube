@@ -83,7 +83,6 @@
         <views:ResultMessage
             Margin="0,15,0,0"
             Text="{Binding Message}"
-            HideOnClose="True"
             CloseCommand="{Binding CloseMessageCommand}"
             IsVisible="{Binding HasMessage}" />
         </StackPanel>

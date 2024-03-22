@@ -7,17 +7,21 @@ using Avalonia.Markup.Xaml;
 namespace dlTubeAvalonia.Views;
 
 public partial class ResultMessage : UserControl
-{
-    public bool HideOnClose { get; set; }
+{   
+    // Define the Text property using Avalonia's property system
+    public static readonly StyledProperty<string> TextProperty = AvaloniaProperty.Register<ResultMessage, string>( 
+        nameof( Text ), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay );
+    
+    // ^ Bound to ViewModel through axaml declaration and to local static property ^
     public string Text
     {
         get => GetValue( TextProperty );
         set => SetValue( TextProperty, value );
     }
     
-    // Define the Text property using Avalonia's property system
-    public static readonly StyledProperty<string> TextProperty = AvaloniaProperty.Register<ResultMessage, string>( nameof( Text ), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay );
+    // Close command property registration so I can call this command from my button
     public static readonly StyledProperty<ICommand> CloseCommandProperty = AvaloniaProperty.Register<ResultMessage, ICommand>( nameof( CloseCommand ) );
+    // ^^
     public ICommand CloseCommand
     {
         get => GetValue( CloseCommandProperty );
@@ -33,9 +37,8 @@ public partial class ResultMessage : UserControl
     {
         AvaloniaXamlLoader.Load( this );
     }
-
     void Close( object? sender, RoutedEventArgs args )
     {
-        IsVisible = false;
+        //IsVisible = false;
     }
 }

@@ -2,7 +2,7 @@
 
 public sealed class MainWindowViewModel : BaseViewModel
 {
-    public MainWindowViewModel() : base( TryGetLogger<MainWindowViewModel>() )
+    public MainWindowViewModel()
     {
         IsFree = true;
     }

@@ -80,7 +80,6 @@
 		<views:ResultMessage
 			Grid.Row="1"
 			Text="{Binding Message}"
-			HideOnClose="True"
 			CloseCommand="{Binding CloseMessageCommand}"
 			IsVisible="{Binding HasMessage}" />
 

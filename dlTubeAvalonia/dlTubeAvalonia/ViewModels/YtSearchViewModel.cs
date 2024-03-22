@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -37,7 +36,7 @@ public sealed class YtSearchViewModel : BaseViewModel
     public ReactiveCommand<string, Unit> CopyUrlCommand { get; }
     
     // Constructor
-    public YtSearchViewModel() : base( TryGetLogger<YtSearchViewModel>() )
+    public YtSearchViewModel()
     {
         SortTypes = GetSortTypeNames();
         ResultCountNames = GetResultsPerPageNames( _resultCounts );
@@ -102,10 +101,15 @@ public sealed class YtSearchViewModel : BaseViewModel
 
         ServiceReply<IReadOnlyList<YoutubeSearchResult>> searchReply = await _youtubeSearchService.GetStreams( _searchText, _resultCounts[ resultCountIndex ] );
 
-        bool success = searchReply is { Success: true, Data: not null };
-        SearchResults = ( success ? searchReply.Data : new List<YoutubeSearchResult>() )!;
-        Message = ServiceErrorType.NotFound.ToString();
-        HasMessage = true;
+        if ( searchReply is { Success: true, Data: not null } )
+        {
+            SearchResults = searchReply.Data;
+            IsFree = true;
+            return;
+        }
+
+        SearchResults = new List<YoutubeSearchResult>();
+        ShowMessage( $"Failed to search : {searchReply.PrintDetails()}" );
         
         IsFree = true;
     }
@@ -126,7 +130,7 @@ public sealed class YtSearchViewModel : BaseViewModel
 
             if ( mainWindow?.Clipboard is null )
             {
-                Logger?.LogError( "Failed to obtain clipboard from main window!" );
+                Logger.LogWithConsole( "Failed to obtain clipboard from main window!" );
                 ShowMessage( "Failed to copy youtube link to clipboard!" );
                 return;
             }
@@ -135,7 +139,7 @@ public sealed class YtSearchViewModel : BaseViewModel
         }
         catch ( Exception e )
         {
-            Logger?.LogError( e, e.Message );
+            Logger.LogWithConsole( ExString( e ) );
             ShowMessage( $"{ServiceErrorType.AppError.ToString()} : Failed to copy youtube link to clipboard!" );
         }
     }
@@ -162,14 +166,14 @@ public sealed class YtSearchViewModel : BaseViewModel
 
         if ( string.IsNullOrWhiteSpace( _searchText ) )
         {
-            Logger?.LogError( "Search text is null!" );
+            Logger.LogWithConsole( "Search text is null!" );
             ShowMessage( "Search text is null!" );
             return false;
         }
         
         if ( !_resultCountNames.Contains( _selectedResultCountName ) )
         {
-            Logger?.LogError( "_resultCountNames out of bounds!" );
+            Logger.LogWithConsole( "_resultCountNames out of bounds!" );
             ShowMessage( "Invalid _selectedResultsPerPage" );
             return false;
         }
@@ -178,7 +182,7 @@ public sealed class YtSearchViewModel : BaseViewModel
 
         if ( resultCountIndex < 0 || resultCountIndex > _resultCounts.Count )
         {
-            Logger?.LogError( "resultCountIndex out of bounds!" );
+            Logger.LogWithConsole( "resultCountIndex out of bounds!" );
             ShowMessage( "Invalid _selectedResultsPerPage" );
             return false;
         }
@@ -205,12 +209,14 @@ public sealed class YtSearchViewModel : BaseViewModel
                 YoutubeSortType.Default => SearchResults,
                 YoutubeSortType.Alphabetical => _searchResults.OrderBy( r => r.Title ).ToList(),
                 YoutubeSortType.Duration => _searchResults.OrderBy( r => r.Duration ).ToList(),
+                YoutubeSortType.AlphabeticalReverse => _searchResults.OrderBy( r => r.Duration ).Reverse().ToList(),
+                YoutubeSortType.DurationReverse => _searchResults.OrderBy( r => r.Duration ).Reverse().ToList(),
                 _ => SearchResults
             };
         }
         catch ( Exception e )
         {
-            Logger?.LogError( e, e.Message );
+            Logger.LogWithConsole( ExString( e ) );
             ShowMessage( $"{ServiceErrorType.AppError} : An error occured while updating sort dropdown." );
         }
 

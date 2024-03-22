@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using dlTubeAvalonia.Enums;
 using dlTubeAvalonia.Models;
@@ -44,13 +43,10 @@ public sealed class ArchiveViewModel : BaseViewModel
     public ReactiveCommand<string, Unit> DownloadCommand { get; }
     
     // Constructor
-    public ArchiveViewModel() : base( TryGetLogger<ArchiveViewModel>() )
+    public ArchiveViewModel()
     {
         SearchCommand = ReactiveCommand.CreateFromTask( SearchArchive );
         DownloadCommand = ReactiveCommand.CreateFromTask<string>( async ( id ) => await DownloadArchiveItem( id ) );
-
-        if ( this.SettingsService is null )
-            return;
         
         _streamTypes = GetStreamFilterTypeNames();
         _sortTypes = GetStreamSortTypeNames();
@@ -67,7 +63,7 @@ public sealed class ArchiveViewModel : BaseViewModel
         }
         catch ( Exception e )
         {
-            Logger?.LogError( e, e.Message );
+            Logger.LogWithConsole( ExString( e ) );
         }
 
         IsFree = true;
@@ -80,7 +76,7 @@ public sealed class ArchiveViewModel : BaseViewModel
 
         if ( !reply.Success || reply.Data is null )
         {
-            Logger?.LogError( reply.PrintDetails() );
+            Logger.LogWithConsole( reply.PrintDetails() );
             ShowMessage( reply.PrintDetails() );
             return;
         }

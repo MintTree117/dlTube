@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using ReactiveUI;
@@ -45,10 +43,8 @@ public sealed class YtDownloaderViewModel : BaseViewModel
     ReactiveCommand<Unit, Unit> NewStreamCommand { get; }
 
     // Constructor
-    public YtDownloaderViewModel() : base( TryGetLogger<YtDownloaderViewModel>() )
+    public YtDownloaderViewModel()
     {
-        TryGetDownloadService( ref _dlService );
-        
         LoadDataCommand = ReactiveCommand.CreateFromTask( HandleNewLink );
         DownloadCommand = ReactiveCommand.CreateFromTask( DownloadStream );
         NewStreamCommand = ReactiveCommand.CreateFromTask( HandleNewStreamType );
@@ -59,18 +55,6 @@ public sealed class YtDownloaderViewModel : BaseViewModel
         
         // Load Initial Settings
         OnAppSettingsChanged( SettingsService.Settings );
-    }
-
-    void TryGetDownloadService( ref YoutubeDownloader? dlService )
-    {
-        try
-        {
-            dlService = Program.ServiceProvider.GetService<YoutubeDownloader>();
-        }
-        catch ( Exception e )
-        {
-            Logger?.LogError( e, e.Message );
-        }
     }
 
     // Reactive Properties
@@ -140,9 +124,9 @@ public sealed class YtDownloaderViewModel : BaseViewModel
         
         if ( !reply.Success )
         {
-            Logger?.LogError( $"Failed to obtain stream manifest! Reply message: {reply.PrintDetails()}" );
+            Logger.LogWithConsole( $"Failed to obtain stream manifest! Reply message: {reply.PrintDetails()}" );
             VideoName = InvalidVideoName;
-            Message = PrintError( reply.ErrorType.ToString() ); //reply.PrintDetails();
+            Message = PrintError( reply.ErrorType.ToString() );
             HasMessage = true;
             _dlService = null;
             return;
@@ -184,7 +168,7 @@ public sealed class YtDownloaderViewModel : BaseViewModel
     {
         if ( _dlService is null || !Enum.TryParse( _selectedStreamTypeName, out StreamType streamType ) )
         {
-            Logger?.LogError( $"Failed to handle new stream type!" );
+            Logger.LogWithConsole( $"Failed to handle new stream type!" );
             Message = PrintError( ServiceErrorType.AppError.ToString() );
             return;
         }
@@ -193,7 +177,7 @@ public sealed class YtDownloaderViewModel : BaseViewModel
 
         StreamQualities = streamQualities.Count > 0
             ? streamQualities
-            : [ ];//[ DefaultVideoQuality ];
+            : [ ];
 
         SelectedStreamQuality = string.Empty;
     }
@@ -233,21 +217,21 @@ public sealed class YtDownloaderViewModel : BaseViewModel
         // No Service
         if ( _dlService is null )
         {
-            Logger?.LogError( "Youtube download service is null!" );
+            Logger.LogWithConsole( "Youtube download service is null!" );
             Message = PrintError( ServiceErrorType.AppError.ToString() );
             return false;
         }
         // Invalid Selected Stream Type
         if ( !Enum.TryParse( _selectedStreamTypeName, out streamType ) )
         {
-            Logger?.LogError( "Invalid Stream Type!" );
+            Logger.LogWithConsole( "Invalid Stream Type!" );
             Message = PrintError( ServiceErrorType.AppError.ToString() );
             return false;
         }
         // Invalid Selected Stream Quality
         if ( !_streamQualities.Contains( _selectedStreamQualityName ) )
         {
-            Logger?.LogError( "Invalid _selectedStreamQualityName!" );
+            Logger.LogWithConsole( "Invalid _selectedStreamQualityName!" );
             Message = PrintError( ServiceErrorType.AppError.ToString() );
             return false;
         }

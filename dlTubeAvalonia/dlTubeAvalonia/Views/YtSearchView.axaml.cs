@@ -1,25 +1,25 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using dlTubeAvalonia.Models;
+using dlTubeAvalonia.Services;
 using dlTubeAvalonia.ViewModels;
 
 namespace dlTubeAvalonia.Views;
 
 public partial class YtSearchView : UserControl
 {
-    readonly ILogger<YtSearchView>? _logger = Program.ServiceProvider.GetService<ILogger<YtSearchView>>();
+    readonly FileLogger _logger = Program.ServiceProvider.GetService<FileLogger>()!;
     readonly YtSearchViewModel _viewModel;
     
     public YtSearchView()
     {
-        InitializeComponent();
         _viewModel = new YtSearchViewModel();
-        this.DataContext = _viewModel;
+        DataContext = _viewModel;
+        InitializeComponent();
     }
     
     void InitializeComponent()
@@ -47,11 +47,11 @@ public partial class YtSearchView : UserControl
         _viewModel.CopyUrlCommand.Execute( url );
     }
     
-    // Here instead of view model because of weird binding issue: as of this comment Avalonia still has quirks
+    // TODO: Fix - Here instead of view model because of weird binding issue: as of this comment Avalonia still has quirks
     void GoToYoutube( string url )
     {
         Process p = new();
-        
+
         try
         {
             p.StartInfo.FileName = url;
@@ -62,9 +62,13 @@ public partial class YtSearchView : UserControl
         }
         catch ( Exception e )
         {
-            p.Kill();
-            _logger?.LogError( e, e.Message );
+            _logger.LogWithConsole( $"{e} : {e.Message}" );
             _viewModel.ShowMessage( $"{ServiceErrorType.AppError} : Failed to open link!" );
+        }
+        finally
+        {
+            if ( !p.HasExited )
+                p.Kill();
         }
     }
 }

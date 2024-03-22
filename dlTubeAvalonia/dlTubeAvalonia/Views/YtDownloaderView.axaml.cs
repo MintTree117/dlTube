@@ -8,10 +8,9 @@ public sealed partial class YtDownloaderView : UserControl
 {
     public YtDownloaderView()
     {
+        DataContext = new YtDownloaderViewModel();
         InitializeComponent();
-        this.DataContext = new YtDownloaderViewModel();
     }
-    
     void InitializeComponent()
     {
         AvaloniaXamlLoader.Load( this );

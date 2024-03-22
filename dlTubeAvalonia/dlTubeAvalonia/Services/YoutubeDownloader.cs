@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Avalonia.Media.Imaging;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
@@ -14,14 +13,13 @@ using dlTubeAvalonia.Models;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class YoutubeDownloader( string videoUrl )
+public sealed class YoutubeDownloader( string videoUrl ) : BaseService
 {
     // Constants
     const string TempThumbnailFileName = "thumbnail.jpg";
     const string TempThumbnailConvertedFileName = "thumbnail_converted.jpg";
     
     // Services
-    readonly ILogger<YoutubeDownloader>? _logger = Program.ServiceProvider.GetService<ILogger<YoutubeDownloader>>();
     readonly YoutubeClientHolder _youtubeService = Program.ServiceProvider.GetService<YoutubeClientHolder>()!;
     readonly FFmpegChecker _ffmpegService = Program.ServiceProvider.GetService<FFmpegChecker>()!;
     readonly HttpController _httpService = Program.ServiceProvider.GetService<HttpController>()!;
@@ -70,7 +68,7 @@ public sealed class YoutubeDownloader( string videoUrl )
         }
         catch ( Exception e )
         {
-            _logger?.LogError( e, e.Message );
+            Logger.LogWithConsole( ExString( e ) );
             return new ServiceReply<bool>( ServiceErrorType.ServerError );
         }
     }
@@ -107,7 +105,7 @@ public sealed class YoutubeDownloader( string videoUrl )
         }
         catch ( Exception e )
         {
-            _logger?.LogError( e, e.Message );
+            Logger.LogWithConsole( ExString( e ) );
             return new ServiceReply<bool>( ServiceErrorType.ServerError );
         }
     }
@@ -192,12 +190,13 @@ public sealed class YoutubeDownloader( string videoUrl )
         if ( !reply.Success || reply.Data is null )
             return;
         
-        reply.Data.Position = 0;
+        reply.Data.Position = 0; // reset stream pointer!
         _thumbnailBitmap = new Bitmap( reply.Data );
         
         await using MemoryStream memoryStream = new();
         await reply.Data.CopyToAsync( memoryStream );
         await reply.Data.DisposeAsync();
+        
         _thumbnailBytes = memoryStream.ToArray();
     }
     async Task AddImage( string videoPath )
@@ -223,7 +222,7 @@ public sealed class YoutubeDownloader( string videoUrl )
         }
         catch ( Exception e )
         {
-            _logger?.LogError( e, e.Message );
+            Logger.LogWithConsole( ExString( e ) );
         }
         finally
         {
@@ -237,45 +236,54 @@ public sealed class YoutubeDownloader( string videoUrl )
                 File.Delete( tempVideoPath );
         }
     }
-    static async Task CreateJpgCopyFFMPEG( string inputPath, string outputPath )
+    async Task CreateJpgCopyFFMPEG( string inputPath, string outputPath )
     {
-        ProcessStartInfo conversionProcessStartInfo = new()
-        {
-            FileName = "ffmpeg",
-            Arguments = $"-i \"{inputPath}\" \"{outputPath}\"",
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-        };
-        
         using Process conversionProcess = new();
-        conversionProcess.StartInfo = conversionProcessStartInfo;
-        conversionProcess.Start();
-        await conversionProcess.WaitForExitAsync();
-    }
-    static async Task CreateVideoWithImageFFMPEG( string videoPath, string convertedThumbnailPath, string tempOutputPath )
-    {
-        ProcessStartInfo processStartInfo = new()
+        conversionProcess.StartInfo.FileName = "ffmpeg";
+        conversionProcess.StartInfo.Arguments = $"-i \"{inputPath}\" \"{outputPath}\"";
+        conversionProcess.StartInfo.RedirectStandardOutput = true;
+        conversionProcess.StartInfo.RedirectStandardError = true;
+        conversionProcess.StartInfo.UseShellExecute = false;
+        conversionProcess.StartInfo.CreateNoWindow = true;
+
+        try
         {
-            FileName = "ffmpeg", // Or the full path to the ffmpeg executable
-            Arguments = $"-i \"{videoPath}\" -i \"{convertedThumbnailPath}\" -map 0 -map 1 -c copy -disposition:v:1 attached_pic \"{tempOutputPath}\"",
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-        };
+            conversionProcess.Start();
+            await conversionProcess.WaitForExitAsync();
+        }
+        catch ( Exception e )
+        {
+            Logger.LogWithConsole( ExString( e ) );
+        }
+        finally
+        {
+            if ( !conversionProcess.HasExited )
+                conversionProcess.Kill();
+        }
+    }
+    async Task CreateVideoWithImageFFMPEG( string videoPath, string convertedThumbnailPath, string tempOutputPath )
+    {
+        using Process createProcess = new();
+        createProcess.StartInfo.FileName = "ffmpeg"; // Or the full path to the ffmpeg executable
+        createProcess.StartInfo.Arguments = $"-i \"{videoPath}\" -i \"{convertedThumbnailPath}\" -map 0 -map 1 -c copy -disposition:v:1 attached_pic \"{tempOutputPath}\"";
+        createProcess.StartInfo.RedirectStandardOutput = true;
+        createProcess.StartInfo.RedirectStandardError = true;
+        createProcess.StartInfo.UseShellExecute = false;
+        createProcess.StartInfo.CreateNoWindow = true;
 
-        using Process process = new();
-        process.StartInfo = processStartInfo;
-        process.Start();
-        
-        //string output = await process.StandardOutput.ReadToEndAsync();
-        //string error = await process.StandardError.ReadToEndAsync();
-        
-        await process.WaitForExitAsync();
-
-        //Console.WriteLine( output );
-        //Console.WriteLine( error );
+        try
+        {
+            createProcess.Start();
+            await createProcess.WaitForExitAsync();
+        }
+        catch ( Exception e )
+        {
+            Logger.LogWithConsole( ExString( e ) );
+        }
+        finally
+        {
+            if ( !createProcess.HasExited )
+                createProcess.Kill();
+        }
     }
 }

@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using dlTubeAvalonia.Models;
 
 namespace dlTubeAvalonia.Services;
 
-public sealed class ArchiveService
+public sealed class ArchiveService : BaseService
 {
     // Constants
     const string ApiPath = "api/archive";
@@ -16,7 +15,6 @@ public sealed class ArchiveService
     const string ApiPathSearch = $"{ApiPath}/search";
     
     // Services
-    readonly ILogger<ArchiveService>? _logger = Program.ServiceProvider.GetService<ILogger<ArchiveService>>();
     readonly HttpController _http = Program.ServiceProvider.GetService<HttpController>()!;
     
     // Public Methods
@@ -45,7 +43,7 @@ public sealed class ArchiveService
         }
         catch ( Exception e )
         {
-            _logger?.LogError( e, e.Message );
+            Logger.LogWithConsole( ExString( e ) );
             return new ServiceReply<bool>( ServiceErrorType.IoError, "Error at file creation/write!" );
         }
     }

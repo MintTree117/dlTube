@@ -35,7 +35,7 @@
 				Margin="0,20,20,20"
 				Padding="15"
 				Content="Ok"
-				Click="Close">
+				Command="{Binding CloseMessageCommand}">
 			</Button>
 		</Grid>
 	</Border>
