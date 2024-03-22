@@ -13,6 +13,7 @@ public sealed record AppSettingsModel
     public static IReadOnlyList<string> BackgroundImages { get; } = [
         TransparentBackgroundKeyword,
         "dlTubeAvalonia.Assets.Backgrounds.space.jpg",
+        "dlTubeAvalonia.Assets.Backgrounds.night_lights.jpg",
         "dlTubeAvalonia.Assets.Backgrounds.forest.jpg",
         "dlTubeAvalonia.Assets.Backgrounds.concert.jpg",
     ];
