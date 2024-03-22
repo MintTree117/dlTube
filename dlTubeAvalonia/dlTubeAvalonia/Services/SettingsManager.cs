@@ -35,7 +35,7 @@ public sealed class SettingsManager : BaseService
             if ( !File.Exists( CachePath ) )
             {
                 Logger.LogWithConsole( $"{ServiceErrorType.IoError} : Settings file doesn't exist" );
-                return Settings;
+                return new AppSettingsModel();
             }
             
             string json = File.ReadAllText( CachePath );
@@ -50,7 +50,7 @@ public sealed class SettingsManager : BaseService
         catch ( Exception e )
         {
             Logger.LogWithConsole( ExString( e ) );
-            return Settings;
+            return new AppSettingsModel();
         }
     }
     

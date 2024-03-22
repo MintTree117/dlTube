@@ -24,9 +24,9 @@ public sealed class SettingsViewModel : BaseViewModel
         SaveChangesCommand = ReactiveCommand.CreateFromTask( SaveSettings );
         
         BackgroundImages = AppSettingsModel.BackgroundImages;
-        ApiKey = SettingsService.Settings.ApiKey;
-        DownloadLocation = SettingsService.Settings.DownloadLocation;
-        SelectedBackgroundImage = SettingsService.Settings.SelectedBackgroundImage;
+        ApiKey = SettingsManager.Settings.ApiKey;
+        DownloadLocation = SettingsManager.Settings.DownloadLocation;
+        SelectedBackgroundImage = SettingsManager.Settings.SelectedBackgroundImage;
 
         IsFree = true;
     }
@@ -89,7 +89,7 @@ public sealed class SettingsViewModel : BaseViewModel
             SelectedBackgroundImage = _selectedBackgroundImage
         };
 
-        ServiceReply<bool> reply = await SettingsService.SaveSettings( settings );
+        ServiceReply<bool> reply = await SettingsManager.SaveSettings( settings );
         
         Message = reply.Success
             ? "Saved Settings To Disk."

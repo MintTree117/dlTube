@@ -27,7 +27,6 @@ sealed class Program
 
     static void ConfigureServices( IServiceCollection services )
     {
-        services.AddLogging(co => co.SetMinimumLevel( LogLevel.Information ));
         services.AddSingleton<FileLogger>();
         services.AddSingleton<SettingsManager>();
         services.AddSingleton<YoutubeClientHolder>();

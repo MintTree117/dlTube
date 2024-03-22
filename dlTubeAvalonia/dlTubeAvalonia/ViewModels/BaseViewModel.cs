@@ -11,7 +11,7 @@ public abstract class BaseViewModel : ReactiveObject, IDisposable
 {
     // Services
     protected readonly FileLogger Logger = Program.ServiceProvider.GetService<FileLogger>()!;
-    protected readonly SettingsManager SettingsService = Program.ServiceProvider.GetService<SettingsManager>()!;
+    protected readonly SettingsManager SettingsManager = Program.ServiceProvider.GetService<SettingsManager>()!;
     
     // Reactive Property Fields
     bool _isFree;
@@ -25,7 +25,7 @@ public abstract class BaseViewModel : ReactiveObject, IDisposable
     public void Dispose()
     {
         GC.SuppressFinalize( this ); // Rider Suggested Optimization
-        SettingsService.SettingsChanged -= OnAppSettingsChanged;
+        SettingsManager.SettingsChanged -= OnAppSettingsChanged;
     }
     protected BaseViewModel()
     {

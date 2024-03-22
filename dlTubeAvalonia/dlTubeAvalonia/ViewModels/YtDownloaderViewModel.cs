@@ -53,7 +53,7 @@ public sealed class YtDownloaderViewModel : BaseViewModel
         LoadDefaultImage();
         
         // Load Initial Settings
-        OnAppSettingsChanged( SettingsService.Settings );
+        OnAppSettingsChanged( SettingsManager.Settings );
     }
 
     // Reactive Properties
@@ -182,8 +182,8 @@ public sealed class YtDownloaderViewModel : BaseViewModel
     }
     string GetDownloadPath()
     {
-        return SettingsService is not null
-            ? SettingsService.Settings.DownloadLocation
+        return SettingsManager is not null
+            ? SettingsManager.Settings.DownloadLocation
             : SettingsManager.DefaultDownloadDirectory;
     }
     void SetImageBitmap()
