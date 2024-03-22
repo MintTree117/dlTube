@@ -34,7 +34,6 @@ public sealed class YtSearchViewModel : BaseViewModel
     string _searchText = string.Empty;
     
     // Commands
-    public ReactiveCommand<Unit, Unit> YoutubeCommand { get; }
     public ReactiveCommand<Unit, Unit> SearchCommand { get; }
     public ReactiveCommand<string, Unit> CopyUrlCommand { get; }
     
@@ -47,7 +46,6 @@ public sealed class YtSearchViewModel : BaseViewModel
         ResultCountNames = GetResultsPerPageNames( _resultCounts );
         SelectedSortType = _sortTypes[ 0 ];
         SelectedResultCountName = _resultCountNames[ 0 ];
-        YoutubeCommand = ReactiveCommand.Create( GoToYoutube );
         SearchCommand = ReactiveCommand.CreateFromTask( Search );
         CopyUrlCommand = ReactiveCommand.CreateFromTask<string>( async ( url ) => { await CopyUrlToClipboard( url ); } );
 
@@ -117,25 +115,6 @@ public sealed class YtSearchViewModel : BaseViewModel
     }
     
     // Command Delegates
-    void GoToYoutube()
-    {
-        try
-        {
-            ProcessStartInfo psi = new()
-            {
-                FileName = "https://www.youtube.com",
-                UseShellExecute = true // Important for .NET Core
-            };
-
-            Process.Start( psi );
-        }
-        catch ( Exception e )
-        {
-            Logger?.LogError( e, e.Message );
-            HasMessage = true;
-            Message = ServiceErrorType.AppError.ToString();
-        }
-    }
     async Task Search()
     {
         if ( !ValidateSearchParams( out int resultCountIndex ) )

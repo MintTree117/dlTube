@@ -21,7 +21,8 @@
                 <Button
                     Grid.Column="0"
                     Classes="LogoButton"
-                    Command="{Binding YoutubeCommand}">
+                    CommandParameter="https://www.youtube.com/"
+                    Click="OnClickLink">
                     <Button.Background>
                         <ImageBrush
                             Stretch="UniformToFill"
@@ -111,14 +112,15 @@
                                     <!-- Row 1: Video Url -->
                                     <Grid ColumnDefinitions="*,Auto">
                                         <!-- Url -->
-                                        <TextBox
+                                        <Button
                                             Grid.Column="0"
                                             VerticalContentAlignment="Center"
-                                            IsReadOnly="True"
                                             BorderBrush="#4a4a4a"
                                             BorderThickness="0"
                                             Background="Transparent"
-                                            Text="{Binding Url}" />
+                                            Content="{Binding Url}"
+                                            CommandParameter="{Binding Url}"
+                                            Click="OnClickLink" />
                                         <!-- Copy Url Button -->
                                         <Button
                                             Grid.Column="1"
