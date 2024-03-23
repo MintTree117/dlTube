@@ -46,7 +46,7 @@
         <div class="mb-3">
             <select class="form-control" id="StreamQuality" @onchange="OnNewStreamQuality">
                 <option value="Select Stream Quality" selected="selected">Select Stream Quality</option>
-                @foreach ( string option in _streamQualities )
+                @foreach ( string option in _selectedStreamQualities )
                 {
                     <option value="@option">@option</option>
                 }

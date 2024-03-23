@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using dlTubeBlazor;
 using dlTubeBlazor.Client.Services;
 using dlTubeBlazor.Components;
 
@@ -11,6 +12,8 @@ builder.Services.AddRazorComponents()
 builder.Services.AddLogging();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<Authenticator>();
+builder.Services.AddScoped<HttpService>();
+builder.Services.AddScoped<YoutubeBrowser>();
 
 
 WebApplication app = builder.Build();

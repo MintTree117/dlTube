@@ -1,3 +1,4 @@
+using dlTubeBlazor.Client.Dtos;
 using dlTubeBlazor.Client.Enums;
 using dlTubeBlazor.Client.Services;
 using Microsoft.AspNetCore.Components;
@@ -9,6 +10,7 @@ public sealed partial class Home
     // Services
     [Inject] ILogger<Home> Logger { get; init; } = default!;
     [Inject] Authenticator Authenticator { get; init; } = default!;
+    [Inject] HttpService Http { get; init; } = default!;
 
     // Constants
     const string DefaultStreamName = "No Video Selected";
@@ -17,12 +19,18 @@ public sealed partial class Home
     const string SuccessDownloadMessage = "Download success!";
     const string FailDownloadMessage = "Failed to download!";
 
+    const string StreamInfoApi = "api/stream/info";
+    const string StreamDownloadApi = "api/stream/download";
+
     // Property Field List Values
     //Bitmap? _videoImageBitmap;
     readonly List<string> _streamTypes = Enum.GetNames<StreamType>().ToList();
-    List<string> _streamQualities = [ ];
+    List<string>[] _streamQualities = [ ];
+    List<string> _selectedStreamQualities = [ ];
     string _youtubeLink = string.Empty;
-    string _videoName = DefaultStreamName;
+    string _streamName = DefaultStreamName;
+    string _streamDuration = string.Empty;
+    string _streamImage = string.Empty;
     string _selectedStreamType = string.Empty;
     string _selectedStreamQuality = string.Empty;
     bool _isLinkBoxEnabled = false;
@@ -33,8 +41,6 @@ public sealed partial class Home
 
     string? _token;
     string? _newToken;
-
-    bool hasLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,34 +84,42 @@ public sealed partial class Home
         ToggleAll( true );
     }
     
-    void OnNewToken( ChangeEventArgs e )
-    {
-        Console.WriteLine("oooooooooooooooooooooooooooooooooooooooooo");
-        Logger.LogError( "v");
-        ToggleAll( false );
-        
-        string? value = e.Value?.ToString();
-        
-        Logger.LogError( "v" + value );
-        
-        _newToken = value ?? string.Empty;
-        
-        ToggleAll( true );
-    }
     async Task OnNewLink( ChangeEventArgs e )
     {
         ToggleAll( false );
-        // await service
+
+        _streamName = LoadingVideoName;
+        _streamQualities = [ ];
+        _selectedStreamQuality = string.Empty;
+        
+        string? value = e.Value?.ToString();
+
+        if ( string.IsNullOrWhiteSpace( value ) )
+        {
+            _streamName = DefaultStreamName;
+        }
+
+        StreamInfo? result = await Http.TryGetRequest<StreamInfo>( StreamInfoApi );
+
+        if ( result is null )
+        {
+            ShowAlert( AlertType.Danger, "Failed to fetch stream info for url! Check console (f12) for more information." );
+            return;
+        }
+
+        _streamName = result.Title;
+        _streamDuration = result.Duration;
+        _streamImage = result.ImageUrl;
+        
         ToggleAll( true );
     }
     async Task OnNewStreamType( ChangeEventArgs e )
     {
         string? value = e.Value?.ToString();
-        Console.WriteLine( "oooooooooooooooooooooooooooooooooooooooooo" );
 
         if ( string.IsNullOrWhiteSpace( value ) || !_streamTypes.Contains( value ) )
         {
-            //Logger.LogWarning( $"Failed to parse new stream type! : {value}" );
+            Console.WriteLine( $"Failed to parse new stream type! : {value}" );
             return;
         }
         
@@ -118,15 +132,24 @@ public sealed partial class Home
         string? value = e.Value?.ToString();
         Console.WriteLine( "oooooooooooooooooooooooooooooooooooooooooo" );
 
-        if ( string.IsNullOrWhiteSpace( value ) || !_streamQualities.Contains( value ) )
+        /*if ( string.IsNullOrWhiteSpace( value ) || !_streamQualities.Contains( value ) )
         {
-            //Logger.LogWarning( $"Failed to parse new stream quality! : {value}" );
+            Console.WriteLine( $"Failed to parse new stream quality! : {value}" );
             return;
-        }
+        }*/
 
         _selectedStreamQuality = value;
         
         // await service
+    }
+    void OnNewToken( ChangeEventArgs e )
+    {
+        ToggleAll( false );
+
+        string? value = e.Value?.ToString();
+        _newToken = value ?? string.Empty;
+
+        ToggleAll( true );
     }
     
     async Task Download()
