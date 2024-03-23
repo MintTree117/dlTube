@@ -3,7 +3,7 @@
     --bg-gradient-2: #cc00ad;
     --bg-gradient-3: #b800cc;
     --content-color: #d4d4d4;
-    --content-bg-color: rgba(212, 212, 212, 0.1);
+    --content-bg-color: rgba(20, 20, 20, 0.65);
     --divider-color: #a6a6a6;
     --border-color: #d4d4d4;
 }
@@ -46,12 +46,6 @@ h1:focus {
     color: var(--content-color);
     background: var(--content-bg-color);
     border-color: var(--border-color);
-}
-
-.form-label {
-    padding: 0;
-    margin: 0;
-    font-weight: bold;
 }
 
 /* ---------------------------------------------------- */

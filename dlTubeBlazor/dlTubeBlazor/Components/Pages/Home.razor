@@ -18,52 +18,67 @@
     <span class="text-wrap fw-bold">No Stream Selected</span>
 </div>
 
-<!-- Divider -->
-<div class="divider"></div>
-
-<!-- Api Key Input -->
+<!-- Download Form -->
 <form class="m-0 mb-3 p-0 d-flex flex-column align-items-stretch">
-    <div class="main-row">
-        <label class="form-label" for="ApiKey">Api Key</label>
-        <input class="form-control" id="ApiKey" type="text"/>
+    
+    <!-- Link Input -->
+    <div class="mb-3">
+        <input class="form-control @GetLinkBoxCss()" id="Url" type="text" placeholder="Youtube Link..."/>
     </div>
-    <div class="main-row d-none">
-        <button class="form-control">Save</button>
+    
+    <!-- Stream Actions -->
+    <div class="d-flex flex-column align-items-stretch @GetSettingsCss()">
+        
+        <!-- Stream Types -->
+        <div class="mb-3">
+            <select class="form-control" id="StreamType" @onchange="HandleNewStreamType">
+                <option value="Select Stream Type" selected="selected">Select Stream Type</option>
+                @foreach ( string option in _streamTypes )
+                {
+                    <option value="@option">@option</option>
+                }
+            </select>
+        </div>
+
+        <!-- Stream Qualities -->
+        <div class="mb-3">
+            <select class="form-control" id="StreamQuality" @onchange="HandleNewStreamQuality">
+                <option value="Select Stream Quality" selected="selected">Select Stream Quality</option>
+                @foreach ( string option in _streamQualities )
+                {
+                    <option value="@option">@option</option>
+                }
+            </select>
+        </div>
+
+        <!-- Download Button -->
+        <div class="mb-3">
+            <button class="form-control btn fw-bold" @onclick="@( async () => await Download() )">Download</button>
+        </div>
+
+        <!-- Alert Message -->
+        <div class="alert flex-grow-1 d-flex align-items-center justify-content-between mb-0">
+            <div>
+                @_alertMessage
+            </div>
+            <button class="btn ms-2" @onclick="CloseAlert">
+                <i class="oi oi-x"></i>
+            </button>
+        </div>
+        
     </div>
 </form>
 
-<!-- Download Form -->
-<form class="m-0 mb-3 p-0 d-flex flex-column align-items-stretch">
-    <!-- Link Input -->
-    <div class="mb-3">
-        <label class="form-label" for="Url">Stream Link</label>
-        <input class="form-control" id="Url" type="text"/>
-    </div>
-    
-    <!-- Stream Types -->
-    <div class="mb-3">
-        <label class="form-label" for="StreamType">Stream Type</label>
-        <select class="form-control" id="StreamType"></select>
-    </div>
+<!-- Divider -->
+<div class="divider mb-4"></div>
 
-    <!-- Stream Qualities -->
-    <div class="mb-3">
-        <label class="form-label" for="StreamQuality">Stream Quality</label>
-        <select class="form-control" id="StreamQuality"></select>
+<!-- Api Key Input -->
+<form class="m-0 p-0 d-flex flex-column align-items-stretch">
+    <div class="main-row d-flex flex-column align-items-stretch">
+        <p class="text-center fw-bold m-0 mb-4 p-0">Api Key</p>
+        <input class="form-control" id="ApiKey" type="text" placeholder="Api Key..."/>
     </div>
-    
-    <!-- Download Button -->
-    <div class="mb-3 mt-4">
-        <button class="form-control btn fw-bold">Download</button>
-    </div>
-    
-    <!-- Alert Message -->
-    <div class="alert flex-grow-1 d-flex align-items-center justify-content-between mb-0">
-        <div>
-            
-        </div>
-        <button class="btn ms-2">
-            <i class="oi oi-x"></i>
-        </button>
+    <div class="main-row d-none">
+        <button class="form-control">Save</button>
     </div>
 </form>

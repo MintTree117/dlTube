@@ -1,4 +1,4 @@
-namespace dlTubeBlazor;
+namespace dlTubeBlazor.Enums;
 
 public enum AlertType
 {
