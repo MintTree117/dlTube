@@ -5,77 +5,72 @@
 <PageTitle>dlTube</PageTitle>
 
 <!-- Title -->
-<h1 class="fw-bold text-center" id="pageTitle">Download YouTube</h1>
+<h1 class="meta-section fw-bold text-center">Download YouTube</h1>
 
 <!-- Divider -->
 <div class="divider"></div>
 
 <!-- Stream Image -->
-<div class="large-mb stream-image-wrapper" id="streamImage">
+<div class="meta-section stream-image-wrapper">
     <img class="stream-image" src="@GetImageUrl()" alt="Stream Image"/>
 </div>
 
 <!-- Stream Title -->
-<div class="text-center" id="streamTitle">
-    <span class="text-wrap fw-bold" @bind="_streamTitle">No Stream Selected</span>
+<div class="meta-section text-center">
+    <span class="title">@_streamTitle</span>
 </div>
 
 <!-- Loading Circle -->
-<div class="loading-container">
+<div class="meta-section loading-container">
     <div class="loading-circle @GetLoaderCss()"></div>
 </div>
 
-<!-- Download Form -->
-<div class="m-0 mb-3 p-0 d-flex flex-column align-items-stretch">
+<!-- Download Section -->
+<div class="download-section">
     
     <!-- Link Input -->
     <div class="mb-3">
-        <input class="form-control @GetLinkBoxCss()" @bind="_youtubeLink" id="Url" type="text" placeholder="Youtube Link..."/>
+        <input disabled="@_isLoading" class="form-control" @bind="_youtubeLink" @oninput="OnNewLink" type="text" placeholder="Youtube Link..."/>
     </div>
     
-    <!-- Stream Actions -->
-    <div class="d-flex flex-column align-items-stretch @GetSettingsCss()">
-        
-        <!-- Stream Types -->
-        <div class="mb-3">
-            <select class="form-control" id="StreamType" @onchange="OnNewStreamType">
-                <option value="Select Stream Type" selected="selected">Select Stream Type</option>
-                @foreach ( string option in _streamTypes )
+    <!-- Stream Types -->
+    <div class="mb-3">
+        <select disabled="@_isLoading" class="form-control" @onchange="OnNewStreamType">
+            <option value="Select Stream Type" selected="selected">Select Stream Type</option>
+            @foreach ( string option in _streamTypes ) // this line
+            {
+                <option value="@option">@option</option>
+            }
+        </select>
+    </div>
+
+    <!-- Stream Qualities -->
+    <div class="mb-3" >
+        <select disabled="@_isLoading" class="form-control" bind="_selectedStreamQualities">
+            <option value="Select Stream Quality" selected="selected">Select Stream Type</option>
+            @if ( _selectedStreamQualities is not null )
+            {
+                foreach ( string option in _selectedStreamQualities )
                 {
                     <option value="@option">@option</option>
                 }
-            </select>
-        </div>
+            }
+        </select>
+    </div>
 
-        <!-- Stream Qualities -->
-        <div class="mb-3">
-            <select class="form-control" id="StreamQuality" @onchange="OnNewStreamQuality">
-                <option value="Select Stream Quality" selected="selected">Select Stream Quality</option>
-                @foreach ( string option in _selectedStreamQualities )
-                {
-                    <option value="@option">@option</option>
-                }
-            </select>
+    <!-- Submit Button -->
+    <div class="mb-3">
+        <button disabled="@_isLoading" class="form-control" @onclick="@( async () => await OnSubmit() )">@GetSubmitText()</button>
+    </div>
+    
+    <!-- Alert Message -->
+    <div class="alert alert-message @_alertCss">
+        <div class="text-dark">
+            @_alertMessage
         </div>
-
-        <!-- Submit Button -->
-        <div class="mb-3">
-            <button class="form-control btn fw-bold" @onclick="@( async () => await OnSubmit() )">@GetSubmitText()</button>
-        </div>
-        
-        @if ( _showAlert )
-        {
-            <!-- Alert Message -->
-            <div class="alert flex-grow-1 d-flex align-items-center justify-content-between mb-0">
-                <div>
-                    @_alertMessage
-                </div>
-                <button class="btn ms-2" @onclick="CloseAlert">
-                    <i class="oi oi-x"></i>
-                </button>
-            </div>
-        }
-        
+        <button class="btn ms-2 text-dark @_alertButtonCss" @onclick="CloseAlert">
+            <i class="fa fa-x text-dark"></i>
+        </button>
     </div>
 </div>
 
@@ -83,12 +78,12 @@
 <div class="divider mb-4"></div>
 
 <!-- Token Input -->
-<div class="m-0 p-0 d-flex flex-column align-items-stretch">
-    <div class="main-row d-flex flex-column align-items-stretch">
-        <p class="text-center fw-bold m-0 mb-4 p-0">Api Token</p>
-        <input class="form-control" id="ApiToken" type="text" value="@_token" placeholder="Token..." @oninput="OnNewToken"/>
+<div class="token-section m-0 p-0">
+    <div class="token-section mb-3">
+        <span class="title m-0 mb-4">Api Token</span>
+        <input disabled="@_isLoading" class="form-control" id="ApiToken" type="text" value="@_token" placeholder="Token..." @oninput="OnNewToken"/>
     </div>
-    <div class="main-row">
-        <button class="form-control @GetTokenButtonCss()" @onclick="@(async () => await TrySaveToken())">Save</button>
+    <div>
+        <button disabled="@GetApiButtonDisabled()" class="form-control" @onclick="@(async () => await TrySaveToken())">Save</button>
     </div>
 </div>

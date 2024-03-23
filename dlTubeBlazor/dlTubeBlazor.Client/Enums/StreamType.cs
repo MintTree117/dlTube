@@ -2,7 +2,7 @@ namespace dlTubeBlazor.Client.Enums;
 
 public enum StreamType
 {
-    Mixed,
-    Audio,
-    Video
+    Mixed = 0,
+    Audio = 1,
+    Video = 2
 }
