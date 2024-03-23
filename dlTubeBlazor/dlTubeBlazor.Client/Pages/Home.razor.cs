@@ -10,9 +10,10 @@ public sealed partial class Home
     // Services
     [Inject] ILogger<Home> Logger { get; init; } = default!;
     [Inject] Authenticator Authenticator { get; init; } = default!;
-    [Inject] HttpService Http { get; init; } = default!;
+    [Inject] Youtube Youtube { get; init; } = default!;
 
     // Constants
+    const string DefaultStreamImage = "defaultplayer.png";
     const string DefaultStreamName = "No Video Selected";
     const string LoadingVideoName = "Loading Video...";
     const string InvalidVideoName = "Invalid Video Link";
@@ -28,13 +29,17 @@ public sealed partial class Home
     List<string>[] _streamQualities = [ ];
     List<string> _selectedStreamQualities = [ ];
     string _youtubeLink = string.Empty;
-    string _streamName = DefaultStreamName;
+    string _streamTitle = DefaultStreamName;
+    string _streamAuthor = string.Empty;
     string _streamDuration = string.Empty;
     string _streamImage = string.Empty;
     string _selectedStreamType = string.Empty;
     string _selectedStreamQuality = string.Empty;
-    bool _isLinkBoxEnabled = false;
-    bool _isSettingsEnabled = false;
+    
+    bool _isNewLink = true;
+    bool _isLinkBoxEnabled;
+    bool _isSettingsEnabled;
+    bool _isLoading;
 
     string _alertMessage = string.Empty;
     bool _showAlert;
@@ -83,37 +88,52 @@ public sealed partial class Home
         
         ToggleAll( true );
     }
-    
-    async Task OnNewLink( ChangeEventArgs e )
+    async Task OnSubmit()
     {
+        if ( _isNewLink )
+            await GetInfo();
+        else
+            await Download();
+    }
+    async Task GetInfo()
+    {
+        _isLoading = true;
         ToggleAll( false );
-
-        _streamName = LoadingVideoName;
+        _streamTitle = LoadingVideoName;
         _streamQualities = [ ];
         _selectedStreamQuality = string.Empty;
-        
-        string? value = e.Value?.ToString();
 
-        if ( string.IsNullOrWhiteSpace( value ) )
+        if ( string.IsNullOrWhiteSpace( _youtubeLink ) )
         {
-            _streamName = DefaultStreamName;
+            _streamTitle = DefaultStreamName;
         }
 
-        StreamInfo? result = await Http.TryGetRequest<StreamInfo>( StreamInfoApi );
+        StreamInfo? result = await Youtube.GetStreamInfo( GetStreamInfoParams() );
 
         if ( result is null )
         {
+            Console.WriteLine( "Result is null!" );
             ShowAlert( AlertType.Danger, "Failed to fetch stream info for url! Check console (f12) for more information." );
             return;
         }
 
-        _streamName = result.Title;
+        _streamTitle = result.Title;
         _streamDuration = result.Duration;
         _streamImage = result.ImageUrl;
+        _streamQualities = result.Qualities;
+        _selectedStreamQualities = SelectStreamQualities();
+        Console.WriteLine($"Name: {result.Title}");
+        _isLoading = false;
+        ToggleAll( true );
+    }
+    async Task Download()
+    {
+        ToggleAll( false );
         
         ToggleAll( true );
     }
-    async Task OnNewStreamType( ChangeEventArgs e )
+
+    void OnNewStreamType( ChangeEventArgs e )
     {
         string? value = e.Value?.ToString();
 
@@ -122,25 +142,21 @@ public sealed partial class Home
             Console.WriteLine( $"Failed to parse new stream type! : {value}" );
             return;
         }
-        
+
         _selectedStreamType = value;
-        
-        // await service
+        SelectStreamQualities();
     }
-    async Task OnNewStreamQuality( ChangeEventArgs e )
+    void OnNewStreamQuality( ChangeEventArgs e )
     {
         string? value = e.Value?.ToString();
-        Console.WriteLine( "oooooooooooooooooooooooooooooooooooooooooo" );
 
-        /*if ( string.IsNullOrWhiteSpace( value ) || !_streamQualities.Contains( value ) )
+        if ( string.IsNullOrWhiteSpace( value ) || !_selectedStreamQualities.Contains( value ) )
         {
             Console.WriteLine( $"Failed to parse new stream quality! : {value}" );
             return;
-        }*/
+        }
 
         _selectedStreamQuality = value;
-        
-        // await service
     }
     void OnNewToken( ChangeEventArgs e )
     {
@@ -152,13 +168,10 @@ public sealed partial class Home
         ToggleAll( true );
     }
     
-    async Task Download()
+    string GetLoaderCss()
     {
-        ToggleAll( false );
-        // await service
-        ToggleAll( true );
+        return _isLoading ? "d-block" : "d-none";
     }
-
     string GetLinkBoxCss()
     {
         return _isLinkBoxEnabled ? "d-block" : "d-none";
@@ -170,6 +183,14 @@ public sealed partial class Home
     string GetTokenButtonCss()
     {
         return _newToken == _token ? "d-none" : "d-flex";
+    }
+    string GetImageUrl()
+    {
+        return !string.IsNullOrWhiteSpace( _streamImage ) ? _streamImage : DefaultStreamImage;
+    }
+    string GetSubmitText()
+    {
+        return _isNewLink ? "Get Stream" : "Download Stream";
     }
     
     void ShowAlert( AlertType type, string message )
@@ -191,5 +212,37 @@ public sealed partial class Home
         _isLinkBoxEnabled = value;
         _isSettingsEnabled = value;
         StateHasChanged();
+    }
+
+    List<string> SelectStreamQualities()
+    {
+        return !string.IsNullOrWhiteSpace( _selectedStreamType )
+            ? _streamQualities[ _streamTypes.IndexOf( _selectedStreamType ) ]
+            : [ ];
+    }
+    Dictionary<string, object> GetStreamInfoParams()
+    {
+        Enum.TryParse( _selectedStreamType, out StreamType type );
+
+        int quality = _selectedStreamQualities.Contains( _selectedStreamQuality )
+            ? _selectedStreamQualities.IndexOf( _selectedStreamQuality )
+            : 0;
+        
+        return new Dictionary<string, object>()
+        {
+            { "url", _youtubeLink },
+            { "type", type },
+            { "quality", quality }
+            // TODO: auth-service.token
+        };
+    }
+    Dictionary<string, object> GetStreamDownloadParams()
+    {
+        return new Dictionary<string, object>()
+        {
+            { "url", _youtubeLink },
+            { "type", _selectedStreamType },
+            { "quality", _selectedStreamQuality }
+        };
     }
 }

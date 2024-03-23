@@ -14,6 +14,26 @@
 <body>
 <Routes/>
 <script src="_framework/blazor.web.js"></script>
+<script>
+    function downloadFileFromStream(filename, content) {
+        // Create a Blob from the content
+        var blob = new Blob([content], { type: "application/octet-stream" });
+        
+        // Create an URL for the blob
+        var url = window.URL.createObjectURL(blob);
+        
+        // Create an anchor (<a>) element
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        
+        // Append anchor to body, trigger click, and remove it
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    }
+</script>
 </body>
 
 </html>

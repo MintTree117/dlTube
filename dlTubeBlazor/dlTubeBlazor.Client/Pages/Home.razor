@@ -12,12 +12,17 @@
 
 <!-- Stream Image -->
 <div class="large-mb stream-image-wrapper" id="streamImage">
-    <img class="stream-image" src="defaultplayer.png" alt="Stream Image"/>
+    <img class="stream-image" src="@GetImageUrl()" alt="Stream Image"/>
 </div>
 
 <!-- Stream Title -->
 <div class="text-center" id="streamTitle">
-    <span class="text-wrap fw-bold">No Stream Selected</span>
+    <span class="text-wrap fw-bold" @bind="_streamTitle">No Stream Selected</span>
+</div>
+
+<!-- Loading Circle -->
+<div class="loading-container">
+    <div class="loading-circle @GetLoaderCss()"></div>
 </div>
 
 <!-- Download Form -->
@@ -25,7 +30,7 @@
     
     <!-- Link Input -->
     <div class="mb-3">
-        <input class="form-control @GetLinkBoxCss()" id="Url" type="text" placeholder="Youtube Link..." @onchange="OnNewLink"/>
+        <input class="form-control @GetLinkBoxCss()" @bind="_youtubeLink" id="Url" type="text" placeholder="Youtube Link..."/>
     </div>
     
     <!-- Stream Actions -->
@@ -53,9 +58,9 @@
             </select>
         </div>
 
-        <!-- Download Button -->
+        <!-- Submit Button -->
         <div class="mb-3">
-            <button class="form-control btn fw-bold" @onclick="@( async () => await Download() )">Download</button>
+            <button class="form-control btn fw-bold" @onclick="@( async () => await OnSubmit() )">@GetSubmitText()</button>
         </div>
         
         @if ( _showAlert )

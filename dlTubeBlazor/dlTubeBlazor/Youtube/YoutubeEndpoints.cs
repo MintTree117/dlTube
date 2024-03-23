@@ -1,25 +1,29 @@
+using dlTubeBlazor.Client;
 using dlTubeBlazor.Client.Dtos;
 using dlTubeBlazor.Client.Enums;
 
-namespace dlTubeBlazor;
+namespace dlTubeBlazor.Youtube;
 
-public static class Endpoints
+public static class YoutubeEndpoints
 {
-    public static void MapReadMenuEndpoints( this IEndpointRouteBuilder app )
+    public static void MapYoutubeEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapGet( "api/stream/info", async ( StreamType type, YoutubeBrowser yt ) => 
+        app.MapGet( HttpConsts.GetStreamInfo, async ( string url, YoutubeBrowser yt ) => 
         {
-            if ( !await yt.TryInitialize() )
+            if ( !await yt.TryInitialize( url ) )
                 return Results.Problem( "Failed to initialize youtube client!" );
 
-            StreamInfo? info = await yt.GetStreamInfo( type );
+            StreamInfo? info = await yt.GetStreamInfo();
+
+            Console.WriteLine( url );
+            Console.WriteLine( info?.Title );
 
             return info is not null
                 ? Results.Ok( info )
                 : Results.NotFound();
         } );
 
-        app.MapGet( "api/stream/download", async ( string url, StreamType type, int quality, YoutubeStreamer yt ) =>
+        app.MapGet( HttpConsts.GetStreamDownload, async ( string url, StreamType type, int quality, YoutubeStreamer yt ) =>
         {
             if ( !await yt.TryInitialize( url ) )
                 return Results.Problem( "Failed to initialize youtube client!" );

@@ -1,8 +1,8 @@
+using dlTubeBlazor.Client.Enums;
 using YoutubeExplode;
 using YoutubeExplode.Videos.Streams;
-using dlTubeBlazor.Client.Enums;
 
-namespace dlTubeBlazor;
+namespace dlTubeBlazor.Youtube;
 
 public sealed class YoutubeStreamer( ILogger<YoutubeBrowser> logger )
 {

@@ -2,27 +2,23 @@ using YoutubeExplode;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 using dlTubeBlazor.Client.Dtos;
-using dlTubeBlazor.Client.Enums;
 
-namespace dlTubeBlazor;
+namespace dlTubeBlazor.Youtube;
 
-public sealed class YoutubeBrowser( string videoUrl, ILogger<YoutubeBrowser> logger )
+public sealed class YoutubeBrowser( ILogger<YoutubeBrowser> logger )
 {
-    // Video Url & Client
-    readonly string _videoUrl = videoUrl;
     readonly YoutubeClient _youtube = new();
     
-    // Stream Data
     StreamManifest? _streamManifest;
     Video? _video;
     
-    // Public Methods
-    public async Task<bool> TryInitialize()
+    // "Constructor"
+    public async Task<bool> TryInitialize( string videoUrl )
     {
         try
         {
-            _streamManifest = await _youtube.Videos.Streams.GetManifestAsync( _videoUrl );
-            _video = await _youtube.Videos.GetAsync( _videoUrl );
+            _streamManifest = await _youtube.Videos.Streams.GetManifestAsync( videoUrl );
+            _video = await _youtube.Videos.GetAsync( videoUrl );
 
             return _streamManifest is not null && _video is not null;
         }
@@ -32,7 +28,7 @@ public sealed class YoutubeBrowser( string videoUrl, ILogger<YoutubeBrowser> log
             return false;
         }
     }
-    public async Task<StreamInfo?> GetStreamInfo( StreamType steamType )
+    public async Task<StreamInfo?> GetStreamInfo()
     {
         if ( _video is null )
             return null;

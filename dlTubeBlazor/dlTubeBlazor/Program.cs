@@ -1,7 +1,7 @@
 using Blazored.LocalStorage;
-using dlTubeBlazor;
 using dlTubeBlazor.Client.Services;
 using dlTubeBlazor.Components;
+using dlTubeBlazor.Youtube;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +12,9 @@ builder.Services.AddRazorComponents()
 builder.Services.AddLogging();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<Authenticator>();
-builder.Services.AddScoped<HttpService>();
+builder.Services.AddScoped<Youtube>();
 builder.Services.AddScoped<YoutubeBrowser>();
+builder.Services.AddScoped<YoutubeStreamer>();
 
 
 WebApplication app = builder.Build();
@@ -27,6 +28,8 @@ else
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts(); // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 }
+
+app.MapYoutubeEndpoints();
 
 app.UseHttpsRedirection();
 
