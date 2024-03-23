@@ -1,0 +1,89 @@
+@rendermode InteractiveWebAssembly
+
+@page "/"
+
+<PageTitle>dlTube</PageTitle>
+
+<!-- Title -->
+<h1 class="fw-bold text-center" id="pageTitle">Download YouTube</h1>
+
+<!-- Divider -->
+<div class="divider"></div>
+
+<!-- Stream Image -->
+<div class="large-mb stream-image-wrapper" id="streamImage">
+    <img class="stream-image" src="defaultplayer.png" alt="Stream Image"/>
+</div>
+
+<!-- Stream Title -->
+<div class="text-center" id="streamTitle">
+    <span class="text-wrap fw-bold">No Stream Selected</span>
+</div>
+
+<!-- Download Form -->
+<div class="m-0 mb-3 p-0 d-flex flex-column align-items-stretch">
+    
+    <!-- Link Input -->
+    <div class="mb-3">
+        <input class="form-control @GetLinkBoxCss()" id="Url" type="text" placeholder="Youtube Link..." @onchange="OnNewLink"/>
+    </div>
+    
+    <!-- Stream Actions -->
+    <div class="d-flex flex-column align-items-stretch @GetSettingsCss()">
+        
+        <!-- Stream Types -->
+        <div class="mb-3">
+            <select class="form-control" id="StreamType" @onchange="OnNewStreamType">
+                <option value="Select Stream Type" selected="selected">Select Stream Type</option>
+                @foreach ( string option in _streamTypes )
+                {
+                    <option value="@option">@option</option>
+                }
+            </select>
+        </div>
+
+        <!-- Stream Qualities -->
+        <div class="mb-3">
+            <select class="form-control" id="StreamQuality" @onchange="OnNewStreamQuality">
+                <option value="Select Stream Quality" selected="selected">Select Stream Quality</option>
+                @foreach ( string option in _streamQualities )
+                {
+                    <option value="@option">@option</option>
+                }
+            </select>
+        </div>
+
+        <!-- Download Button -->
+        <div class="mb-3">
+            <button class="form-control btn fw-bold" @onclick="@( async () => await Download() )">Download</button>
+        </div>
+        
+        @if ( _showAlert )
+        {
+            <!-- Alert Message -->
+            <div class="alert flex-grow-1 d-flex align-items-center justify-content-between mb-0">
+                <div>
+                    @_alertMessage
+                </div>
+                <button class="btn ms-2" @onclick="CloseAlert">
+                    <i class="oi oi-x"></i>
+                </button>
+            </div>
+        }
+        
+    </div>
+</div>
+
+<!-- Divider -->
+<div class="divider mb-4"></div>
+
+<!-- Token Input -->
+<div class="m-0 p-0 d-flex flex-column align-items-stretch">
+    <div class="main-row d-flex flex-column align-items-stretch">
+        <p class="text-center fw-bold m-0 mb-4 p-0">Api Token</p>
+        <input class="form-control" id="ApiToken" type="text" value="@_token" placeholder="Token..." @oninput="OnNewToken"/>
+    </div>
+    <div class="main-row">
+        <button class="form-control @GetTokenButtonCss()" @onclick="@(async () => await TrySaveToken())">Save</button>
+    </div>
+</div>

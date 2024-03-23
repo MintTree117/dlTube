@@ -1,15 +1,20 @@
-using dlTubeBlazor.Client.Pages;
+using Blazored.LocalStorage;
+using dlTubeBlazor.Client.Services;
 using dlTubeBlazor.Components;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
-var app = builder.Build();
+builder.Services.AddLogging();
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddScoped<Authenticator>();
 
-// Configure the HTTP request pipeline.
+
+WebApplication app = builder.Build();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
@@ -17,8 +22,7 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    app.UseHsts(); // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 }
 
 app.UseHttpsRedirection();
