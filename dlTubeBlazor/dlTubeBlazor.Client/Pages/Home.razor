@@ -12,7 +12,7 @@
 
 <!-- Stream Image -->
 <div class="meta-section stream-image-wrapper">
-    <img class="stream-image" src="@GetImageUrl()" alt="Stream Image"/>
+    <img class="stream-image" src="@_imageUrl" alt="Stream Image"/>
 </div>
 
 <!-- Stream Title -->
@@ -21,8 +21,8 @@
 </div>
 
 <!-- Loading Circle -->
-<div class="meta-section loading-container">
-    <div class="loading-circle @GetLoaderCss()"></div>
+<div class="meta-section loading-container @_loaderCss">
+    <div class="loading-circle"></div>
 </div>
 
 <!-- Download Section -->
@@ -35,9 +35,8 @@
     
     <!-- Stream Types -->
     <div class="mb-3">
-        <select disabled="@_isLoading" class="form-control" @onchange="OnNewStreamType">
-            <option value="Select Stream Type" selected="selected">Select Stream Type</option>
-            @foreach ( string option in _streamTypes ) // this line
+        <select disabled="@_isLoading && @_hasStream" class="form-control" bind="_selectedStreamType">
+            @foreach ( string option in _streamTypeNames )
             {
                 <option value="@option">@option</option>
             }
@@ -46,21 +45,17 @@
 
     <!-- Stream Qualities -->
     <div class="mb-3" >
-        <select disabled="@_isLoading" class="form-control" bind="_selectedStreamQualities">
-            <option value="Select Stream Quality" selected="selected">Select Stream Type</option>
-            @if ( _selectedStreamQualities is not null )
+        <select disabled="@GetStreamTypeDropdownDisabled()" class="form-control" bind="_selectedStreamQuality">
+            @foreach ( string option in _streamQualities )
             {
-                foreach ( string option in _selectedStreamQualities )
-                {
-                    <option value="@option">@option</option>
-                }
+                <option value="@option">@option</option>
             }
         </select>
     </div>
 
     <!-- Submit Button -->
     <div class="mb-3">
-        <button disabled="@_isLoading" class="form-control" @onclick="@( async () => await OnSubmit() )">@GetSubmitText()</button>
+        <button disabled="@_isLoading" class="form-control" @onclick="@( async () => await OnSubmit() )">@_submitButtonText</button>
     </div>
     
     <!-- Alert Message -->

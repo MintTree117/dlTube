@@ -6,19 +6,20 @@ namespace dlTubeBlazor.Youtube;
 
 public sealed class YoutubeStreamer( ILogger<YoutubeBrowser> logger )
 {
+    readonly ILogger<YoutubeBrowser> _logger = logger;
     readonly YoutubeClient _youtube = new();
-    StreamManifest? _streamManifest;
+    StreamManifest _streamManifest = null!;
 
     public async Task<bool> TryInitialize( string videoUrl )
     {
         try
         {
             _streamManifest = await _youtube.Videos.Streams.GetManifestAsync( videoUrl );
-            return _streamManifest is not null;
+            return true;
         }
         catch ( Exception e )
         {
-            logger.LogError( e, e.Message );
+            _logger.LogError( e, e.Message );
             return false;
         }
     }
@@ -26,7 +27,7 @@ public sealed class YoutubeStreamer( ILogger<YoutubeBrowser> logger )
     {
         if ( _streamManifest is null )
         {
-            logger.LogError( "StreamManifest is null upon Download request!" );
+            _logger.LogError( "StreamManifest is null upon Download request!" );
             return null;
         }
         
@@ -42,7 +43,7 @@ public sealed class YoutubeStreamer( ILogger<YoutubeBrowser> logger )
 
             if ( streamInfo is null )
             {
-                logger.LogError( "StreamInfo is null upon info request!" );
+                _logger.LogError( "StreamInfo is null upon info request!" );
                 return null;
             }
 
@@ -53,54 +54,30 @@ public sealed class YoutubeStreamer( ILogger<YoutubeBrowser> logger )
         }
         catch ( Exception e )
         {
-            logger.LogError( e, e.Message );
+            _logger.LogError( e, e.Message );
             return null;
         }
     }
 
-    static MuxedStreamInfo? GetMuxedStreamInfo( StreamManifest manifest, int qualityIndex )
+    MuxedStreamInfo? GetMuxedStreamInfo( StreamManifest manifest, int qualityIndex )
     {
-        List<MuxedStreamInfo> streams = manifest
-            .GetMuxedStreams()
-            .ToList();
+        _logger.LogError( qualityIndex.ToString() );
         
-        bool isValidQualityIndex = 
-            qualityIndex >= 0 && 
-            qualityIndex < streams.Count && 
-            streams.Count == 0;
-        
-        return isValidQualityIndex ? 
-            streams[ qualityIndex ] 
-            : null;
+        List<MuxedStreamInfo> streams = manifest.GetMuxedStreams().ToList();
+        bool isValidQualityIndex = qualityIndex >= 0 && qualityIndex < streams.Count;
+        return isValidQualityIndex ? streams[ qualityIndex ] : null;
     }
+
     static AudioOnlyStreamInfo? GetAudioOnlyStreamInfo( StreamManifest manifest, int qualityIndex )
     {
-        List<AudioOnlyStreamInfo> streams = manifest
-            .GetAudioOnlyStreams()
-            .ToList();
-
-        bool isValidQualityIndex =
-            qualityIndex >= 0 &&
-            qualityIndex < streams.Count &&
-            streams.Count == 0;
-
-        return isValidQualityIndex
-            ? streams[ qualityIndex ]
-            : null;
+        List<AudioOnlyStreamInfo> streams = manifest.GetAudioOnlyStreams().ToList();
+        bool isValidQualityIndex = qualityIndex >= 0 && qualityIndex < streams.Count;
+        return isValidQualityIndex ? streams[ qualityIndex ] : null;
     }
     static VideoOnlyStreamInfo? GetVideoOnlyStreamInfo( StreamManifest manifest, int qualityIndex )
     {
-        List<VideoOnlyStreamInfo> streams = manifest
-            .GetVideoOnlyStreams()
-            .ToList();
-
-        bool isValidQualityIndex =
-            qualityIndex >= 0 &&
-            qualityIndex < streams.Count &&
-            streams.Count == 0;
-
-        return isValidQualityIndex
-            ? streams[ qualityIndex ]
-            : null;
+        List<VideoOnlyStreamInfo> streams = manifest.GetVideoOnlyStreams().ToList();
+        bool isValidQualityIndex = qualityIndex >= 0 && qualityIndex < streams.Count;
+        return isValidQualityIndex ? streams[ qualityIndex ] : null;
     }
 }

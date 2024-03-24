@@ -2,16 +2,18 @@ using System.Collections.Specialized;
 using System.Net;
 using System.Net.Http.Json;
 using System.Web;
-using dlTubeBlazor.Client.Dtos;
 using Microsoft.JSInterop;
+using dlTubeBlazor.Client.Dtos;
 
 namespace dlTubeBlazor.Client.Services;
 
-public sealed class Youtube()
+public sealed class Youtube( IJSRuntime jsRuntime )
 {
+    // Fields
     readonly HttpClient _http = new();
-    readonly IJSRuntime _jsRuntime = null;
-
+    readonly IJSRuntime _jsRuntime = jsRuntime;
+    
+    // Public Methods
     public async Task<StreamInfo?> GetStreamInfo( Dictionary<string, object> parameters )
     {
         _http.BaseAddress = new Uri( "https://localhost:7166" );
@@ -43,7 +45,7 @@ public sealed class Youtube()
             await stream.CopyToAsync( memoryStream );
             
             byte[] bytes = memoryStream.ToArray();
-            await _jsRuntime.InvokeVoidAsync( "downloadFileFromStream", "yourFileName.ext", bytes );
+            await _jsRuntime.InvokeVoidAsync( "downloadFileFromStream", "yourFileName.mp4", bytes );
             return true;
         }
         catch ( Exception e )
@@ -52,7 +54,8 @@ public sealed class Youtube()
             return false;
         }
     }
-
+    
+    // Private Methods
     static string GetQueryParameters( string apiPath, Dictionary<string, object>? parameters )
     {
         if ( parameters is null )

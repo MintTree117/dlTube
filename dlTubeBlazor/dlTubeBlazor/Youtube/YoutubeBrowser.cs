@@ -2,6 +2,7 @@ using YoutubeExplode;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 using dlTubeBlazor.Client.Dtos;
+using dlTubeBlazor.Client.Enums;
 
 namespace dlTubeBlazor.Youtube;
 
@@ -24,31 +25,32 @@ public sealed class YoutubeBrowser( ILogger<YoutubeBrowser> logger )
         }
         catch ( Exception e )
         {
-            logger.LogError( e,e.Message );
+            logger.LogError( e, e.Message );
             return false;
         }
     }
-    public async Task<StreamInfo?> GetStreamInfo()
+    public async Task<StreamInfo?> GetStreamInfo( StreamType type )
     {
         if ( _video is null )
             return null;
-        
+
         return new StreamInfo
         {
             Title = _video.Title,
             Duration = _video.Duration.ToString() ?? "00:00:00",
             ImageUrl = _video.Thumbnails.Any() ? _video.Thumbnails[ 0 ].Url : string.Empty,
-            Qualities =
-            [
-                await GetMixedStreams(),
-                await GetAudioStreams(),
-                await GetVideoStreams()
-            ]
+            Qualities = type switch
+            {
+                StreamType.Mixed => await GetMuxedStreams(),
+                StreamType.Audio => await GetAudioOnlyStreams(),
+                StreamType.Video => await GetVideoOnlyStreams(),
+                _ => await GetMuxedStreams()
+            }
         };
     }
 
     // Get Streams
-    async Task<List<string>> GetMixedStreams()
+    async Task<List<string>> GetMuxedStreams()
     {
         return await Task.Run( () => {
             List<MuxedStreamInfo> _mixedStreams = _streamManifest!.GetMuxedStreams().ToList();
@@ -63,7 +65,7 @@ public sealed class YoutubeBrowser( ILogger<YoutubeBrowser> logger )
             return _mixedSteamQualities;
         } );
     }
-    async Task<List<string>> GetAudioStreams()
+    async Task<List<string>> GetAudioOnlyStreams()
     {
         return await Task.Run( () => {
             List<AudioOnlyStreamInfo> streams = _streamManifest!.GetAudioOnlyStreams().ToList();
@@ -78,7 +80,7 @@ public sealed class YoutubeBrowser( ILogger<YoutubeBrowser> logger )
             return _audioSteamQualities;
         } );
     }
-    async Task<List<string>> GetVideoStreams()
+    async Task<List<string>> GetVideoOnlyStreams()
     {
         return await Task.Run( () => {
             List<VideoOnlyStreamInfo> streams = _streamManifest!.GetVideoOnlyStreams().ToList();

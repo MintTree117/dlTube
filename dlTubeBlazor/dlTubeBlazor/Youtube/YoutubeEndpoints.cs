@@ -8,12 +8,12 @@ public static class YoutubeEndpoints
 {
     public static void MapYoutubeEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapGet( HttpConsts.GetStreamInfo, async ( string url, YoutubeBrowser yt ) => 
+        app.MapGet( HttpConsts.GetStreamInfo, async ( string url, StreamType type, YoutubeBrowser yt ) => 
         {
             if ( !await yt.TryInitialize( url ) )
                 return Results.Problem( "Failed to initialize youtube client!" );
 
-            StreamInfo? info = await yt.GetStreamInfo();
+            StreamInfo? info = await yt.GetStreamInfo( type );
 
             Console.WriteLine( url );
             Console.WriteLine( info?.Title );

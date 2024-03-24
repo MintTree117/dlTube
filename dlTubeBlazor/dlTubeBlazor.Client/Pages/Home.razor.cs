@@ -1,12 +1,12 @@
+using Microsoft.AspNetCore.Components;
 using dlTubeBlazor.Client.Dtos;
 using dlTubeBlazor.Client.Enums;
 using dlTubeBlazor.Client.Services;
-using Microsoft.AspNetCore.Components;
 
 namespace dlTubeBlazor.Client.Pages;
 
 public sealed partial class Home
-{   
+{
     // Services
     [Inject] ILogger<Home> Logger { get; init; } = default!;
     [Inject] Authenticator Authenticator { get; init; } = default!;
@@ -20,35 +20,42 @@ public sealed partial class Home
     const string FailDownloadMessage = "Failed to Download";
     const string LoadingStreamName = "Loading Stream Information...";
     const string DownloadingStreamName = "Downloading Stream...";
-    
+    const string GetStreamText = "Get Stream Info";
+    const string DownloadStreamText = "Download Stream";
+
     // Css
     const string CssHide = "d-none";
     const string CssBlock = "d-block";
     const string CssFlex = "d-flex";
 
     // Youtube Fields
-    readonly List<string> _streamTypes = Enum.GetNames<StreamType>().ToList();
-    List<string>[] _streamQualities = [ ];
-    List<string>? _selectedStreamQualities = [ ];
+    readonly List<StreamType> _streamTypes = Enum.GetValues<StreamType>().ToList();
+    readonly List<string> _streamTypeNames = GetStreamTypeNames( Enum.GetNames<StreamType>().ToList() );
+    List<string> _streamQualities = [ ];
     string _youtubeLink = string.Empty;
     string _streamTitle = DefaultStreamName;
     string _streamAuthor = string.Empty;
     string _streamDuration = string.Empty;
     string _streamImage = string.Empty;
-    string _selectedStreamType = string.Empty;
-    string _selectedStreamQuality = string.Empty;
-    
+    string _selectedStreamTypeName = string.Empty;
+    string _selectedStreamQuality = "Select a stream quality";
+
     // State
-    bool _isNewLink = true;
     bool _isLoading;
+    bool _hasStream;
     string? _token;
     string? _newToken;
-    
+
+    // Misc Css
+    string _loaderCss = CssHide;
+    string _submitButtonText = GetStreamText;
+    string _imageUrl = DefaultStreamImage;
+
     // Alerts
     string _alertMessage = string.Empty;
     string _alertCss = CssHide;
     string _alertButtonCss = string.Empty;
-    
+
     // Initialization
     protected override async Task OnInitializedAsync()
     {
@@ -61,11 +68,23 @@ public sealed partial class Home
 
         if ( firstRender )
         {
-            if ( await TryGetToken() )
-                ToggleLoading( false );
+            _selectedStreamTypeName = _streamTypeNames[ 0 ];
+            await TryGetToken();
+            ToggleLoading( false );
         }
     }
-    
+    static List<string> GetStreamTypeNames( List<string> streamTypes )
+    {
+        List<string> names = [ ];
+
+        foreach ( string t in streamTypes )
+        {
+            names.Add( $"Stream Type: {t}" );
+        }
+        
+        return names;
+    }
+
     // User Actions
     async Task<bool> TryGetToken()
     {
@@ -90,14 +109,14 @@ public sealed partial class Home
             ShowAlert( AlertType.Success, "Saved the token to storage!" );
 
         _token = null;
-        
+
         ToggleLoading( false );
     }
     async Task OnSubmit()
     {
         ToggleLoading( true );
-        
-        if ( _isNewLink )
+
+        if ( !_hasStream )
             await GetStreamInfo();
         else
             await GetStreamDownload();
@@ -110,7 +129,8 @@ public sealed partial class Home
         _streamDuration = string.Empty;
         _streamImage = string.Empty;
         _selectedStreamQuality = string.Empty;
-        _streamQualities = [ ];
+        _submitButtonText = GetStreamText;
+        _imageUrl = DefaultStreamImage;
 
         if ( string.IsNullOrWhiteSpace( _youtubeLink ) )
         {
@@ -128,51 +148,38 @@ public sealed partial class Home
             return;
         }
 
+        _imageUrl = result.ImageUrl;
         _streamTitle = result.Title;
         _streamDuration = result.Duration;
         _streamImage = result.ImageUrl;
         _streamQualities = result.Qualities;
-        _selectedStreamQuality = string.Empty;
+        _submitButtonText = DownloadStreamText;
+        _hasStream = true;
 
-        _selectedStreamQualities = new( SelectStreamQualities() );
         StateHasChanged();
     }
     async Task GetStreamDownload()
     {
-        
+        ToggleLoading( true );
+
+        bool result = await Youtube.TryDownloadStream( GetStreamDownloadParams() );
+
+        if ( result )
+        {
+            ShowAlert( AlertType.Success, "Downloaded stream." );
+        }
+        else
+        {
+            ShowAlert( AlertType.Danger, "Error: Failed to download stream!" );
+        }
+
+        ToggleLoading( false );
     }
-    
+
     // UI Events
     void OnNewLink( ChangeEventArgs e )
     {
-        _isNewLink = true;
-    }
-    void OnNewStreamType( ChangeEventArgs e )
-    {
-        string? value = e.Value?.ToString();
-
-        if ( string.IsNullOrWhiteSpace( value ) || !_streamTypes.Contains( value ) )
-        {
-            Console.WriteLine( $"Failed to parse new stream type! : {value}" );
-            return;
-        }
-        
-        //_selectedStreamQualities = new List<string>() { "a", "b", "c" };
-        _selectedStreamQualities = SelectStreamQualities();
-        _selectedStreamType = value;
-        StateHasChanged();
-    }
-    void OnNewStreamQuality( ChangeEventArgs e )
-    {
-        string? value = e.Value?.ToString();
-
-        if ( string.IsNullOrWhiteSpace( value ) || !_selectedStreamQualities.Contains( value ) )
-        {
-            Console.WriteLine( $"Failed to parse new stream quality! : {value}" );
-            return;
-        }
-
-        _selectedStreamQuality = value;
+        _hasStream = false;
         StateHasChanged();
     }
     void OnNewToken( ChangeEventArgs e )
@@ -184,23 +191,15 @@ public sealed partial class Home
 
         ToggleLoading( false );
     }
-    
+
     // Utilities
-    string GetLoaderCss()
-    {
-        return _isLoading ? CssBlock : CssHide;
-    }
     bool GetApiButtonDisabled()
     {
         return _newToken == _token;
     }
-    string GetImageUrl()
+    bool GetStreamTypeDropdownDisabled()
     {
-        return !string.IsNullOrWhiteSpace( _streamImage ) ? _streamImage : DefaultStreamImage;
-    }
-    string GetSubmitText()
-    {
-        return _isNewLink ? "Get Stream" : "Download Stream";
+        return _isLoading || !_hasStream;
     }
     
     void ShowAlert( AlertType type, string message )
@@ -237,61 +236,16 @@ public sealed partial class Home
     void ToggleLoading( bool value )
     {
         _isLoading = value;
+        _loaderCss = value ? CssFlex : CssHide;
         StateHasChanged();
     }
-
-    List<string> SelectStreamQualities()
-    {
-        if ( string.IsNullOrWhiteSpace( _selectedStreamType ) )
-        {
-            Console.WriteLine( "Steam type null" );
-            return [ ];
-        }
-
-        if ( !_streamTypes.Contains( _selectedStreamType ) )
-        {
-            Console.WriteLine( "Steam type invalid" );
-            return [ ];
-        }
-
-        int index = _streamTypes.IndexOf( _selectedStreamType );
-        
-        Console.WriteLine( _selectedStreamType );
-        Console.WriteLine( index );
-        Console.WriteLine( _streamQualities.Length );
-        
-        if ( index < 0 || index >= _streamQualities.Length )
-        {
-            Console.WriteLine( "Stream index invalid" );
-            return [ ];
-        }
-
-        if ( _streamQualities[ index ] is null )
-        {
-            Console.WriteLine( "Stream qualities is null" );
-            return [ ];
-        }
-
-        foreach ( string s in _streamQualities[ index ] )
-        {
-            Console.WriteLine( s );
-        }
-
-        return _streamQualities[ index ];
-    }
+    
     Dictionary<string, object> GetStreamInfoParams()
     {
-        Enum.TryParse( _selectedStreamType, out StreamType type );
-
-        int quality = _selectedStreamQualities.Contains( _selectedStreamQuality )
-            ? _selectedStreamQualities.IndexOf( _selectedStreamQuality )
-            : 0;
-        
         return new Dictionary<string, object>()
         {
             { "url", _youtubeLink },
-            { "type", type },
-            { "quality", quality }
+            { "type", GetSelectedStreamType() }
             // TODO: auth-service.token
         };
     }
@@ -300,15 +254,20 @@ public sealed partial class Home
         return new Dictionary<string, object>()
         {
             { "url", _youtubeLink },
-            { "type", _selectedStreamType },
-            { "quality", _selectedStreamQuality }
+            { "type", GetSelectedStreamType() },
+            { "quality", GetSelectedQualityIndex() }
         };
     }
-
-    List<string> DeepCopyStringList( List<string> listToCopy )
+    StreamType GetSelectedStreamType()
     {
-        List<string> listToReturn = [ ];
-        listToReturn.AddRange( from s in listToCopy select new string( s ) );
-        return listToReturn;
+        int index = _streamTypeNames.IndexOf( _selectedStreamTypeName );
+        StreamType type = _streamTypes[ index ];
+        return type;
+    }
+    int GetSelectedQualityIndex()
+    {
+        int index = _streamQualities.IndexOf( _selectedStreamQuality );
+        Console.WriteLine( _selectedStreamQuality );
+        return 0; //index;
     }
 }

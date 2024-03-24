@@ -6,5 +6,5 @@ public sealed record StreamInfo
     public string Duration { get; init; } = string.Empty;
     public string ImageUrl { get; init; } = string.Empty;
 
-    public List<string>[] Qualities { get; init; } = [ ];
+    public List<string> Qualities { get; init; } = [ ];
 }
