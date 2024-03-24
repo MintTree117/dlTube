@@ -9,7 +9,7 @@ public sealed partial class Home
 {
     // Services
     [Inject] ILogger<Home> Logger { get; init; } = default!;
-    [Inject] Authenticator Authenticator { get; init; } = default!;
+    [Inject] ClientAuthenticator ClientAuthenticator { get; init; } = default!;
     [Inject] Youtube Youtube { get; init; } = default!;
 
     // Defaults
@@ -88,20 +88,20 @@ public sealed partial class Home
     // User Actions
     async Task<bool> TryGetToken()
     {
-        if ( !await Authenticator.TryLoadToken() )
+        if ( !await ClientAuthenticator.TryLoadToken() )
         {
             ShowAlert( AlertType.Warning, "You need an api token to use this service." );
             return false;
         }
 
-        _token = Authenticator.Token;
+        _token = ClientAuthenticator.Token;
         _newToken = _token;
         return true;
     }
     async Task TrySaveToken()
     {
         ToggleLoading( true );
-        bool success = await Authenticator.TrySetToken( _newToken );
+        bool success = await ClientAuthenticator.TrySetToken( _newToken );
 
         if ( !success )
             ShowAlert( AlertType.Danger, "IO Error: Failed to save the token to storage!" );

@@ -10,7 +10,7 @@ builder.Services.AddScoped( http => new HttpClient
     BaseAddress = new Uri( builder.HostEnvironment.BaseAddress )
 } );
 builder.Services.AddBlazoredLocalStorage();
-builder.Services.AddScoped<Authenticator>();
+builder.Services.AddScoped<ClientAuthenticator>();
 builder.Services.AddScoped<Youtube>();
 
 await builder.Build().RunAsync();

@@ -1,15 +1,17 @@
-using dlTubeBlazor.Client.Enums;
 using YoutubeExplode;
 using YoutubeExplode.Videos.Streams;
+using dlTubeBlazor.Client.Enums;
 
-namespace dlTubeBlazor.Youtube;
+namespace dlTubeBlazor.Features.Youtube;
 
 public sealed class YoutubeStreamer( ILogger<YoutubeBrowser> logger )
 {
+    // Fields
     readonly ILogger<YoutubeBrowser> _logger = logger;
     readonly YoutubeClient _youtube = new();
     StreamManifest _streamManifest = null!;
 
+    // Public Methods
     public async Task<bool> TryInitialize( string videoUrl )
     {
         try
@@ -25,12 +27,6 @@ public sealed class YoutubeStreamer( ILogger<YoutubeBrowser> logger )
     }
     public async Task<Stream?> Stream( StreamType streamType, int qualityIndex )
     {
-        if ( _streamManifest is null )
-        {
-            _logger.LogError( "StreamManifest is null upon Download request!" );
-            return null;
-        }
-        
         try
         {
             IStreamInfo? streamInfo = streamType switch
@@ -58,16 +54,14 @@ public sealed class YoutubeStreamer( ILogger<YoutubeBrowser> logger )
             return null;
         }
     }
-
-    MuxedStreamInfo? GetMuxedStreamInfo( StreamManifest manifest, int qualityIndex )
+    
+    // Private Methods
+    static MuxedStreamInfo? GetMuxedStreamInfo( StreamManifest manifest, int qualityIndex )
     {
-        _logger.LogError( qualityIndex.ToString() );
-        
         List<MuxedStreamInfo> streams = manifest.GetMuxedStreams().ToList();
         bool isValidQualityIndex = qualityIndex >= 0 && qualityIndex < streams.Count;
         return isValidQualityIndex ? streams[ qualityIndex ] : null;
     }
-
     static AudioOnlyStreamInfo? GetAudioOnlyStreamInfo( StreamManifest manifest, int qualityIndex )
     {
         List<AudioOnlyStreamInfo> streams = manifest.GetAudioOnlyStreams().ToList();

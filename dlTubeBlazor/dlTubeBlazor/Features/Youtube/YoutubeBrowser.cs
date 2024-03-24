@@ -4,7 +4,7 @@ using YoutubeExplode.Videos.Streams;
 using dlTubeBlazor.Client.Dtos;
 using dlTubeBlazor.Client.Enums;
 
-namespace dlTubeBlazor.Youtube;
+namespace dlTubeBlazor.Features.Youtube;
 
 public sealed class YoutubeBrowser( ILogger<YoutubeBrowser> logger )
 {

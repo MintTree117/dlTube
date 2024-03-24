@@ -2,7 +2,7 @@ using dlTubeBlazor.Client;
 using dlTubeBlazor.Client.Dtos;
 using dlTubeBlazor.Client.Enums;
 
-namespace dlTubeBlazor.Youtube;
+namespace dlTubeBlazor.Features.Youtube;
 
 public static class YoutubeEndpoints
 {

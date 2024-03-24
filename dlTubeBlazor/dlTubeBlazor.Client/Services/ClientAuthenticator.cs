@@ -2,16 +2,16 @@ namespace dlTubeBlazor.Client.Services;
 
 using Blazored.LocalStorage;
 
-public sealed class Authenticator
+public sealed class ClientAuthenticator
 {
-    ILogger<Authenticator> Logger { get; init; }
+    ILogger<ClientAuthenticator> Logger { get; init; }
     ILocalStorageService Storage { get; init; }
 
     const string TokenStorageKey = "Token";
 
     public string? Token { get; private set; }
 
-    public Authenticator( ILogger<Authenticator> logger, ILocalStorageService storage )
+    public ClientAuthenticator( ILogger<ClientAuthenticator> logger, ILocalStorageService storage )
     {
         Logger = logger;
         Storage = storage;

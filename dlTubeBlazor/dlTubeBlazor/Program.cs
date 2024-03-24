@@ -1,7 +1,8 @@
 using Blazored.LocalStorage;
 using dlTubeBlazor.Client.Services;
 using dlTubeBlazor.Components;
-using dlTubeBlazor.Youtube;
+using dlTubeBlazor.Features.Authentication;
+using dlTubeBlazor.Features.Youtube;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -11,13 +12,15 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddLogging();
 builder.Services.AddBlazoredLocalStorage();
-builder.Services.AddScoped<Authenticator>();
+builder.Services.AddScoped<AuthenticatorRepository>();
+builder.Services.AddScoped<AuthenticatorService>();
 builder.Services.AddScoped<Youtube>();
 builder.Services.AddScoped<YoutubeBrowser>();
 builder.Services.AddScoped<YoutubeStreamer>();
 
-
 WebApplication app = builder.Build();
+
+app.UseMiddleware<AuthenticatorMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
