@@ -5,50 +5,95 @@ namespace dlTubeBlazor.Features.Authentication;
 
 public sealed class AuthenticatorMiddleware
 {
+    const string InvalidIpMessage = "Your ip address is not authenticated! Try turning off your vpn if you have one.";
+    const string InvalidKeyMessage = "Your access token is invalid or has expired!";
+    
     readonly RequestDelegate _next;
     readonly ILogger<AuthenticatorMiddleware> _logger;
     AuthenticatorService _authenticatorService = null!;
 
+    // Constructor
     public AuthenticatorMiddleware( RequestDelegate next, ILogger<AuthenticatorMiddleware> logger, IHostEnvironment environment )
     {
         _next = next;
         _logger = logger;
     }
-
+    
+    // Main
     public async Task InvokeAsync( HttpContext httpContext  )
     {
         try
         {
+            if ( !ShouldAuthenticate( httpContext ) )
+            {
+                await _next( httpContext );
+                return;
+            }
+            
             IServiceScope scope = httpContext.RequestServices.CreateScope();
             _authenticatorService = scope.ServiceProvider.GetRequiredService<AuthenticatorService>();
             
-            if ( !_authenticatorService.ValidateIp( httpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty ) )
-            {
-                JsonSerializerOptions options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-                string json = JsonSerializer.Serialize( "Your ip address is not authenticated!", options );
-                await httpContext.Response.WriteAsync( json );
+            if ( !await HandleIpValidation( httpContext ) )
                 return;
-            }
 
-            if ( !_authenticatorService.ValidateToken( httpContext.Response.Headers.Authorization.ToString() ) )
-            {
-                JsonSerializerOptions options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-                string json = JsonSerializer.Serialize( "Your access token is invalid or expired!", options );
-                await httpContext.Response.WriteAsync( json );
+            if ( !await HandleKeyValidation( httpContext ) )
                 return;
-            }
             
             await _next( httpContext );
         }
-        catch ( Exception ex )
+        catch ( Exception e )
         {
-            _logger.LogError( ex, ex.Message );
-            httpContext.Response.ContentType = "application/json";
-            httpContext.Response.StatusCode = ( int ) HttpStatusCode.InternalServerError;
-
-            JsonSerializerOptions options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-            string json = JsonSerializer.Serialize( "Failed to authenticate your request!", options );
-            await httpContext.Response.WriteAsync( json );
+            await HandleAuthenticationException( httpContext, e );
         }
+    }
+    
+    // Utils
+    static bool ShouldAuthenticate( HttpContext httpContext )
+    {
+        PathString path = httpContext.Request.Path;
+        return path.StartsWithSegments( "/api/stream/" );
+    }
+    async Task<bool> HandleIpValidation( HttpContext httpContext )
+    {
+        return true;
+        
+        if ( _authenticatorService.ValidateIp( httpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty ) )
+            return true;
+
+        JsonSerializerOptions options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        string json = JsonSerializer.Serialize( InvalidIpMessage, options );
+        await httpContext.Response.WriteAsync( json );
+        return false;
+    }
+    async Task<bool> HandleKeyValidation( HttpContext httpContext )
+    {
+        if ( !httpContext.Request.Headers.ContainsKey( "Authorization" ) )
+        {
+            // No Authorization header present
+            httpContext.Response.StatusCode = ( int ) HttpStatusCode.Unauthorized;
+            await httpContext.Response.WriteAsync( InvalidKeyMessage );
+            return false;
+        }
+
+        string? authToken = httpContext.Request.Headers.Authorization;
+
+        // Validate authToken with your authenticator service
+        if ( _authenticatorService.ValidateToken( authToken ?? string.Empty ) ) 
+            return true;
+        
+        httpContext.Response.StatusCode = ( int ) HttpStatusCode.Unauthorized;
+        await httpContext.Response.WriteAsync( InvalidKeyMessage );
+        return false;
+
+    }
+    async Task HandleAuthenticationException( HttpContext httpContext, Exception e )
+    {
+        _logger.LogError( e, e.Message );
+        httpContext.Response.StatusCode = ( int ) HttpStatusCode.InternalServerError;
+        httpContext.Response.ContentType = "application/json";
+
+        JsonSerializerOptions options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        string json = JsonSerializer.Serialize( "Failed to authenticate your request!", options );
+        await httpContext.Response.WriteAsync( json );
     }
 }
