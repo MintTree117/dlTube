@@ -43,6 +43,12 @@
 			Margin="0 0 0 15"
 			Padding="15"
 			Text="{Binding DownloadLocation}" />
+		<!-- FFmpeg Filepath (Required for file thumbnails) -->
+		<TextBox
+			HorizontalAlignment="Stretch"
+			Margin="0 0 0 15"
+			Padding="15"
+			Text="{Binding DownloadLocation}" />
 		<!-- Background Image Title -->
 		<TextBlock
 			HorizontalAlignment="Left"

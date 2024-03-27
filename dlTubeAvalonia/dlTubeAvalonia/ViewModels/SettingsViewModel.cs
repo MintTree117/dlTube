@@ -12,6 +12,7 @@ public sealed class SettingsViewModel : BaseViewModel
     IReadOnlyList<string> _backgroundImages = [ ];
     string _apiKey = string.Empty;
     string _downloadLocation = string.Empty;
+    string _ffmpegPath = string.Empty;
     string _selectedBackgroundImage = string.Empty;
     bool _settingsChanged;
     
@@ -47,6 +48,15 @@ public sealed class SettingsViewModel : BaseViewModel
         set
         {
             this.RaiseAndSetIfChanged( ref _downloadLocation, value );
+            SettingsChanged = true;
+        }
+    }
+    public string FFmpegPath
+    {
+        get => _ffmpegPath;
+        set
+        {
+            this.RaiseAndSetIfChanged( ref _ffmpegPath, value );
             SettingsChanged = true;
         }
     }
@@ -86,6 +96,7 @@ public sealed class SettingsViewModel : BaseViewModel
         {
             ApiKey = _apiKey,
             DownloadLocation = _downloadLocation,
+            FFmpegFilepath = _ffmpegPath,
             SelectedBackgroundImage = _selectedBackgroundImage
         };
 

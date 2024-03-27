@@ -8,16 +8,17 @@ public sealed class FFmpegChecker : BaseService
 {
     bool? _isFFmpegInstalled;
 
-    public async Task<bool> CheckFFmpegInstallationAsync()
+    public async Task<bool> CheckFFmpegInstallationAsync( string ffmpegFilepath )
     {
-        _isFFmpegInstalled ??= await IsFFmpegInstalledAsync();
+        _isFFmpegInstalled ??= await IsFFmpegInstalledAsync( ffmpegFilepath );
         return _isFFmpegInstalled.Value;
     }
-    async Task<bool> IsFFmpegInstalledAsync()
+    async Task<bool> IsFFmpegInstalledAsync( string ffmpegFilepath )
     {
         // FFmpeg process
+        bool processStarted = false;
         using Process process = new();
-        process.StartInfo.FileName = "ffmpeg";
+        process.StartInfo.FileName = ffmpegFilepath;
         process.StartInfo.Arguments = "-version";
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.RedirectStandardError = true;
@@ -26,7 +27,13 @@ public sealed class FFmpegChecker : BaseService
         
         try
         {
-            process.Start();
+            processStarted = process.Start();
+
+            if ( !processStarted )
+            {
+                Logger.LogWithConsole( $"FFmpeg initialization failed to start process!" );
+                return false;
+            }
 
             // Read the output to ensure the command was executed
             string output = await process.StandardOutput.ReadToEndAsync();
@@ -48,7 +55,7 @@ public sealed class FFmpegChecker : BaseService
         }
         finally
         {
-            if ( !process.HasExited )
+            if ( processStarted && !process.HasExited )
                 process.Kill();
         }
     }

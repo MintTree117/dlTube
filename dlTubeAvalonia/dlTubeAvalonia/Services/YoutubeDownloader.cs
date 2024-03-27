@@ -20,8 +20,9 @@ public sealed class YoutubeDownloader( string videoUrl ) : BaseService
     const string TempThumbnailConvertedFileName = "thumbnail_converted.jpg";
     
     // Services
-    readonly YoutubeClientHolder _youtubeService = Program.ServiceProvider.GetService<YoutubeClientHolder>()!;
+    readonly SettingsManager _settingsManager = Program.ServiceProvider.GetService<SettingsManager>()!;
     readonly FFmpegChecker _ffmpegService = Program.ServiceProvider.GetService<FFmpegChecker>()!;
+    readonly YoutubeClientHolder _youtubeService = Program.ServiceProvider.GetService<YoutubeClientHolder>()!;
     readonly HttpController _httpService = Program.ServiceProvider.GetService<HttpController>()!;
     
     // Video Url From Constructor
@@ -56,7 +57,7 @@ public sealed class YoutubeDownloader( string videoUrl ) : BaseService
         {
             _streamManifest = await _youtubeService.YoutubeClient.Videos.Streams.GetManifestAsync( _videoUrl );
             _video = await _youtubeService.YoutubeClient.Videos.GetAsync( _videoUrl );
-            _hasFFmeg = await _ffmpegService.CheckFFmpegInstallationAsync();
+            _hasFFmeg = await _ffmpegService.CheckFFmpegInstallationAsync( _settingsManager.Settings.FFmpegFilepath );
             
             // Get Video Image Data
             if ( _hasFFmeg )
