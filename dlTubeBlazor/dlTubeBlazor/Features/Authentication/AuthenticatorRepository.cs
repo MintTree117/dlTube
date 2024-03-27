@@ -9,7 +9,7 @@ public sealed class AuthenticatorRepository
     // Fields
     readonly IConfiguration _config;
     readonly string _connectionString;
-    SqlConnection _connection = null!;
+    readonly SqlConnection _connection = null!;
 
     // Constructor
     public AuthenticatorRepository( IConfiguration config )

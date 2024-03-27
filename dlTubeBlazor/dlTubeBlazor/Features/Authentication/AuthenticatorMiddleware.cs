@@ -5,8 +5,8 @@ namespace dlTubeBlazor.Features.Authentication;
 
 public sealed class AuthenticatorMiddleware
 {
-    const string InvalidIpMessage = "Your ip address is not authenticated! Try turning off your vpn if you have one.";
-    const string InvalidKeyMessage = "Your access token is invalid or has expired!";
+    const string InvalidIpMessage = "Your ip address is not authorized.";
+    const string InvalidKeyMessage = "Your access key is invalid or has expired.";
     
     readonly RequestDelegate _next;
     readonly ILogger<AuthenticatorMiddleware> _logger;

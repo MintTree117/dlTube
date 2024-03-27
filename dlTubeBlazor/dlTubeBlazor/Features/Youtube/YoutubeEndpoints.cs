@@ -14,10 +14,7 @@ public static class YoutubeEndpoints
                 return Results.Problem( "Failed to initialize youtube client!" );
 
             StreamInfo? info = await yt.GetStreamInfo( type );
-
-            Console.WriteLine( url );
-            Console.WriteLine( info?.Title );
-
+            
             return info is not null
                 ? Results.Ok( info )
                 : Results.NotFound();
